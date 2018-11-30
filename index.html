@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+        <title>ba[sic?]</title>
+        <!-- Bootstrap core CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"/>
+        <!-- Fontawesome - webfont -->
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/solid.css"/>
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/fontawesome.css"/>
+        <!-- App styles -->
+        <link rel="Stylesheet" href="styles.css"/>
+    </head>
+    <body>
+        <div class="fixed-top">
+            <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+                <a class="navbar-brand" href="#">ba[sic?]</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarMenu" aria-controls="navbarMenu">
+                <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarMenu">
+                    <ul class="navbar-nav mr-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="persons/index.html">
+                            <i class="fas fa-users"></i> Persons
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="places/index.html">
+                            <i class="fas fa-globe"></i> Places
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="organisations/index.html">
+                            <i class="fas fa-building"></i> Organisations
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </div>
+        <main class="container">
+            <div class="card border-light mb-3" id="introduction-card">
+                <div class="card-body">
+                    <h1 class="card-title text-monospace">Better Authorities [Search, Identify, Connect]</h1>
+                    <p class="card-text">ba[sic?] is a tool for searching, identifiing and connecting named entities  with authority data. Currently persistent identifiers from the <a href="http://www.dnb.de/EN/Standardisierung/GND/gnd_node.html" rel="nofollow">GND</a> (persons) and <a href="http://www.geonames.org/" rel="nofollow">Geonames.org</a> (places) are used.</p>
+                    <p class="card-text">The main goal of this tool is to give an instance of quality assurance to the process of connecting own data with authority data. This is done by adding a configurable <em>status</em> attribute (e.g. <em>unsafe</em>, <em>unavailable</em>, etc.) and the possibility to set a preferred linked dataset from a list of possible matching datasets.</p>
+                    <p class="card-text">The tool is facing the problem of fast and comfortable identification of the correct corresponding authority data, if it already exist. Therefor it provides a name based search interfaces to quickly get a list of possible matching datasets and a view for easy comparing the properties of the different results and finally choose and set the preferred one.</p>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body border-light">
+                    <h2 class="card-title quickguide-title">Quick Start Guide</h2>
+                    <div class="card-group" id="quickguide-cards">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Step one</h5>
+                                <p class="card-text">Choose a context: persons, places or organisations</p>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Step two</h5>
+                                <p class="card-text">Open the settings and add a new dataset</p>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Step three</h5>
+                                <p class="card-text">Add your data manually or import it, using the provided actions.</p>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Step four</h5>
+                                <p class="card-text">Add links to authority data manually via input field or automatically find possible matching datasets by clicking the autofill button (binoculars).</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <footer id="footer" class="fixed-bottom">
+        </footer>
+        <!-- Bootstrap core JavaScript ================================================== -->
+        <!-- Placed at the end of the document so the pages load faster -->
+        <script src="https://code.jquery.com/jquery-3.2.1.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+        <!-- App: Setting context -->
+        <script>var context = 'root';</script>
+        <!-- App: Base code and plugins  -->
+        <script src="config.js"></script>
+        <script src="app.js"></script>
+    </body>
+</html>

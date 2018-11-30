@@ -1,0 +1,333 @@
+html {
+    height: 100%;
+    /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#e2e2e2+0,dbdbdb+50,d1d1d1+51,fefefe+100;Grey+Gloss+%231 */
+    background: rgb(226,226,226); /* Old browsers */
+    background: -moz-linear-gradient(-45deg, rgba(226,226,226,1) 0%, rgba(219,219,219,1) 50%, rgba(209,209,209,1) 51%, rgba(254,254,254,1) 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(-45deg, rgba(226,226,226,1) 0%,rgba(219,219,219,1) 50%,rgba(209,209,209,1) 51%,rgba(254,254,254,1) 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(135deg, rgba(226,226,226,1) 0%,rgba(219,219,219,1) 50%,rgba(209,209,209,1) 51%,rgba(254,254,254,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e2e2e2', endColorstr='#fefefe',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+    background-attachment: fixed;
+}
+body {
+    /* Margin bottom by footer height */
+    margin-bottom: 60px;
+    background: transparent;
+}
+footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  /* Set the fixed height of the footer here */
+  height: 60px;
+  line-height: 60px; /* Vertically center the text there */
+  background-color: #007d40;
+}
+#footer-text {
+    text-align: center;
+}
+#footer-version {
+    text-align: right;
+}
+
+#app-content-plugins > div.row {
+    padding-bottom: 1rem;
+    padding-top: 1rem;
+}
+#app-content-plugins-button {
+    border-radius: 0;
+}
+
+.status-ref-safe .btn-group-toggle .btn,
+.status-ref-safe button.dropdown-toggle {
+    background: #28a745;
+    color: #fff;
+}
+.status-ref-safe .btn-group-toggle .btn.active {
+    background: #1e7e34;
+}
+
+.status-ref-unsafe .btn-group-toggle .btn,
+.status-ref-unsafe button.dropdown-toggle {
+    background: #ffc107;
+}
+.status-ref-unsafe .btn-group-toggle .btn.active {
+    background: #e0a800;
+}
+.status-ref-unchecked .btn-group-toggle .btn,
+.status-ref-unchecked button.dropdown-toggle {
+    background: #6c757d;
+    color: #fff;
+}
+.status-ref-unchecked .btn-group-toggle .btn.active {
+    background: #5a6268;
+    color: #fff;
+}
+.status-ref-unavailable .btn-group-toggle .btn,
+.status-ref-unavailable button.dropdown-toggle {
+    background: #dc3545;
+    color: #fff;
+}
+.status-ref-unavailable .btn-group-toggle .btn.active {
+    background: #c82333;
+    color: #fff;
+}
+.status-ref .btn-group-toggle .btn.disabled {
+    color: #000;
+}
+.status-ref.list-group-item:hover {
+    border-color: #333;
+}
+.btn-status {
+    width: 7rem;
+    text-align: left;
+}
+
+.btn-group-ads {
+    margin-top: .2rem;
+    display: block;
+}
+
+button.dropdown-item:hover {
+    background: #a5a5a5;
+}
+
+main.container {
+    margin-top: 6em;
+}
+
+#result-container {
+    margin-top: 1em;
+}
+
+.form-control-gray:focus {
+  border-color: #999;
+  outline: 0;
+  -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075),0 0 8px rgba(100,100,100,.6);
+  box-shadow: inset 0 1px 1px rgba(0,0,0,.075),0 0 8px rgba(100,100,100,.6);
+}
+
+#button_add_text {
+    margin-left: 42px;
+}
+
+#button_add_p_text {
+    margin-left: 111px;
+}
+
+#compare-modal .card {
+    font-size: 0.8em;
+    width: 15em;
+    display: inline-flex;
+}
+#compare-modal .modal-dialog {
+    max-width: 80%;
+}
+#map-modal .modal-dialog {
+    max-width: 80%;
+}
+#modal-cards {
+    white-space: nowrap;
+    overflow-x: auto;
+    text-align: center;
+    margin-bottom: 2em;
+}
+#modal-cards .text-truncate {
+    cursor: -webkit-zoom-in;
+    cursor: -moz-zoom-in;
+    cursor: zoom-in;
+}
+#modal-zoom {
+    min-height: 2rem;
+}
+#compare-modal .card-footer {
+    white-space: normal;
+    text-align: left;
+}
+#compare-modal .card-footer .badge {
+    margin-bottom: .1rem;
+}
+#compare-modal .card-footer .badge:not(:last-of-type) {
+    margin-right: .1rem;
+}
+
+#dw-dataset > button {
+}
+
+.btn-loading {
+    outline: 0;
+    box-shadow: 0 0 0 rgba(0, 0, 0, .5);
+    animation: pulse 1s infinite;
+}
+
+#map-modal .modal-body {
+    min-height: 70%;
+}
+
+#map .leaflet-popup-content .btn {
+    max-width: 100%;
+    margin-top: 1em;
+}
+
+#map .leaflet-popup-content {
+    max-width: 100%;
+}
+
+@-webkit-keyframes pulse {
+  0% {
+    -webkit-box-shadow: 0 0 0 0 rgba(0,0,0, 0.4);
+  }
+  70% {
+      -webkit-box-shadow: 0 0 0 10px rgba(0,0,0, 0);
+  }
+  100% {
+      -webkit-box-shadow: 0 0 0 0 rgba(0,0,0, 0);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    -moz-box-shadow: 0 0 0 0 rgba(0,0,0, 0.4);
+    box-shadow: 0 0 0 0 rgba(0,0,0, 0.4);
+  }
+  70% {
+      -moz-box-shadow: 0 0 0 10px rgba(0,0,0, 0);
+      box-shadow: 0 0 0 10px rgba(0,0,0, 0);
+  }
+  100% {
+      -moz-box-shadow: 0 0 0 0 rgba(0,0,0, 0);
+      box-shadow: 0 0 0 0 rgba(0,0,0, 0);
+  }
+}
+
+.status-geo-safe .btn-group-toggle .btn,
+.status-geo-safe button.dropdown-toggle {
+    background: #28a745;
+    color: #fff;
+}
+.status-geo-safe .btn-group-toggle .btn.active {
+    background: #1e7e34;
+}
+
+.status-geo-unsafe .btn-group-toggle .btn,
+.status-geo-unsafe button.dropdown-toggle {
+    background: #ffc107;
+}
+.status-geo-unsafe .btn-group-toggle .btn.active {
+    background: #e0a800;
+}
+.status-geo-unchecked .btn-group-toggle .btn,
+.status-geo-unchecked button.dropdown-toggle {
+    background: #6c757d;
+    color: #fff;
+}
+.status-geo-unchecked .btn-group-toggle .btn.active {
+    background: #5a6268;
+    color: #fff;
+}
+.status-geo-unavailable .btn-group-toggle .btn,
+.status-geo-unavailable button.dropdown-toggle {
+    background: #dc3545;
+    color: #fff;
+}
+.status-geo-unavailable .btn-group-toggle .btn.active {
+    background: #c82333;
+    color: #fff;
+}
+.status-geo .btn-group-toggle .btn.disabled {
+    color: #000;
+}
+
+#mapMarkerPref {
+    font-size: 75%;
+}
+
+/* Dropdown Overlay Bugfix for Status Button */
+#result-container .input-group-prepend .btn {
+    z-index: 0;
+}
+#result-container .input-group-append .btn {
+    z-index: 0;
+}
+#result-container .btn-group .btn.active {
+    z-index: 0;
+}
+
+
+a.link-seealso {
+    font-size: 75%;
+}
+.btn-group-card-header .btn {
+    font-size: 75%;
+}
+.modal-card-zoom:hover {
+    box-shadow: 0 0 0 0.2rem rgba(108,117,125,.5);
+}
+.modal-card-zoom-fixed, .modal-card-zoom-fixed:hover {
+    box-shadow: 0 0 0 0.2rem rgba(7, 175, 255, 0.5);
+    z-index: 100;
+}
+
+
+/* Thin out the quickguide title */
+.quickguide-title {
+  font-weight: 350;
+  line-height: 0.8;
+  letter-spacing: -.08rem;
+  font-size: 47px;
+  margin-bottom: 1rem;
+}
+
+#quickguide-cards > .card{
+  background-color: #b4b8b3;
+  overflow: hidden;
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
+  -webkit-transition: .25s box-shadow;
+  transition: .25s box-shadow;
+}
+
+#quickguide-cards .card-body > .card-text{
+  margin-right: 2em;
+}
+
+
+#introduction-card .card-body > .card-text {
+  margin-left: 1em;
+  margin-right: 16em;
+  text-align: justify;
+}
+
+*[class*='filtered-'] {
+    display: none;
+}
+
+.app-plugin {
+    margin-bottom: 2em;
+}
+
+#app-content-plugins-area {
+    background-color: rgba(52, 58, 64, 0.95);
+}
+/* Permanently show plugins if we have a large screen */
+@media (min-width: 1200px) {
+  /* Add space to the right for the app area */
+  #main-container {
+    padding-right: 33%;
+  }
+  /* Hide the settings button */
+  #app-content-plugins-button {
+    display: none;
+  }
+  /* Display the app area fixed to the right */
+  #app-content-plugins-area {
+    display: block;
+    position: fixed;
+    width: 33%;
+    right: 0;
+  }
+  /* Bootstrap modals remove  */
+  /* Adjust heights to screen */
+  #app-content-plugins-area,
+  #app-content-plugins {
+    height: 100%;
+  }
+}
