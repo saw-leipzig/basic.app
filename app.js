@@ -60,7 +60,14 @@ function asArray (thing_to_transform) {
 
 function getLocalObjectById (id) {
     return asArray(data_objects[config.a.JSONContainer]).find(function (e) {
-        return e.id === id
+        return e.id === id;
+    });
+}
+
+
+function getLocalObjectByTitle (title) {
+    return asArray(data_objects[config.a.JSONContainer]).find(function (e) {
+        return e[config.v.titleElement] === title;
     });
 }
 
@@ -323,6 +330,16 @@ function togglePreferred (id, ref_id) {
     // toggle button state in list
     $('#' + id + ' label.btn.active').removeClass('active');
     $('#lbl-' + id + '_' + ref_id).addClass('active');
+}
+
+
+function getPreferredIdentifierFromObject (obj) {
+    var preferred_id_obj = asArray(obj[config.v.identifierElement]).find(o => o.preferred == 'YES');
+    if (preferred_id_obj != undefined) {
+        return preferred_id_obj['#text'];
+    } else {
+        return null;
+    }
 }
 
 

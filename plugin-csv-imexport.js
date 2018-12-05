@@ -12,6 +12,18 @@ function CSVImportExportPlugin() {
     basicPluginActions.registerButton(this.btn_csv_up);
 
 
+    // Create and register CSV download button
+    this.btn_csv_down = $('<button class="btn btn-outline-light" id="btn-download-csv" type="button" data-toggle="modal" data-target="#csv-file-merge-modal">\
+                                <span class="fas fa-file-download"></span> Merge with CSV\
+                            </button>');
+    this.btn_csv_down.on('click', function(e){
+        // Hide plugins
+        $('#app-content-plugins-area').collapse('hide');
+    })
+    basicPluginActions.registerButton(this.btn_csv_down);
+
+
+    // Upload modal
     this.modal_csv_file_upload_html = '<div class="modal fade" id="csv-file-upload-modal" tabindex="-1" aria-hidden="true" role="dialog">\
                                       <div class="modal-dialog modal-lg" role="document">\
                                           <div class="modal-content">\
@@ -36,6 +48,32 @@ function CSVImportExportPlugin() {
     $(this.modal_csv_file_upload_html).appendTo('#modals');
 
 
+    // Download/merge modal
+    this.modal_csv_file_merge_html = '<div class="modal fade" id="csv-file-merge-modal" tabindex="-1" aria-hidden="true" role="dialog">\
+                                      <div class="modal-dialog modal-lg" role="document">\
+                                          <div class="modal-content">\
+                                              <div class="modal-header">\
+                                                  <h5 class="modal-title">Merge with local CSV</h5>\
+                                                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">\
+                                                      <span aria-hidden="true">✖</span>\
+                                                  </button>\
+                                              </div>\
+                                              <div class="modal-body">\
+                                                  <div class="custom-file mb-2">\
+                                                    <label for="mergeFileCSV" class="custom-file-label" id="mergeFileCSVLabel">Choose CSV-file to update</label>\
+                                                    <input type="file" class="custom-file-input" id="mergeFileCSV">\
+                                                  </div>\
+                                                  <form id="merge-csvdata-form"></form>\
+                                              </div>\
+                                              <div class="modal-footer">\
+                                                  <button type="button" class="btn btn-primary disabled" id="btn-merge-with-csv">Merge objects and download CSV</button>\
+                                              </div>\
+                                          </div>\
+                                      </div>\
+                                  </div>';
+    $(this.modal_csv_file_merge_html).appendTo('#modals');
+
+
     // register click event listener
     $('#modals').on('click', '#btn-import-from-csv', function (e){
         if (!$(this).hasClass('disabled')) {
@@ -50,13 +88,30 @@ function CSVImportExportPlugin() {
     $('#modals').on('change', '#uploadFileCSV', function (e){
         plugin.getObjectsFromCSV();
     });
+    $('#modals').on('change', '#mergeFileCSV', function (e){
+        $('#mergeFileCSVLabel').html(this.files[0].name);
+        plugin.mergeObjectsWithCSV();
+    });
+    $('#modals').on('click', '#btn-merge-with-csv', function (e){
+        plugin
+            .mergeCSV()
+            .downloadCSV();
+    });
     $('#modals').on('hidden.bs.modal', '#csv-file-upload-modal', function (e){
         $('#csv-file-upload-modal').replaceWith(plugin.modal_csv_file_upload_html);
+    });
+    $('#modals').on('hidden.bs.modal', '#csv-file-merge-modal', function (e){
+        $('#csv-file-merge-modal').replaceWith(plugin.modal_csv_file_merge_html);
     });
 
 
     this.importable_entities = [];
     this.names_to_import = [];
+    this.context2columnnames = {
+        'persons': ['sender', 'addressee'],
+        'places': ['senderPlace', 'addresseePlace'],
+        'organisations': ['sender', 'addressee']
+    };
 }
 
 
@@ -83,6 +138,7 @@ CSVImportExportPlugin.prototype.updateImportables = function(event) {
         $('#btn-import-from-csv').addClass('disabled');
         $('#btn-add-from-csv').addClass('disabled');
     }
+    return this;
 }
 
 
@@ -92,17 +148,13 @@ CSVImportExportPlugin.prototype.getObjectsFromCSV = function() {
     var btn_add = document.querySelector('#btn-add-from-csv');
     var count_span = $('.found-csv-objects');
     var entities_form = $('#import-csvdata-form');
-    var file    = document.querySelector('#uploadFileCSV').files[0];
-    var reader  = new FileReader();
-    var context2columnnames = {
-        'persons': ['sender', 'addressee'],
-        'places': ['senderPlace', 'addresseePlace'],
-        'organisations': ['sender', 'addressee']
-    };
+    var file = document.querySelector('#uploadFileCSV').files[0];
+    var context2columnnames = plugin.context2columnnames;
 
     if (file) {
         Papa.parse(file, {
             header: true,
+            skipEmptyLines: true,
             complete: function(results) {
                 console.log('CSV Import/Export: File ' + file.name + ' loaded.');
                 // Reset importables, form, etc.
@@ -175,6 +227,7 @@ CSVImportExportPlugin.prototype.getObjectsFromCSV = function() {
             }
         });
     }
+    return plugin;
 }
 
 
@@ -191,6 +244,7 @@ CSVImportExportPlugin.prototype.importEntities = function(event) {
     console.log('CSV Import/Export: Existing data objects deleted.');
     // Add all new entities
     this.addEntities(event);
+    return this;
 }
 
 
@@ -218,6 +272,128 @@ CSVImportExportPlugin.prototype.addEntities = function(event) {
     countObjectsByStatus();
     // Hide the modal dialog, it will be reseted automatically by event hidden.bs.modal
     $('#csv-file-upload-modal').modal('hide');
+    return this;
+}
+
+
+CSVImportExportPlugin.prototype.mergeObjectsWithCSV = function() {
+    var plugin = this;
+    var btn_merge = document.querySelector('#btn-merge-with-csv');
+    //var count_span = $('.found-csv-objects');
+    var entities_form = $('#merge-csvdata-form');
+    var file = document.querySelector('#mergeFileCSV').files[0];
+    var context2columnnames = plugin.context2columnnames;
+    var preselected_statuus = ['safe'];
+
+    if (file) {
+        Papa.parse(file, {
+            header: true,
+            skipEmptyLines: true,
+            complete: function(results) {
+                console.log('CSV Import/Export: File ' + file.name + ' loaded.');
+                plugin.csv_data = results.data;
+                plugin.csv_filename = file.name;
+                // Build settings form
+                $(entities_form).append('<small class="form-text">Select merging method. <span class="text-muted">Hard mode will replace existing identifier in CSV with the preferred identifier of the object. The soft mode only adds identifier to objects, not having an identifier in CSV.</span></small>');
+                var method_buttons = $('<div class="btn-group btn-group-toggle mb-2" data-toggle="buttons"></div>')
+                    .append('<label class="btn btn-secondary active">\
+                                <input type="radio" name="csv-merge-method" value="hard" autocomplete="off" checked> Hard\
+                            </label>')
+                    .append('<label class="btn btn-secondary">\
+                                <input type="radio" name="csv-merge-method" value="soft" autocomplete="off"> Soft\
+                            </label>')
+                    .appendTo(entities_form);
+                $(entities_form).append('<small class="form-text">Select statu(u)s to merge. <span class="text-muted">Only objects with the selected status will be merged.</span></small>');
+                var status_buttons = $('<div class="btn-group btn-group-toggle mb-2" data-toggle="buttons"></div>')
+                    .appendTo(entities_form);
+                config.app.config.status.available.forEach(function (status) {
+                    if (preselected_statuus.includes(status)) {
+                        status_buttons.append('<label class="btn btn-secondary active">\
+                                                <input type="checkbox" name="csv-statuus" value="' + status + '" autocomplete="off" checked>\
+                                                ' + status + '\
+                                            </label>')
+                    } else {
+                        status_buttons.append('<label class="btn btn-secondary">\
+                                                <input type="checkbox" name="csv-statuus" value="' + status + '" autocomplete="off">\
+                                                ' + status + '\
+                                            </label>')
+                    }
+                });
+                $(btn_merge).removeClass('disabled');
+            }
+        });
+    }
+    return plugin;
+}
+
+
+CSVImportExportPlugin.prototype.mergeCSV = function() {
+    var plugin = this;
+    // Get settings from form
+    var entities_form = $('#merge-csvdata-form');
+    var settings_array = entities_form.serializeArray();
+    var context2columnnames = plugin.context2columnnames;
+    var method = '';
+    var statuus = [];
+    settings_array.forEach(function (e) {
+        if (e.name == 'csv-merge-method') {
+            method = e.value;
+        } else if (e.name == 'csv-statuus') {
+            statuus.push(e.value);
+        }
+    });
+    console.log('CSV Import/Export: Merging data ' + method + 'ly ...');
+    /* Update csv_data
+    Option 1: method
+        hard: set/replace the corresponding identifier value in CSV
+        soft: add identifier, if there is no one given for the entity, but don't replace one,
+              if it's still there
+    Option 2: status - Only objects with these status will be used to merge. This allows, e.g.
+              only merging objects with a safe status.
+    */
+    // Iterate over letters
+    this.csv_data.forEach(function (letter, index) {
+        // Iterate over columns
+        context2columnnames[context].forEach(function (col) {
+            var name = letter[col];
+            var id = letter[col + 'ID'];
+            // Don't replace/add anything in 'soft' mode if an ID is already given
+            if (name != undefined && name.trim() != '' && !(method == 'soft' && id.trim() != '')) {
+                // Get matching object
+                var obj = getLocalObjectByTitle(name);
+                // Check if object is in correct state
+                if (obj !== undefined && statuus.includes(obj[config.v.statusElement])) {
+                    // Get preferred ID from local object
+                    var preferred_id = getPreferredIdentifierFromObject(obj);
+                    // Check if IDs are different
+                    if (preferred_id != null && id != preferred_id) {
+                        plugin.csv_data[index][col + 'ID'] = preferred_id;
+                        console.log('CSV Import/Export: Updated CSV row ' + (index + 2) + ' column ' + col + 'ID with ' + preferred_id);
+                    }
+                }
+            }
+        });
+    });
+    console.log('CSV Import/Export: Merge finished.');
+    // Hide the modal dialog, it will be reseted automatically by event hidden.bs.modal
+    $('#csv-file-merge-modal').modal('hide');
+    return plugin;
+}
+
+
+CSVImportExportPlugin.prototype.downloadCSV = function() {
+    var plugin = this;
+    var dataStr = "data:text/csv;charset=utf-8," + encodeURIComponent(Papa.unparse(plugin.csv_data, {
+        quotes: true,
+        header: true
+    }));
+    var downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href",     dataStr);
+    downloadAnchorNode.setAttribute("download", plugin.csv_filename);
+    document.body.appendChild(downloadAnchorNode); // required for firefox
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+    return plugin;
 }
 
 
