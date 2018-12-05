@@ -23,6 +23,10 @@ var config = {
                         "maxRows": "10",
                         "featureClass": "P"
                     }
+                },
+                "organisations": {
+                    "JSONContainer" : "organisation",
+                    "authorityDataBaseURL": "http://hub.culturegraph.org/entityfacts/"
                 }
             },
             "view": {
@@ -41,6 +45,14 @@ var config = {
                     "identifierElement": "ref",
                     "identifierAbbreviation": "GEO",
                     "identifierBaseURL": "http://www.geonames.org/"
+                },
+                "organisations":{
+                    "titleElement": "name",
+                    "descriptionElement": "description",
+                    "statusElement": "status",
+                    "identifierElement": "ref",
+                    "identifierAbbreviation": "DNB",
+                    "identifierBaseURL": "http://d-nb.info/gnd/"
                 }
 
             },
