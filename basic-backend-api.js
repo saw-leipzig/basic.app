@@ -225,22 +225,24 @@ function APIDatasets () {
         cds = sessionStorage.getItem(context);
         query_dataset = {'dataset': cds};
     }
-    // Load objects from cds in object cache
-    $.getJSON(config.app.config.baseURL + config.app.config.api[context].RESTAPI, query_dataset).done(function (result) {
-        var cnt = 0;
-        if (result) {
-            cnt = 1;
-            if (Array.isArray(result[config.a.JSONContainer])) {
-                cnt = result[config.a.JSONContainer].length;
+    if (cds) {
+        // Load objects from cds in object cache
+        $.getJSON(config.app.config.baseURL + config.app.config.api[context].RESTAPI, query_dataset).done(function (result) {
+            var cnt = 0;
+            if (result) {
+                cnt = 1;
+                if (Array.isArray(result[config.a.JSONContainer])) {
+                    cnt = result[config.a.JSONContainer].length;
+                }
+                data_objects = result;
             }
-            data_objects = result;
-        }
-        console.log('REST-API: ' + cnt + ' object(s) loaded.');
-        // Create result list representation
-        asArray(data_objects[config.a.JSONContainer]).reverse().forEach(function (obj) {createNewHTMLObject(obj)});
-        // Set current dataset
-        $('#xml-dataset-current').html(cds);
-        // dataset loaded
-        $('body').trigger('datasetLoaded');
-    });
+            console.log('REST-API: ' + cnt + ' object(s) loaded.');
+            // Create result list representation
+            asArray(data_objects[config.a.JSONContainer]).reverse().forEach(function (obj) {createNewHTMLObject(obj)});
+            // Set current dataset
+            $('#xml-dataset-current').html(cds);
+            // dataset loaded
+            $('body').trigger('datasetLoaded');
+        });
+    }
 }
