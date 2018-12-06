@@ -25,7 +25,7 @@ var plugin_ls_dataset_info = $('<div id="ls-dataset-info"></div>')
 
 
 // Add plugin section
-var basicPluginLocalStorage = new BasicAppPlugin('app-plugin-ls', 'Local Storage Configuration', 'fas fa-database', '#app-content-plugins-configuration');
+var basicPluginLocalStorage = new BasicAppPlugin('app-plugin-ls', 'Local Storage Configuration', 'fas fa-database', '#app-content-plugins-configuration', 'NO');
 basicPluginLocalStorage.render([plugin_ls_datasets, plugin_ls_dataset_info, plugin_ls_dataset_name]);
 
 
@@ -171,7 +171,6 @@ LocalStorageAdapter.prototype.load = function () {
         console.log('Local Storage API: ' + objects_array.length + ' object(s) loaded (context: ' + ctx + ', dataset: ' + ds + ')');
         // Update frontend info
         updateFrontendDatasetInformation(this.last_updated, objects_array.length);
-        $('body').trigger('datasetLoaded');
     } else {
         console.log('Local Storage API (ERROR): Context or dataset is null. Nothing loaded.');
     }
@@ -203,6 +202,7 @@ LocalStorageAdapter.prototype.setDataset = function (ds) {
     // Save current dataset name
     localStorage.setItem(this.ls_key_last, ds);
     console.log('Local Storage API: Current dataset: ' + ds);
+    $('body').trigger('datasetLoaded');         
     return this;
 }
 

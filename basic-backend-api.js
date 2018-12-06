@@ -35,7 +35,7 @@ var plugin_xml_datasets = $('<div id="xml-datasets-dropdown"></div>')
 
 
 // Add plugin section
-var basicPluginXMLStorage = new BasicAppPlugin('app-plugin-xml', 'eXist Storage Configuration', 'fas fa-database', '#app-content-plugins-configuration');
+var basicPluginXMLStorage = new BasicAppPlugin('app-plugin-xml', 'eXist Storage Configuration', 'fas fa-database', '#app-content-plugins-configuration', 'NO');
 basicPluginXMLStorage.render(plugin_xml_datasets);
 
 
