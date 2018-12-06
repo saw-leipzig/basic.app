@@ -6,7 +6,7 @@ function ImportExportPlugin() {
                                 <span class="fas fa-file-download"></span> Download JSON\
                             </button>');
     this.btn_json_down.on('click', function(e){
-        plugin.downloadJSON(data_objects, 'basic-app-data');
+        plugin.downloadJSON(data_objects, 'basic-' + context);
         // Hide plugins
         $('#app-content-plugins-area').collapse('hide');
     })
