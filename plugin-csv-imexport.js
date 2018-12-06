@@ -34,11 +34,13 @@ function CSVImportExportPlugin() {
                                                   </button>\
                                               </div>\
                                               <div class="modal-body">\
-                                                  <div class="form-group">\
-                                                    <label for="uploadFileCSV">CSV-file to load data from</label>\
-                                                    <input type="file" class="form-control-file" id="uploadFileCSV">\
+                                                  <div class="custom-file mb-2">\
+                                                    <label for="uploadFileCSV" class="custom-file-label" id="uploadFileCSVLabel">CSV-file to load data from</label>\
+                                                    <input type="file" class="custom-file-input" id="uploadFileCSV">\
                                                   </div>\
                                                   <form id="import-csvdata-form"></form>\
+                                              </div>\
+                                              <div class="modal-footer">\
                                                   <button type="button" class="btn btn-primary disabled" id="btn-import-from-csv">Import <span class="badge badge-light found-csv-objects">0</span> objects</button>\
                                                   <button type="button" class="btn btn-primary disabled" id="btn-add-from-csv">Add <span class="badge badge-light found-csv-objects">0</span> objects</button>\
                                               </div>\
@@ -86,6 +88,7 @@ function CSVImportExportPlugin() {
         }
     });
     $('#modals').on('change', '#uploadFileCSV', function (e){
+        $('#uploadFileCSVLabel').html(this.files[0].name);
         plugin.getObjectsFromCSV();
     });
     $('#modals').on('change', '#mergeFileCSV', function (e){
@@ -173,13 +176,35 @@ CSVImportExportPlugin.prototype.getObjectsFromCSV = function() {
                         var id = letter[column + 'ID'];
                         var entity = {};
                         // Name and ID are given. Check for duplicate ID
-                        // TODO: if ID already imported and name differs add name as alias
                         if (name && id && !found_ids.includes(id)) {
                             entity[config.v.titleElement] = name;
                             entity[config.v.identifierElement] = id;
                             importable_entities.push(entity);
                             unique_names.push(name);
                             found_ids.push(id);
+                        }
+                        // If ID already imported and name differs add name as alias
+                        else if (name && id && found_ids.includes(id) && !unique_names.includes(name)) {
+                            if (config.v.aliasElement != undefined) {
+                                // Update importable entity with id and add an alias, if not already done
+                                var already_imported_entity = importable_entities.find(function (e) {
+                                    return e[config.v.identifierElement] == id;
+                                });
+                                if (already_imported_entity[config.v.aliasElement] == undefined) {
+                                    // there is no alias yet
+                                    already_imported_entity[config.v.aliasElement] = name;
+                                } else {
+                                    // Alias(es) aready set.
+                                    var old_aliases = asArray(already_imported_entity[config.v.aliasElement]);
+                                    // Add if not already done.
+                                    if (!old_aliases.includes(name)) {
+                                        old_aliases.push(name);
+                                        already_imported_entity[config.v.aliasElement] = old_aliases;
+                                    }
+                                }
+                            } else {
+                                // If aliases aren't configured, we can't handle this case
+                            }
                         }
                         // Only the name is given. Check for duplicate name.
                         else if (name && !id && !unique_names.includes(name)) {
@@ -195,12 +220,12 @@ CSVImportExportPlugin.prototype.getObjectsFromCSV = function() {
                 count_span.html(importable_entities.length);
                 if (importable_entities.length > 0) {
                     // Add importable entities to import form with filter buttons
-                    $('#csv-file-upload-modal .form-group button[type="button"]').remove();
-                    var chk_button_filter = '<div class="btn-group mt-2" id="check-buttons" role="group">\
+                    var chk_button_filter = '<div class="btn-group form-group" id="check-buttons" role="group">\
                                                 <button class="btn btn-sm btn-secondary" id="import-csv-btn-chk-all" type="button">Select All</button>\
                                                 <button class="btn btn-sm btn-secondary" id="import-csv-btn-chk-none" type="button">Deselect All</button>\
                                             </div>';
-                    $(chk_button_filter).appendTo('#csv-file-upload-modal .form-group');
+                    $(chk_button_filter).appendTo(entities_form);
+                    var entities_btn_group = $('<div class="form-group"></div>').appendTo(entities_form);
                     importable_entities.forEach(function (e, i) {
                         var ref_html = '';
                         if (e[config.v.identifierElement] && e[config.v.identifierElement].startsWith(config.v.identifierBaseURL)) {
@@ -212,7 +237,7 @@ CSVImportExportPlugin.prototype.getObjectsFromCSV = function() {
                                             ' + e[config.v.titleElement] + ref_html +'\
                                           </label>\
                                         </div>';
-                        $(chk_html).appendTo(entities_form);
+                        $(chk_html).appendTo(entities_btn_group);
                     })
                     $(btn_import).removeClass('disabled');
                     $(btn_add).removeClass('disabled');
@@ -264,6 +289,9 @@ CSVImportExportPlugin.prototype.addEntities = function(event) {
                     '#text': e[config.v.identifierElement],
                     'preferred': 'YES'
                 };
+            }
+            if (e[config.v.aliasElement] != undefined) {
+                params[config.v.aliasElement] = e[config.v.aliasElement];
             }
             addObject(event.target, params)
         }
