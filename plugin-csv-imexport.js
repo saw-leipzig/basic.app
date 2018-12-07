@@ -313,6 +313,7 @@ CSVImportExportPlugin.prototype.mergeObjectsWithCSV = function() {
     var context2columnnames = plugin.context2columnnames;
     var preselected_statuus = ['safe'];
 
+    // TODO: Check if file type is text/csv and handle error case
     if (file) {
         Papa.parse(file, {
             header: true,
@@ -388,7 +389,12 @@ CSVImportExportPlugin.prototype.mergeCSV = function() {
             // Don't replace/add anything in 'soft' mode if an ID is already given
             if (name != undefined && name.trim() != '' && !(method == 'soft' && id.trim() != '')) {
                 // Get matching object
+                // Default case is matching with preferred name (titleElement)
                 var obj = getLocalObjectByTitle(name);
+                // If there is no match on titleElement, try to find one with matching alias, if alias is configured
+                if (obj == undefined && config.v.aliasElement != undefined) {
+                    obj = getLocalObjectByAlias(name);
+                }
                 // Check if object is in correct state
                 if (obj !== undefined && statuus.includes(obj[config.v.statusElement])) {
                     // Get preferred ID from local object
