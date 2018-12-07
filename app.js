@@ -144,9 +144,17 @@ function replaceLocalIDInFrontend(old_id, new_id) {
 }
 
 
+function dataToString (data) {
+    if (Array.isArray(data)) {
+        data = data.join(', ');
+    }   
+    return data;
+}
+
+
 function createNewHTMLObject(data){
     if(config.v.descriptionElement !== undefined && data[config.v.descriptionElement] != null){
-        description_html = '<p class="mb-1">'+ data[config.v.descriptionElement] + '</p>';
+        description_html = '<p class="mb-1">' + dataToString(data[config.v.descriptionElement]) + '</p>';
     } else {
         description_html = '<p class="mb-1"></p>'
     }
@@ -669,7 +677,6 @@ function changeStatus (trigger_element, element_id, current_status, new_status){
 function prepareValueMapping (mapping_config, mapping_value) {
     var ret = mapping_value;
     if (mapping_config.multiple){
-        // is expectes that in mapping_value multiple values include
         if (typeof mapping_value === 'string') {
             var value_arr = mapping_value.split('\n');
             if (value_arr.length > 1) {
@@ -768,7 +775,7 @@ function editObject(id) {
     /* 2. update frontend
     Update title and description of list item */
     $('#' + id + ' h5').text(local_object[config.v.titleElement]);
-    $('#' + id + ' p').text(local_object[config.v.descriptionElement]);
+    $('#' + id + ' p').text(dataToString(local_object[config.v.descriptionElement]));
     // Close modal,
     $('#object-modal').modal('hide');
 }
