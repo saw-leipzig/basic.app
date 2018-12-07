@@ -72,6 +72,13 @@ function getLocalObjectByTitle (title) {
 }
 
 
+function getLocalObjectByAlias (alias) {
+    return asArray(data_objects[config.a.JSONContainer]).find(function (e) {
+        return asArray(e[config.v.aliasElement]).includes(alias);
+    });
+}
+
+
 // get the value using the path_key from config template
 function deepFind (obj, path_key) {
     // Dynamic attributes
