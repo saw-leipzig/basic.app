@@ -331,3 +331,7 @@ a.link-seealso {
     height: 100%;
   }
 }
+
+.plugin-hidden {
+  display: none;
+}

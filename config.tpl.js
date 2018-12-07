@@ -1,6 +1,6 @@
 var config = {
     "app": {
-        "version": "1.0.1-dev",
+        "version": "1.0.1",
         "config": {
             "use_corsanywhere": false,
             "footer": {
@@ -36,7 +36,8 @@ var config = {
                     "statusElement": "status",
                     "identifierElement": "ref",
                     "identifierAbbreviation": "DNB",
-                    "identifierBaseURL": "http://d-nb.info/gnd/"
+                    "identifierBaseURL": "http://d-nb.info/gnd/",
+                    "aliasElement": "alias"
                 },
                 "places": {
                     "titleElement": "name",
@@ -44,7 +45,8 @@ var config = {
                     "statusElement": "status",
                     "identifierElement": "ref",
                     "identifierAbbreviation": "GEO",
-                    "identifierBaseURL": "http://www.geonames.org/"
+                    "identifierBaseURL": "http://www.geonames.org/",
+                    "aliasElement": "alias"
                 },
                 "organisations":{
                     "titleElement": "name",
@@ -52,7 +54,8 @@ var config = {
                     "statusElement": "status",
                     "identifierElement": "ref",
                     "identifierAbbreviation": "DNB",
-                    "identifierBaseURL": "http://d-nb.info/gnd/"
+                    "identifierBaseURL": "http://d-nb.info/gnd/",
+                    "aliasElement": "alias"
                 }
 
             },
@@ -124,7 +127,9 @@ var config = {
                         "localJSONPath": "name"
                     },{
                         "displayName": "Namensvariante",
-                        "JSONPath": "alternateNames.name"
+                        "JSONPath": "alternateNames.name",
+                        "localJSONPath": "alias",
+                        "multiple": true
                     },{
                         "displayName": "Breitengrad",
                         "JSONPath": "lat"
