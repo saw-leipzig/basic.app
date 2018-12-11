@@ -101,7 +101,7 @@ ImportExportPlugin.prototype.getObjectsFromJSON = function() {
         // Get all objects
         var objects = JSON.parse(reader.result);
         import_object = objects;
-        var num_objects = import_object[config.a.JSONContainer].length
+        var num_objects = asArray(import_object[config.a.JSONContainer]).length
         // Update import button
         count_span.html(num_objects);
         if (num_objects > 0) {
@@ -126,8 +126,10 @@ ImportExportPlugin.prototype.importObjects = function(event) {
 
 ImportExportPlugin.prototype.addObjects = function(event) {
     console.log('JSON Import/Export: Adding objects ...');
-    for (i in import_object[config.a.JSONContainer]) {
-        addObject(event.target, import_object[config.a.JSONContainer][i]);
+
+    var importable_objects = asArray(import_object[config.a.JSONContainer]);
+    for (i in importable_objects) {
+        addObject(event.target, importable_objects[i]);
     }
     console.log('Addition finished.');
     countObjectsByStatus();
