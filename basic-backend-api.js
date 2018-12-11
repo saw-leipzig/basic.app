@@ -27,7 +27,7 @@ var plugin_xml_datasets = $('<div id="xml-datasets-dropdown"></div>')
     // Add classes
     .addClass('btn-group btn-group-sm')
     // Add dropdown button
-    .append('<button type="button" class="btn btn-outline-light dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">\
+    .append('<button type="button" class="btn btn-outline-light dropdown-toggle text-truncate" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">\
                 Current Dataset: <em id="xml-dataset-current"/>\
             </button>')
     // Add dropdown menu
