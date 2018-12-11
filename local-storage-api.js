@@ -3,7 +3,7 @@ var plugin_ls_datasets = $('<div id="ls-datasets-dropdown"></div>')
     // Add classes
     .addClass('btn-group btn-group-sm d-block')
     // Add dropdown button
-    .append('<button type="button" class="btn btn-outline-light btn-block dropdown-toggle text-left" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">\
+    .append('<button type="button" class="btn btn-outline-light btn-block dropdown-toggle text-left text-truncate" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">\
                 <strong>Current Dataset</strong>: <em id="ls-dataset-current"></em>\
             </button>')
     // Add dropdown menu
@@ -202,7 +202,7 @@ LocalStorageAdapter.prototype.setDataset = function (ds) {
     // Save current dataset name
     localStorage.setItem(this.ls_key_last, ds);
     console.log('Local Storage API: Current dataset: ' + ds);
-    $('body').trigger('datasetLoaded');         
+    $('body').trigger('datasetLoaded');
     return this;
 }
 
