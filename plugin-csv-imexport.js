@@ -487,7 +487,8 @@ CSVImportExportPlugin.prototype.downloadCSV = function() {
     var plugin = this;
     var dataStr = "data:text/csv;charset=utf-8," + encodeURIComponent(Papa.unparse(plugin.csv_data, {
         quotes: true,
-        header: true
+        header: true,
+        delimiter: plugin.csv_delimiter
     }));
     var downloadAnchorNode = document.createElement('a');
     downloadAnchorNode.setAttribute("href",     dataStr);
