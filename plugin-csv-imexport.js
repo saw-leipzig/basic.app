@@ -34,10 +34,12 @@ function CSVImportExportPlugin() {
                                                   </button>\
                                               </div>\
                                               <div class="modal-body">\
-                                                  <div class="custom-file mb-2">\
-                                                    <label for="uploadFileCSV" class="custom-file-label" id="uploadFileCSVLabel">CSV-file to load data from</label>\
-                                                    <input type="file" class="custom-file-input" id="uploadFileCSV">\
-                                                  </div>\
+                                                  <form id="import-csvdata-file-form">\
+                                                      <div class="custom-file mb-2">\
+                                                        <input type="file" class="custom-file-input" id="uploadFileCSV">\
+                                                        <label for="uploadFileCSV" class="custom-file-label" id="uploadFileCSVLabel">CSV-file to load data from</label>\
+                                                      </div>\
+                                                  </form>\
                                                   <form id="import-csvdata-form"></form>\
                                               </div>\
                                               <div class="modal-footer">\
@@ -61,10 +63,12 @@ function CSVImportExportPlugin() {
                                                   </button>\
                                               </div>\
                                               <div class="modal-body">\
-                                                  <div class="custom-file mb-2">\
-                                                    <label for="mergeFileCSV" class="custom-file-label" id="mergeFileCSVLabel">Choose CSV-file to update</label>\
-                                                    <input type="file" class="custom-file-input" id="mergeFileCSV">\
-                                                  </div>\
+                                                  <form id="merge-csvdata-file-form">\
+                                                      <div class="custom-file mb-2">\
+                                                        <input type="file" class="custom-file-input" id="mergeFileCSV">\
+                                                        <label for="mergeFileCSV" class="custom-file-label" id="mergeFileCSVLabel">Choose CSV-file to update</label>\
+                                                      </div>\
+                                                  </form>\
                                                   <form id="merge-csvdata-form"></form>\
                                               </div>\
                                               <div class="modal-footer">\
@@ -78,11 +82,13 @@ function CSVImportExportPlugin() {
 
     // register click event listener
     $('#modals').on('click', '#btn-import-from-csv', function (e){
+        // Make sure button is not disabled
         if (!$(this).hasClass('disabled')) {
             plugin.importEntities(e);
         }
     });
     $('#modals').on('click', '#btn-add-from-csv', function (e){
+        // Make sure button is not disabled
         if (!$(this).hasClass('disabled')) {
             plugin.addEntities(e);
         }
@@ -96,9 +102,12 @@ function CSVImportExportPlugin() {
         plugin.mergeObjectsWithCSV();
     });
     $('#modals').on('click', '#btn-merge-with-csv', function (e){
-        plugin
-            .mergeCSV()
-            .downloadCSV();
+        // Make sure button is not disabled
+        if (!$(this).hasClass('disabled')) {
+            plugin
+                .mergeCSV()
+                .downloadCSV();
+        }
     });
     $('#modals').on('hidden.bs.modal', '#csv-file-upload-modal', function (e){
         $('#csv-file-upload-modal').replaceWith(plugin.modal_csv_file_upload_html);
@@ -147,110 +156,137 @@ CSVImportExportPlugin.prototype.updateImportables = function(event) {
 
 CSVImportExportPlugin.prototype.getObjectsFromCSV = function() {
     var plugin = this;
-    var btn_import = document.querySelector('#btn-import-from-csv');
-    var btn_add = document.querySelector('#btn-add-from-csv');
+    var btn_import = $('#btn-import-from-csv');
+    var btn_add = $('#btn-add-from-csv');
     var count_span = $('.found-csv-objects');
+    var file_form = $('#import-csvdata-file-form');
+    var file_input = $('#uploadFileCSV');
     var entities_form = $('#import-csvdata-form');
     var file = document.querySelector('#uploadFileCSV').files[0];
     var context2columnnames = plugin.context2columnnames;
 
+    // Clear possible further validation results
+    file_form.find('.is-valid, .is-invalid').removeClass('is-valid is-invalid');
+    file_form.find('.invalid-feedback').remove();
+    entities_form.empty();
+    importable_entities = [];
+    count_span.empty();
+    btn_import.addClass('disabled');
+    btn_add.addClass('disabled');
+
     if (file) {
-        Papa.parse(file, {
-            header: true,
-            skipEmptyLines: true,
-            complete: function(results) {
-                console.log('CSV Import/Export: File ' + file.name + ' loaded.');
-                // Reset importables, form, etc.
-                importable_entities = [];
-                entities_form.empty();
-                count_span.empty();
-                $(btn_import).addClass('disabled');
-                $(btn_add).addClass('disabled');
-                // Get entities
-                // Uniquify by reference and name
-                var unique_names = [];
-                var found_ids = [];
-                results.data.forEach(function (letter) {
-                    context2columnnames[context].forEach(function (column) {
-                        var name = letter[column];
-                        var id = letter[column + 'ID'];
-                        var entity = {};
-                        // Name and ID are given. Check for duplicate ID
-                        if (name && id && !found_ids.includes(id)) {
-                            entity[config.v.titleElement] = name;
-                            entity[config.v.identifierElement] = id;
-                            importable_entities.push(entity);
-                            unique_names.push(name);
-                            found_ids.push(id);
-                        }
-                        // If ID already imported and name differs add name as alias
-                        else if (name && id && found_ids.includes(id) && !unique_names.includes(name)) {
-                            if (config.v.aliasElement != undefined) {
-                                // Update importable entity with id and add an alias, if not already done
-                                var already_imported_entity = importable_entities.find(function (e) {
-                                    return e[config.v.identifierElement] == id;
-                                });
-                                if (already_imported_entity[config.v.aliasElement] == undefined) {
-                                    // there is no alias yet
-                                    already_imported_entity[config.v.aliasElement] = name;
-                                } else {
-                                    // Alias(es) aready set.
-                                    var old_aliases = asArray(already_imported_entity[config.v.aliasElement]);
-                                    // Add if not already done.
-                                    if (!old_aliases.includes(name)) {
-                                        old_aliases.push(name);
-                                        already_imported_entity[config.v.aliasElement] = old_aliases;
+        if (file.type == 'text/csv') {
+            Papa.parse(file, {
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    console.log('CSV Import/Export: File ' + file.name + ' loaded.');
+                    if (results.errors.length == 0) {
+                        // Bootstrap form validation
+                        file_input.addClass('is-valid');
+                        // Get entities
+                        // Uniquify by reference and name
+                        var unique_names = [];
+                        var found_ids = [];
+                        results.data.forEach(function (letter) {
+                            context2columnnames[context].forEach(function (column) {
+                                var name = letter[column];
+                                var id = letter[column + 'ID'];
+                                var entity = {};
+                                // Name and ID are given. Check for duplicate ID
+                                if (name && id && !found_ids.includes(id)) {
+                                    entity[config.v.titleElement] = name;
+                                    entity[config.v.identifierElement] = id;
+                                    importable_entities.push(entity);
+                                    unique_names.push(name);
+                                    found_ids.push(id);
+                                }
+                                // If ID already imported and name differs add name as alias
+                                else if (name && id && found_ids.includes(id) && !unique_names.includes(name)) {
+                                    if (config.v.aliasElement != undefined) {
+                                        // Update importable entity with id and add an alias, if not already done
+                                        var already_imported_entity = importable_entities.find(function (e) {
+                                            return e[config.v.identifierElement] == id;
+                                        });
+                                        if (already_imported_entity[config.v.aliasElement] == undefined) {
+                                            // there is no alias yet
+                                            already_imported_entity[config.v.aliasElement] = name;
+                                        } else {
+                                            // Alias(es) aready set.
+                                            var old_aliases = asArray(already_imported_entity[config.v.aliasElement]);
+                                            // Add if not already done.
+                                            if (!old_aliases.includes(name)) {
+                                                old_aliases.push(name);
+                                                already_imported_entity[config.v.aliasElement] = old_aliases;
+                                            }
+                                        }
+                                    } else {
+                                        // If aliases aren't configured, we can't handle this case
                                     }
                                 }
-                            } else {
-                                // If aliases aren't configured, we can't handle this case
-                            }
+                                // Only the name is given. Check for duplicate name.
+                                else if (name && !id && !unique_names.includes(name)) {
+                                    entity[config.v.titleElement] = name;
+                                    importable_entities.push(entity);
+                                    unique_names.push(name);
+                                }
+                            });
+                        });
+                        plugin.importable_entities = importable_entities;
+                        plugin.names_to_import = unique_names;
+                        // Update form
+                        count_span.html(importable_entities.length);
+                        if (importable_entities.length > 0) {
+                            // Add importable entities to import form with filter buttons
+                            var chk_button_filter = '<div class="btn-group form-group" id="check-buttons" role="group">\
+                                                        <button class="btn btn-sm btn-secondary" id="import-csv-btn-chk-all" type="button">Select All</button>\
+                                                        <button class="btn btn-sm btn-secondary" id="import-csv-btn-chk-none" type="button">Deselect All</button>\
+                                                    </div>';
+                            $(chk_button_filter).appendTo(entities_form);
+                            var entities_btn_group = $('<div class="form-group"></div>').appendTo(entities_form);
+                            importable_entities.forEach(function (e, i) {
+                                var ref_html = '';
+                                if (e[config.v.identifierElement] && e[config.v.identifierElement].startsWith(config.v.identifierBaseURL)) {
+                                    ref_html = ' <span class="badge badge-dark">' + e[config.v.identifierElement].substr(config.v.identifierBaseURL.length) + '</span>';
+                                }
+                                var chk_html = '<div class="form-check form-check-inline">\
+                                                  <input class="form-check-input" type="checkbox" value="' + e[config.v.titleElement] + '" id="import-entitiy-' + i + '" checked>\
+                                                  <label class="form-check-label" for="import-entitiy-' + i + '">\
+                                                    ' + e[config.v.titleElement] + ref_html +'\
+                                                  </label>\
+                                                </div>';
+                                $(chk_html).appendTo(entities_btn_group);
+                            })
+                            btn_import.removeClass('disabled');
+                            btn_add.removeClass('disabled');
+                            $('#modals').on('click', '#import-csv-btn-chk-all', function(){
+                                $('#import-csvdata-form input[type="checkbox"]').prop('checked', true).trigger('change');
+                            });
+                            $('#modals').on('click', '#import-csv-btn-chk-none', function(){
+                                $('#import-csvdata-form input[type="checkbox"]').prop('checked', false).trigger('change');
+                            });
                         }
-                        // Only the name is given. Check for duplicate name.
-                        else if (name && !id && !unique_names.includes(name)) {
-                            entity[config.v.titleElement] = name;
-                            importable_entities.push(entity);
-                            unique_names.push(name);
-                        }
-                    });
-                });
-                plugin.importable_entities = importable_entities;
-                plugin.names_to_import = unique_names;
-                // Update form
-                count_span.html(importable_entities.length);
-                if (importable_entities.length > 0) {
-                    // Add importable entities to import form with filter buttons
-                    var chk_button_filter = '<div class="btn-group form-group" id="check-buttons" role="group">\
-                                                <button class="btn btn-sm btn-secondary" id="import-csv-btn-chk-all" type="button">Select All</button>\
-                                                <button class="btn btn-sm btn-secondary" id="import-csv-btn-chk-none" type="button">Deselect All</button>\
-                                            </div>';
-                    $(chk_button_filter).appendTo(entities_form);
-                    var entities_btn_group = $('<div class="form-group"></div>').appendTo(entities_form);
-                    importable_entities.forEach(function (e, i) {
-                        var ref_html = '';
-                        if (e[config.v.identifierElement] && e[config.v.identifierElement].startsWith(config.v.identifierBaseURL)) {
-                            ref_html = ' <span class="badge badge-dark">' + e[config.v.identifierElement].substr(config.v.identifierBaseURL.length) + '</span>';
-                        }
-                        var chk_html = '<div class="form-check form-check-inline">\
-                                          <input class="form-check-input" type="checkbox" value="' + e[config.v.titleElement] + '" id="import-entitiy-' + i + '" checked>\
-                                          <label class="form-check-label" for="import-entitiy-' + i + '">\
-                                            ' + e[config.v.titleElement] + ref_html +'\
-                                          </label>\
-                                        </div>';
-                        $(chk_html).appendTo(entities_btn_group);
-                    })
-                    $(btn_import).removeClass('disabled');
-                    $(btn_add).removeClass('disabled');
-                    $('#modals').on('click', '#import-csv-btn-chk-all', function(){
-                        $('#import-csvdata-form input[type="checkbox"]').prop('checked', true).trigger('change');
-                    });
-                    $('#modals').on('click', '#import-csv-btn-chk-none', function(){
-                        $('#import-csvdata-form input[type="checkbox"]').prop('checked', false).trigger('change');
-                    });
+                        $('#modals').on('change', '#import-csvdata-form input[type="checkbox"]', function (e) {plugin.updateImportables(e)} );
+                    } else {
+                        // There were parsing errors.
+                        var msg = '[ERROR] There are parsing errors. View JavaScript console for more information.';
+                        console.log('CSV Import/Export: ' + msg, results.errors);
+                        // Bootstrap form validation
+                        file_input
+                            .after('<div class="invalid-feedback">' + msg + '</div>')
+                            .addClass('is-invalid');
+                    }
                 }
-                $('#modals').on('change', '#import-csvdata-form input[type="checkbox"]', function (e) {plugin.updateImportables(e)} );
-            }
-        });
+            });
+        } else {
+            // Wrong filetype: abort
+            var msg = '[ERROR] Wrong file type "' + file.type + '" detected. Please choose a CSV file (text/csv).';
+            console.log('CSV Import/Export: ' + msg);
+            // Bootstrap form validation
+            file_input
+                .after('<div class="invalid-feedback">' + msg + '</div>')
+                .addClass('is-invalid');
+        }
     }
     return plugin;
 }
@@ -306,51 +342,83 @@ CSVImportExportPlugin.prototype.addEntities = function(event) {
 
 CSVImportExportPlugin.prototype.mergeObjectsWithCSV = function() {
     var plugin = this;
-    var btn_merge = document.querySelector('#btn-merge-with-csv');
+    var btn_merge = $('#btn-merge-with-csv');
     //var count_span = $('.found-csv-objects');
+    var file_form = $('#merge-csvdata-file-form');
+    var file_input = $('#mergeFileCSV');
     var entities_form = $('#merge-csvdata-form');
     var file = document.querySelector('#mergeFileCSV').files[0];
     var context2columnnames = plugin.context2columnnames;
     var preselected_statuus = ['safe'];
 
-    // TODO: Check if file type is text/csv and handle error case
+    // Clear possible further validation results
+    file_form.find('.is-valid, .is-invalid').removeClass('is-valid is-invalid');
+    file_form.find('.invalid-feedback').remove();
+    entities_form.empty();
+    btn_merge.addClass('disabled');
+
     if (file) {
-        Papa.parse(file, {
-            header: true,
-            skipEmptyLines: true,
-            complete: function(results) {
-                console.log('CSV Import/Export: File ' + file.name + ' loaded.');
-                plugin.csv_data = results.data;
-                plugin.csv_filename = file.name;
-                // Build settings form
-                $(entities_form).append('<small class="form-text">Select merging method. <span class="text-muted">Hard mode will replace existing identifier in CSV with the preferred identifier of the object. The soft mode only adds identifier to objects, not having an identifier in CSV.</span></small>');
-                var method_buttons = $('<div class="btn-group btn-group-toggle mb-2" data-toggle="buttons"></div>')
-                    .append('<label class="btn btn-secondary active">\
-                                <input type="radio" name="csv-merge-method" value="hard" autocomplete="off" checked> Hard\
-                            </label>')
-                    .append('<label class="btn btn-secondary">\
-                                <input type="radio" name="csv-merge-method" value="soft" autocomplete="off"> Soft\
-                            </label>')
-                    .appendTo(entities_form);
-                $(entities_form).append('<small class="form-text">Select statu(u)s to merge. <span class="text-muted">Only objects with the selected status will be merged.</span></small>');
-                var status_buttons = $('<div class="btn-group btn-group-toggle mb-2" data-toggle="buttons"></div>')
-                    .appendTo(entities_form);
-                config.app.config.status.available.forEach(function (status) {
-                    if (preselected_statuus.includes(status)) {
-                        status_buttons.append('<label class="btn btn-secondary active">\
-                                                <input type="checkbox" name="csv-statuus" value="' + status + '" autocomplete="off" checked>\
-                                                ' + status + '\
-                                            </label>')
+        if (file.type == 'text/csv') {
+            Papa.parse(file, {
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    console.log('CSV Import/Export: File ' + file.name + ' loaded.');
+                    if (results.errors.length == 0) {
+                        // Bootstrap form validation
+                        file_input.addClass('is-valid');
+                        // Store data needed for later merging
+                        plugin.csv_data = results.data;
+                        plugin.csv_filename = file.name;
+                        // Use detected delimiter from original file
+                        plugin.csv_delimiter = results.meta.delimiter;
+                        // Build settings form
+                        $(entities_form).append('<small class="form-text">Select merging method. <span class="text-muted">Hard mode will replace existing identifier in CSV with the preferred identifier of the object. The soft mode only adds identifier to objects, not having an identifier in CSV.</span></small>');
+                        var method_buttons = $('<div class="btn-group btn-group-toggle mb-2" data-toggle="buttons"></div>')
+                            .append('<label class="btn btn-secondary active">\
+                                        <input type="radio" name="csv-merge-method" value="hard" autocomplete="off" checked> Hard\
+                                    </label>')
+                            .append('<label class="btn btn-secondary">\
+                                        <input type="radio" name="csv-merge-method" value="soft" autocomplete="off"> Soft\
+                                    </label>')
+                            .appendTo(entities_form);
+                        $(entities_form).append('<small class="form-text">Select statu(u)s to merge. <span class="text-muted">Only objects with the selected status will be merged.</span></small>');
+                        var status_buttons = $('<div class="btn-group btn-group-toggle mb-2" data-toggle="buttons"></div>')
+                            .appendTo(entities_form);
+                        config.app.config.status.available.forEach(function (status) {
+                            if (preselected_statuus.includes(status)) {
+                                status_buttons.append('<label class="btn btn-secondary active">\
+                                                        <input type="checkbox" name="csv-statuus" value="' + status + '" autocomplete="off" checked>\
+                                                        ' + status + '\
+                                                    </label>')
+                            } else {
+                                status_buttons.append('<label class="btn btn-secondary">\
+                                                        <input type="checkbox" name="csv-statuus" value="' + status + '" autocomplete="off">\
+                                                        ' + status + '\
+                                                    </label>')
+                            }
+                        });
+                        btn_merge.removeClass('disabled');
                     } else {
-                        status_buttons.append('<label class="btn btn-secondary">\
-                                                <input type="checkbox" name="csv-statuus" value="' + status + '" autocomplete="off">\
-                                                ' + status + '\
-                                            </label>')
+                        // There were parsing errors.
+                        var msg = '[ERROR] There are parsing errors. View JavaScript console for more information.';
+                        console.log('CSV Import/Export: ' + msg, results.errors);
+                        // Bootstrap form validation
+                        file_input
+                            .after('<div class="invalid-feedback">' + msg + '</div>')
+                            .addClass('is-invalid');
                     }
-                });
-                $(btn_merge).removeClass('disabled');
-            }
-        });
+                }
+            });
+        } else {
+            // Wrong filetype: abort
+            var msg = '[ERROR] Wrong file type "' + file.type + '" detected. Please choose a CSV file (text/csv).';
+            console.log('CSV Import/Export: ' + msg);
+            // Bootstrap form validation
+            file_input
+                .after('<div class="invalid-feedback">' + msg + '</div>')
+                .addClass('is-invalid');
+        }
     }
     return plugin;
 }
