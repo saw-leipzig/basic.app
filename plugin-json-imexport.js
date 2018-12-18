@@ -97,7 +97,12 @@ ImportExportPlugin.prototype.getObjectsFromJSON = function() {
     var file_input = $('#uploadFileJSON');
     var file = document.querySelector('#uploadFileJSON').files[0];
     var accepted_mimetypes = [
-        'application/json'
+        'application/json',
+        'application/javascript',
+        'application/x-javascript',
+        'text/javascript',
+        'text/x-javascript',
+        'text/x-json'
     ]
     var reader  = new FileReader();
 
