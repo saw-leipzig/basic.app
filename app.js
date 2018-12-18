@@ -705,8 +705,12 @@ function addObject (el, params){
     var local_object = {};
     // Set new ID
     local_object.id = 'loc' + create_UUID();
-    // Set status (default status is configured)
-    local_object[config.v.statusElement] = config.app.config.status.default;
+    // Set status (default status is configured), if not given as parameter
+    if (params && params[config.v.statusElement] != undefined) {
+        local_object[config.v.statusElement] = params[config.v.statusElement];
+    } else {
+        local_object[config.v.statusElement] = config.app.config.status.default;
+    }
     // Add configured attributes to object
     var attributes = config.app.config.mapping[context];
     attributes.forEach(function (e) {

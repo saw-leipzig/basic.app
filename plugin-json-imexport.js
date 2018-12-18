@@ -25,6 +25,14 @@ function ImportExportPlugin() {
     basicPluginActions.registerButton(this.btn_json_up);
 
 
+    var modal_json_file_upload_status_html = '<label class="btn btn-secondary active">\
+                <input type="radio" name="json-import-status" value="as_is" autocomplete="off" checked> from file\
+            </label>';
+    config.app.config.status.available.forEach(function (status) {
+        modal_json_file_upload_status_html += '<label class="btn btn-secondary">\
+                <input type="radio" name="json-import-status" value="' + status + '" autocomplete="off">' + status + '\
+            </label>';
+    });
     this.modal_json_file_upload_html = '<div class="modal fade" id="json-file-upload-modal" tabindex="-1" aria-hidden="true" role="dialog">\
                                       <div class="modal-dialog modal-lg" role="document">\
                                           <div class="modal-content">\
@@ -39,6 +47,10 @@ function ImportExportPlugin() {
                                                       <div class="custom-file mb-2">\
                                                         <input type="file" class="custom-file-input" id="uploadFileJSON">\
                                                         <label for="uploadFileCSV" class="custom-file-label" id="uploadFileJSONLabel">JSON-file to load data from</label>\
+                                                      </div>\
+                                                      <small class="form-text">Choose method to set status. <span class="text-muted">"From file" will leave status of objects as set in the file, while any other explicitly set status will force each objects status to the chosen status.</span></small>\
+                                                      <div id="import-jsondata-file-form-statuus-btn-grp" class="btn-group btn-group-sm btn-group-toggle mb-2" data-toggle="buttons">\
+                                                        '+ modal_json_file_upload_status_html +'\
                                                       </div>\
                                                   </form>\
                                                   <form id="import-jsondata-form"></form>\
@@ -66,6 +78,9 @@ function ImportExportPlugin() {
     });
     $('#modals').on('change', '#uploadFileJSON', function (e){
         $('#uploadFileJSONLabel').html(this.files[0].name);
+        plugin.getObjectsFromJSON();
+    });
+    $('#modals').on('change', '#import-jsondata-file-form input[name=json-import-status]', function (e){
         plugin.getObjectsFromJSON();
     });
     $('#modals').on('hidden.bs.modal', '#json-file-upload-modal', function (e){
@@ -123,7 +138,19 @@ ImportExportPlugin.prototype.getObjectsFromJSON = function() {
         try {
             // Get all objects
             var objects = JSON.parse(reader.result);
-            import_object = objects;
+            // Check if status should be replaced, and do so if wanted
+            // Get delimiter set by user in import form
+            var status = file_form.serializeArray().find(ipt => ipt.name == 'json-import-status').value;
+            if (status != undefined && status != 'as_is') {
+                var importable_objects = asArray(objects[config.a.JSONContainer]);
+                importable_objects.forEach(function (obj, idx) {
+                    asArray(objects[config.a.JSONContainer])[idx][config.v.statusElement] = status;
+                });
+                import_object = objects;
+            } else {
+                console.log('JSON Import/Export: Status will be set to "' + status + '".');
+                import_object = objects;
+            }
             var num_objects = asArray(import_object[config.a.JSONContainer]).length
             // Update import button
             count_span.html(num_objects);
