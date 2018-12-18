@@ -147,7 +147,7 @@ function replaceLocalIDInFrontend(old_id, new_id) {
 function dataToString (data) {
     if (Array.isArray(data)) {
         data = data.join(', ');
-    }   
+    }
     return data;
 }
 
@@ -796,7 +796,7 @@ function deleteObject (trigger, element_id) {
     }
     console.log('Session: Deleted object with ID: ' + element_id);
     //Fire event triggerDel
-    $(trigger).trigger('triggerDel');
+    $(trigger).trigger('triggerDel', element_id);
     // 3. Update Frontend
     $('#' + element_id).remove()
 }
