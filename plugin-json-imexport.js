@@ -35,11 +35,15 @@ function ImportExportPlugin() {
                                                   </button>\
                                               </div>\
                                               <div class="modal-body">\
-                                                  <div class="form-group">\
-                                                    <label for="uploadFileJSON">JSON-file to load data from</label>\
-                                                    <input type="file" class="form-control-file" id="uploadFileJSON">\
-                                                  </div>\
+                                                  <form id="import-jsondata-file-form">\
+                                                      <div class="custom-file mb-2">\
+                                                        <input type="file" class="custom-file-input" id="uploadFileJSON">\
+                                                        <label for="uploadFileCSV" class="custom-file-label" id="uploadFileJSONLabel">JSON-file to load data from</label>\
+                                                      </div>\
+                                                  </form>\
                                                   <form id="import-jsondata-form"></form>\
+                                              </div>\
+                                              <div class="modal-footer">\
                                                   <button type="button" class="btn btn-primary disabled" id="btn-import-from-json">Import <span class="badge badge-light found-json-objects">0</span> objects</button>\
                                                   <button type="button" class="btn btn-primary disabled" id="btn-add-from-json">Add <span class="badge badge-light found-json-objects">0</span> objects</button>\
                                               </div>\
@@ -61,6 +65,7 @@ function ImportExportPlugin() {
         }
     });
     $('#modals').on('change', '#uploadFileJSON', function (e){
+        $('#uploadFileJSONLabel').html(this.files[0].name);
         plugin.getObjectsFromJSON();
     });
     $('#modals').on('hidden.bs.modal', '#json-file-upload-modal', function (e){
@@ -84,34 +89,66 @@ ImportExportPlugin.prototype.downloadJSON = function(exportObj, exportName) {
 
 
 ImportExportPlugin.prototype.getObjectsFromJSON = function() {
-    var btn_import = document.querySelector('#btn-import-from-json');
-    var btn_add = document.querySelector('#btn-add-from-json');
+    var btn_import = $('#btn-import-from-json');
+    var btn_add = $('#btn-add-from-json');
     var count_span = $('.found-json-objects');
     var objects_form = $('#import-objects-form');
-    var file    = document.querySelector('#uploadFileJSON').files[0];
+    var file_form = $('#import-jsondata-file-form');
+    var file_input = $('#uploadFileJSON');
+    var file = document.querySelector('#uploadFileJSON').files[0];
+    var accepted_mimetypes = [
+        'application/json'
+    ]
     var reader  = new FileReader();
+
+    // Clear possible further validation results
+    file_form.find('.is-valid, .is-invalid').removeClass('is-valid is-invalid');
+    file_form.find('.invalid-feedback').remove();
+    // Reset importables, form, etc.
+    import_object = {};
+    objects_form.empty();
+    count_span.empty();
+    btn_import.addClass('disabled');
+    btn_add.addClass('disabled');
 
     reader.addEventListener("load", function () {
         console.log('JSON Import/Export: File ' + file.name + ' loaded.');
-        // Reset importables, form, etc.
-        import_object = {};
-        objects_form.empty();
-        count_span.empty();
-        $(btn_import).addClass('disabled');
-        // Get all objects
-        var objects = JSON.parse(reader.result);
-        import_object = objects;
-        var num_objects = asArray(import_object[config.a.JSONContainer]).length
-        // Update import button
-        count_span.html(num_objects);
-        if (num_objects > 0) {
-            $(btn_import).removeClass('disabled');
-            $(btn_add).removeClass('disabled');
+        // Bootstrap form validation
+        file_input.addClass('is-valid');
+        try {
+            // Get all objects
+            var objects = JSON.parse(reader.result);
+            import_object = objects;
+            var num_objects = asArray(import_object[config.a.JSONContainer]).length
+            // Update import button
+            count_span.html(num_objects);
+            if (num_objects > 0) {
+                btn_import.removeClass('disabled');
+                btn_add.removeClass('disabled');
+            }
+        } catch (e) {
+            // SyntaxError
+            var msg = '[' + e.name + '] ' + e.message;
+            console.log('JSON Import/Export: ' + msg);
+            // Bootstrap form validation
+            file_input
+                .after('<div class="invalid-feedback">' + msg + '</div>')
+                .addClass('is-invalid');
         }
     }, false);
 
     if (file) {
-        reader.readAsText(file);
+        if (accepted_mimetypes.includes(file.type)) {
+            reader.readAsText(file);
+        } else {
+            // Wrong filetype: abort
+            var msg = '[ERROR] Wrong file type "' + file.type + '" detected. Please choose a JSON file (' + accepted_mimetypes.join(', ') + ').';
+            console.log('JSON Import/Export: ' + msg);
+            // Bootstrap form validation
+            file_input
+                .after('<div class="invalid-feedback">' + msg + '</div>')
+                .addClass('is-invalid');
+        }
     }
 }
 
