@@ -203,64 +203,68 @@ CSVImportExportPlugin.prototype.getObjectsFromCSV = function() {
                         var found_ids = [];
                         // Get delimiter set by user in import form
                         var delimiter = file_form.serializeArray().find(ipt => ipt.name == 'csv-import-delimiter').value;
-                        console.log('CSV Import/Export: Using "' + delimiter + '"" as delimiter.');
+                        console.log('CSV Import/Export: Using "' + delimiter + '" as delimiter.');
                         // Extract entities from each row
                         results.data.forEach(function (letter) {
                             // Lookup each configured possible column
                             context2columnnames[context].forEach(function (column) {
-                                // There could be multiple entities in one cell, divided by delimiter.
-                                // Therefor split the column content by delimiter to an array and iterate through
-                                // remember the current position to correctly match corresponding name and ID.
-                                var names = letter[column].split(delimiter);
-                                var ids = letter[column + 'ID'].split(delimiter);
-                                names.forEach(function (name, idx) {
-                                    var id = ids[idx];
-                                    // csv2cmi automatically assigns ID to GND if not given as URL
-                                    if (id && id.trim().length > 0 && !id.startsWith('http')) {
-                                        id = config.v.identifierBaseURL + id.trim();
-                                    }
-                                    var entity = {};
-
-                                    // Name and ID are given. Check for duplicate ID
-                                    if (name && id && !found_ids.includes(id)) {
-                                        entity[config.v.titleElement] = name;
-                                        entity[config.v.identifierElement] = id;
-                                        importable_entities.push(entity);
-                                        unique_names.push(name);
-                                        found_ids.push(id);
-                                    }
-                                    // If ID already imported and name differs add name as alias
-                                    else if (name && id && found_ids.includes(id) && !unique_names.includes(name)) {
-                                        if (config.v.aliasElement != undefined) {
-                                            // Update importable entity with id and add an alias, if not already done
-                                            var already_imported_entity = importable_entities.find(function (e) {
-                                                return e[config.v.identifierElement] == id;
-                                            });
-                                            if (already_imported_entity[config.v.aliasElement] == undefined) {
-                                                // there is no alias yet
-                                                already_imported_entity[config.v.aliasElement] = name;
-                                                unique_aliases.push(name);
-                                            } else {
-                                                // Alias(es) already set.
-                                                var old_aliases = asArray(already_imported_entity[config.v.aliasElement]);
-                                                // Add if not already done.
-                                                if (!old_aliases.includes(name)) {
-                                                    old_aliases.push(name);
-                                                    already_imported_entity[config.v.aliasElement] = old_aliases;
-                                                    unique_aliases.push(name);
-                                                }
-                                            }
-                                        } else {
-                                            // If aliases aren't configured, we can't handle this case
+                                // Ensure there is a column to read from. We presuppose the coexistence of
+                                // columns <name> and <name>ID.
+                                if (letter[column] != undefined && letter[column + 'ID'] != undefined) {
+                                    // There could be multiple entities in one cell, divided by delimiter.
+                                    // Therefor split the column content by delimiter to an array and iterate through
+                                    // remember the current position to correctly match corresponding name and ID.
+                                    var names = letter[column].split(delimiter);
+                                    var ids = letter[column + 'ID'].split(delimiter);
+                                    names.forEach(function (name, idx) {
+                                        var id = ids[idx];
+                                        // csv2cmi automatically assigns ID to GND if not given as URL
+                                        if (id && id.trim().length > 0 && !id.startsWith('http')) {
+                                            id = config.v.identifierBaseURL + id.trim();
                                         }
-                                    }
-                                    // Only the name is given. Check for duplicate name (names and aliases).
-                                    else if (name && !id && !unique_names.includes(name) && !unique_aliases.includes(name)) {
-                                        entity[config.v.titleElement] = name;
-                                        importable_entities.push(entity);
-                                        unique_names.push(name);
-                                    }
-                                });
+                                        var entity = {};
+
+                                        // Name and ID are given. Check for duplicate ID
+                                        if (name && id && !found_ids.includes(id)) {
+                                            entity[config.v.titleElement] = name;
+                                            entity[config.v.identifierElement] = id;
+                                            importable_entities.push(entity);
+                                            unique_names.push(name);
+                                            found_ids.push(id);
+                                        }
+                                        // If ID already imported and name differs add name as alias
+                                        else if (name && id && found_ids.includes(id) && !unique_names.includes(name)) {
+                                            if (config.v.aliasElement != undefined) {
+                                                // Update importable entity with id and add an alias, if not already done
+                                                var already_imported_entity = importable_entities.find(function (e) {
+                                                    return e[config.v.identifierElement] == id;
+                                                });
+                                                if (already_imported_entity[config.v.aliasElement] == undefined) {
+                                                    // there is no alias yet
+                                                    already_imported_entity[config.v.aliasElement] = name;
+                                                    unique_aliases.push(name);
+                                                } else {
+                                                    // Alias(es) already set.
+                                                    var old_aliases = asArray(already_imported_entity[config.v.aliasElement]);
+                                                    // Add if not already done.
+                                                    if (!old_aliases.includes(name)) {
+                                                        old_aliases.push(name);
+                                                        already_imported_entity[config.v.aliasElement] = old_aliases;
+                                                        unique_aliases.push(name);
+                                                    }
+                                                }
+                                            } else {
+                                                // If aliases aren't configured, we can't handle this case
+                                            }
+                                        }
+                                        // Only the name is given. Check for duplicate name (names and aliases).
+                                        else if (name && !id && !unique_names.includes(name) && !unique_aliases.includes(name)) {
+                                            entity[config.v.titleElement] = name;
+                                            importable_entities.push(entity);
+                                            unique_names.push(name);
+                                        }
+                                    });
+                                }
                             });
                         });
                         plugin.importable_entities = importable_entities;
@@ -516,38 +520,42 @@ CSVImportExportPlugin.prototype.mergeCSV = function() {
     this.csv_data.forEach(function (letter, index) {
         // Iterate over columns
         context2columnnames[context].forEach(function (col) {
-            // There could be multiple entities in one cell, divided by delimiter.
-            // Therefor split the column content by delimiter to an array and iterate through
-            // remember the current position to correctly match corresponding name and ID.
-            var names = letter[col].split(delimiter);
-            var ids = letter[col + 'ID'].split(delimiter);
-            names.forEach(function (name, idx) {
-                var id = ids[idx];
-                // Don't replace/add anything in 'soft' mode if an ID is already given
-                if (name != undefined && name.trim() != '' && !(method == 'soft' && id.trim() != '')) {
-                    // Get matching object
-                    // Default case is matching with preferred name (titleElement)
-                    var obj = getLocalObjectByTitle(name);
-                    // If there is no match on titleElement, try to find one with matching alias, if alias is configured
-                    if (obj == undefined && config.v.aliasElement != undefined) {
-                        obj = getLocalObjectByAlias(name);
-                    }
-                    // Check if object is in correct state
-                    if (obj !== undefined && statuus.includes(obj[config.v.statusElement])) {
-                        // Get preferred ID from local object
-                        var preferred_id = getPreferredIdentifierFromObject(obj);
-                        // if plain mode is choosen, remove base URL from preferred ID
-                        if (mode == 'plain' && preferred_id) {preferred_id = preferred_id.substr(config.v.identifierBaseURL.length)}
-                        // Check if IDs are different
-                        if (preferred_id != null && id != preferred_id) {
-                            ids[idx] = preferred_id;
-                            var preferred_ids = ids.join(delimiter);
-                            plugin.csv_data[index][col + 'ID'] = preferred_ids;
-                            console.log('CSV Import/Export: Updated CSV row ' + (index + 2) + ' column ' + col + 'ID with ' + preferred_ids);
+            // Ensure there is a column to read from. We presuppose the coexistence of
+            // columns <name> and <name>ID.
+            if (letter[col] != undefined && letter[col + 'ID'] != undefined) {
+                // There could be multiple entities in one cell, divided by delimiter.
+                // Therefor split the column content by delimiter to an array and iterate through
+                // remember the current position to correctly match corresponding name and ID.
+                var names = letter[col].split(delimiter);
+                var ids = letter[col + 'ID'].split(delimiter);
+                names.forEach(function (name, idx) {
+                    var id = ids[idx];
+                    // Don't replace/add anything in 'soft' mode if an ID is already given
+                    if (name != undefined && name.trim() != '' && !(method == 'soft' && id.trim() != '')) {
+                        // Get matching object
+                        // Default case is matching with preferred name (titleElement)
+                        var obj = getLocalObjectByTitle(name);
+                        // If there is no match on titleElement, try to find one with matching alias, if alias is configured
+                        if (obj == undefined && config.v.aliasElement != undefined) {
+                            obj = getLocalObjectByAlias(name);
+                        }
+                        // Check if object is in correct state
+                        if (obj !== undefined && statuus.includes(obj[config.v.statusElement])) {
+                            // Get preferred ID from local object
+                            var preferred_id = getPreferredIdentifierFromObject(obj);
+                            // if plain mode is choosen, remove base URL from preferred ID
+                            if (mode == 'plain' && preferred_id) {preferred_id = preferred_id.substr(config.v.identifierBaseURL.length)}
+                            // Check if IDs are different
+                            if (preferred_id != null && id != preferred_id) {
+                                ids[idx] = preferred_id;
+                                var preferred_ids = ids.join(delimiter);
+                                plugin.csv_data[index][col + 'ID'] = preferred_ids;
+                                console.log('CSV Import/Export: Updated CSV row ' + (index + 2) + ' column ' + col + 'ID with ' + preferred_ids);
+                            }
                         }
                     }
-                }
-            });
+                });
+            }
         });
     });
     console.log('CSV Import/Export: Merge finished.');
