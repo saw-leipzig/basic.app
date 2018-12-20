@@ -46,7 +46,7 @@ function ImportExportPlugin() {
                                                   <form id="import-jsondata-file-form">\
                                                       <div class="custom-file mb-2">\
                                                         <input type="file" class="custom-file-input" id="uploadFileJSON">\
-                                                        <label for="uploadFileCSV" class="custom-file-label" id="uploadFileJSONLabel">JSON-file to load data from</label>\
+                                                        <label for="uploadFileJSON" class="custom-file-label" id="uploadFileJSONLabel">JSON-file to load data from</label>\
                                                       </div>\
                                                       <small class="form-text">Choose method to set status. <span class="text-muted">"From file" will leave status of objects as set in the file, while any other explicitly set status will force each objects status to the chosen status.</span></small>\
                                                       <div id="import-jsondata-file-form-statuus-btn-grp" class="btn-group btn-group-sm btn-group-toggle mb-2" data-toggle="buttons">\
