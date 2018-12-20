@@ -147,7 +147,7 @@ function replaceLocalIDInFrontend(old_id, new_id) {
 function dataToString (data) {
     if (Array.isArray(data)) {
         data = data.join(', ');
-    }   
+    }
     return data;
 }
 
@@ -548,8 +548,7 @@ function enableButtonDelete (selector, delegate_selector) {
 /* Reset form if modal is hiding */
 function enableObjectFormReset (selector) {
     $(selector).on('hidden.bs.modal', function () {
-        $('#object-form input.form-control[type=hidden]').val('')
-        $('#object-form input.form-control[type=text]').val('')
+        $('#object-form')[0].reset();
     });
 }
 
@@ -706,8 +705,12 @@ function addObject (el, params){
     var local_object = {};
     // Set new ID
     local_object.id = 'loc' + create_UUID();
-    // Set status (default status is configured)
-    local_object[config.v.statusElement] = config.app.config.status.default;
+    // Set status (default status is configured), if not given as parameter
+    if (params && params[config.v.statusElement] != undefined) {
+        local_object[config.v.statusElement] = params[config.v.statusElement];
+    } else {
+        local_object[config.v.statusElement] = config.app.config.status.default;
+    }
     // Add configured attributes to object
     var attributes = config.app.config.mapping[context];
     attributes.forEach(function (e) {
@@ -797,7 +800,7 @@ function deleteObject (trigger, element_id) {
     }
     console.log('Session: Deleted object with ID: ' + element_id);
     //Fire event triggerDel
-    $(trigger).trigger('triggerDel');
+    $(trigger).trigger('triggerDel', element_id);
     // 3. Update Frontend
     $('#' + element_id).remove()
 }

@@ -148,8 +148,8 @@ function getXMLStringFromLocalObjectByID (id) {
 $('body').on('triggerAdd', function (e,data) {
     APIAdd(data);
 })
-$('body').on('triggerDel', function (e) {
-    APIDelete(getIDFromEventListItem(e));
+$('body').on('triggerDel', function (e, id) {
+    APIDelete(id);
 })
 $('body').on('triggerUpdate triggerSetStatus triggerSetPref triggerAddRef triggerAutoAdd', function (e) {
     APIUpdate(getIDFromEventListItem(e));
