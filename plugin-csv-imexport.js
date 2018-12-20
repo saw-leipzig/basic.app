@@ -22,7 +22,19 @@ function CSVImportExportPlugin() {
     })
     basicPluginActions.registerButton(this.btn_csv_down);
 
-
+    // Build the statuus buttons
+    var modal_csv_file_upload_status_html = '';
+    config.app.config.status.available.forEach(function (status) {
+        if(status == config.app.config.status.default){
+            modal_csv_file_upload_status_html += '<label class="btn btn-secondary active">\
+                    <input type="radio" name="csv-import-status" value="' + status + '" autocomplete="off" checked>' + status + '\
+                </label>';
+        } else {
+            modal_csv_file_upload_status_html += '<label class="btn btn-secondary">\
+                    <input type="radio" name="csv-import-status" value="' + status + '" autocomplete="off">' + status + '\
+                </label>';
+        }
+    });
     // Upload modal
     this.modal_csv_file_upload_html = '<div class="modal fade" id="csv-file-upload-modal" tabindex="-1" aria-hidden="true" role="dialog">\
                                       <div class="modal-dialog modal-lg" role="document">\
@@ -38,6 +50,10 @@ function CSVImportExportPlugin() {
                                                       <div class="custom-file mb-2">\
                                                         <input type="file" class="custom-file-input" id="uploadFileCSV">\
                                                         <label for="uploadFileCSV" class="custom-file-label" id="uploadFileCSVLabel">CSV-file to load data from</label>\
+                                                      </div>\
+                                                      <small class="form-text">Select status. <span class="text-muted">The selected status will be set on all imported/added entities.</span></small>\
+                                                      <div id="import-teidata-file-form-statuus-btn-grp" class="btn-group btn-group-sm btn-group-toggle mb-2" data-toggle="buttons">\
+                                                        '+ modal_csv_file_upload_status_html +'\
                                                       </div>\
                                                       <small class="form-text">Select delimiter. <span class="text-muted">This character will be used to seperate multiple values in one cell, e.g. names or identifier. Ensure it\'s not the same character used for cell seperation in your CSV-file.</span></small>\
                                                       <div class="btn-group btn-group-sm btn-group-toggle mb-2" data-toggle="buttons">\
@@ -273,7 +289,7 @@ CSVImportExportPlugin.prototype.getObjectsFromCSV = function() {
                         count_span.html(importable_entities.length);
                         if (importable_entities.length > 0) {
                             // Add importable entities to import form with filter buttons
-                            var chk_button_filter = '<div class="btn-group form-group" id="check-buttons" role="group">\
+                            var chk_button_filter = '<div class="btn-group form-group" role="group">\
                                                         <button class="btn btn-sm btn-secondary" id="import-csv-btn-chk-all" type="button">Select All</button>\
                                                         <button class="btn btn-sm btn-secondary" id="import-csv-btn-chk-none" type="button">Deselect All</button>\
                                                     </div>';
@@ -346,12 +362,16 @@ CSVImportExportPlugin.prototype.importEntities = function(event) {
 
 CSVImportExportPlugin.prototype.addEntities = function(event) {
     var nti = this.names_to_import;
-    console.log('CSV Import/Export: Adding objects ' + nti.length + ' ...');
+    var file_form = $('#import-csvdata-file-form');
+    var status = file_form.serializeArray().find(ipt => ipt.name == 'csv-import-status').value;    
+    console.log('CSV Import/Export: Adding ' + nti.length + ' objects ...');
     this.importable_entities.forEach(function (e) {
         if (nti.includes(e[config.v.titleElement])) {
             // Set params for new local object
             var params = {};
             params[config.v.titleElement] = e[config.v.titleElement];
+            params[config.v.statusElement] = status;
+            console.log('CSV Import/Export: Imported data is set to the status: "' + status + '".'); 
             // Check if we already have references set, which we can import.
             if (e[config.v.identifierElement] !== undefined && e[config.v.identifierElement].startsWith(config.v.identifierBaseURL)) {
                 // TODO: this structure must be configurable and should not be fixed in the code, because this is
