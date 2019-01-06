@@ -11,15 +11,9 @@ The tool is facing the problem of fast and comfortable identification of the cor
 
 ## Authors
 
-* **Uwe Kretschmer** - *application concept and software development* 
+* **Uwe Kretschmer** - *application concept and software development*
 * **Lars Scheideler** - *software development*
 
 ## Licence
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md)
  file for details
-
-
-
-
-
-
