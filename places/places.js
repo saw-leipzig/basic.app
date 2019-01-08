@@ -34,12 +34,15 @@ function findAuthorityData (trigger, searchterm, element_id) {
             .toggleClass('fa-binoculars fa-sync-alt fa-spin')
             .html(cnt);
         // add buttons for each result
-        for (var key in all_results) {
+        var references = [];
+        for (var key in person_gnd_results) {
             if (Number(key) != 'NaN') {
-                addReference(trigger, element_id, all_results[key].geonameId);
+                //console.log(person_gnd_results[key]);
+                references.push(all_results[key].geonameId);
             }
         }
-        console.log('results (type is place and has GEO entry): ' + cnt);
+        console.log('FindAuthorityData: results (type is place and has GEO entry): ' + cnt);
+        addReference(trigger, element_id, references);
     }).fail(function (jqxhr, textStatus, error) {
         var err = textStatus + ", " + error;
         console.log('Request Failed: ' + err);
