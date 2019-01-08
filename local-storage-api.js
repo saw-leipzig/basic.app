@@ -212,7 +212,7 @@ var basicLSA = new LocalStorageAdapter(context);
 
 
 // Add listener for all API related events
-$('body').on('triggerAdd triggerDel triggerUpdate triggerSetStatus triggerSetPref triggerAddRef triggerAutoAdd cardRefDelete cardSetPref cardShifting mapSetPref', function (e, data) {
+$('body').on('triggerAdd triggerDel triggerUpdate triggerSetStatus triggerSetPref updatedReferences cardRefDelete cardSetPref cardShifting mapSetPref', function (e, data) {
     basicLSA.save();
 });
 $('body').on('basicAppConfigLoaded', function () {

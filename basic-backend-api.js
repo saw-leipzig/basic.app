@@ -151,7 +151,7 @@ $('body').on('triggerAdd', function (e,data) {
 $('body').on('triggerDel', function (e, id) {
     APIDelete(id);
 })
-$('body').on('triggerUpdate triggerSetStatus triggerSetPref triggerAddRef triggerAutoAdd', function (e) {
+$('body').on('triggerUpdate triggerSetStatus triggerSetPref updatedReferences', function (e) {
     APIUpdate(getIDFromEventListItem(e));
 })
 

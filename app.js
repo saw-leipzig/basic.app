@@ -408,7 +408,7 @@ function enableButtonObjectFormSubmit (selector, delegate_selector) {
 
 
 /* ---  Logging API Events --- */
-$('body').on('triggerAdd triggerUpdate triggerAddRef triggerSetPref triggerSetStatus triggerAutoAdd triggerDel basicAppConfigLoaded',  function(e, data){
+$('body').on('triggerAdd triggerUpdate triggerSetPref triggerSetStatus updatedReferences triggerDel basicAppConfigLoaded',  function(e, data){
     console.log('Fired ' + e.type);
 })
 
@@ -436,8 +436,6 @@ function enableButtonAddReference (selector, delegate_selector) {
                 // add button and set popover event
                 addReference(this, element_id, ref_id);
             }
-            // Fire event triggerAddRef
-            $(this).trigger('triggerAddRef');
         }
     });
 }
@@ -625,21 +623,31 @@ initIdentifierButtons('#result-container', '.btn-group-ads .btn');
 enableObjectFormReset('#object-modal');
 
 
-function addReference (trigger_element, element_id, ref_id) {
-    var selector = '#lbl-' + element_id + '_' + ref_id;
-    // Only update, if not already set
-    if ($(selector).length == 0) {
-        // 1. update local object
-        addRef2Data(element_id, ref_id);
-        // 2. update frontend
-        $(trigger_element).parents('.list-group-item').find('.btn-group-toggle')
-            .append('<label id="lbl-' + element_id + '_' + ref_id + '" data-ref-id="' + ref_id + '" data-content="Loading <i class=\'fas fa-sync-alt fa-spin\'></i>" class="btn">\
-                        <input name="ad_' + element_id + '" id="' + element_id + '_' + ref_id + '" autocomplete="off" type="radio">' + ref_id + '</input>\
-                    </label>');
-        //Fire event triggerAutoAdd
-        $(trigger_element).trigger('triggerAutoAdd');
-    } else {
-        console.log('Reference already exist.');
+function addReference (trigger_element, element_id, ref_input) {
+    // ensure we have an array for further processing
+    if (!Array.isArray(ref_input)) {
+        ref_input = [ref_input];
+    }
+    var has_updated = false;
+    ref_input.forEach(function(ref_id) {
+        var selector = '#lbl-' + element_id + '_' + ref_id;
+        // Only update, if not already set
+        if ($(selector).length == 0) {
+            has_updated = true;
+            // 1. update local object
+            addRef2Data(element_id, ref_id);
+            // 2. update frontend
+            $(trigger_element).parents('.list-group-item').find('.btn-group-toggle')
+                .append('<label id="lbl-' + element_id + '_' + ref_id + '" data-ref-id="' + ref_id + '" data-content="Loading <i class=\'fas fa-sync-alt fa-spin\'></i>" class="btn">\
+                            <input name="ad_' + element_id + '" id="' + element_id + '_' + ref_id + '" autocomplete="off" type="radio">' + ref_id + '</input>\
+                        </label>');
+        } else {
+            console.log('Reference already exist.');
+        }
+    });
+    if (has_updated) {
+        //Fire event updatedReferences
+        $(trigger_element).trigger('updatedReferences');
     }
 }
 
