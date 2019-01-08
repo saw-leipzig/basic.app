@@ -31,10 +31,10 @@ function findAuthorityData (trigger, searchterm, element_id) {
             .html(cnt);
         // add buttons for each result
         var references = [];
-        for (var key in person_gnd_results) {
+        for (var key in organisation_gnd_results) {
             if (Number(key) != 'NaN') {
                 //console.log(person_gnd_results[key]);
-                references.push(person_gnd_results[key].dnb);
+                references.push(organisation_gnd_results[key].dnb);
             }
         }
         console.log('FindAuthorityData: results (type is person and has DNB entry): ' + cnt);
