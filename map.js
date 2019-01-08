@@ -65,8 +65,8 @@ function markerButtonSetPreferred(selector, id, greenIcon, greyIcon, data){
             var geo_id = ids.substring(ids.indexOf('_') + 1);
             // 1. update local object
             togglePreferredRef2Data(element_id, geo_id);
-            //Fire event mapSetPref
-            $(this).trigger('mapSetPref');
+            //Fire event mapPreferredReferenceChange
+            $(this).trigger('mapPreferredReferenceChange');
             // 3. update frontend
             map.eachLayer(function (layer) {
                 if (layer._popup) {
@@ -87,8 +87,9 @@ function markerButtonSetPreferred(selector, id, greenIcon, greyIcon, data){
 }
 
 
-$('#modals').on('mapSetPref', function (e) {
-    console.log('Fired SetPref');
+/* ---  Logging Events --- */
+$('body').on('mapPreferredReferenceChange',  function(e, data){
+    console.log('Fired ' + e.type);
 })
 
 

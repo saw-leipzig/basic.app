@@ -363,7 +363,7 @@ CSVImportExportPlugin.prototype.importEntities = function(event) {
 CSVImportExportPlugin.prototype.addEntities = function(event) {
     var nti = this.names_to_import;
     var file_form = $('#import-csvdata-file-form');
-    var status = file_form.serializeArray().find(ipt => ipt.name == 'csv-import-status').value;    
+    var status = file_form.serializeArray().find(ipt => ipt.name == 'csv-import-status').value;
     console.log('CSV Import/Export: Adding ' + nti.length + ' objects ...');
     this.importable_entities.forEach(function (e) {
         if (nti.includes(e[config.v.titleElement])) {
@@ -371,7 +371,7 @@ CSVImportExportPlugin.prototype.addEntities = function(event) {
             var params = {};
             params[config.v.titleElement] = e[config.v.titleElement];
             params[config.v.statusElement] = status;
-            console.log('CSV Import/Export: Imported data is set to the status: "' + status + '".'); 
+            console.log('CSV Import/Export: Imported data is set to the status: "' + status + '".');
             // Check if we already have references set, which we can import.
             if (e[config.v.identifierElement] !== undefined && e[config.v.identifierElement].startsWith(config.v.identifierBaseURL)) {
                 // TODO: this structure must be configurable and should not be fixed in the code, because this is

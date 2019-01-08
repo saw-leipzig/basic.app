@@ -17,6 +17,7 @@ var fetched_objects = {
     seealso: []
 };
 
+
 $(document).ready(function () {
     initApplication(config);
 });
@@ -408,7 +409,7 @@ function enableButtonObjectFormSubmit (selector, delegate_selector) {
 
 
 /* ---  Logging API Events --- */
-$('body').on('triggerAdd triggerUpdate triggerSetPref triggerSetStatus updatedReferences triggerDel basicAppConfigLoaded',  function(e, data){
+$('body').on('objectAdd objectUpdate preferredReferenceChange statusChange referenceUpdate objectDelete basicAppConfigLoaded',  function(e, data){
     console.log('Fired ' + e.type);
 })
 
@@ -451,8 +452,8 @@ function enableButtonIdentifierToggling (selector, delegate_selector) {
                 var ref_id = $(this).attr("data-ref-id");
                 // toggle state: local, backend, frontend
                 togglePreferred(element_id, ref_id);
-                // Fire event triggerSetPref
-                $(this).trigger('triggerSetPref');
+                // Fire event preferredReferenceChange
+                $(this).trigger('preferredReferenceChange');
             }
         }
     });
@@ -483,7 +484,7 @@ function enableButtonStatus (selector, delegate_selector) {
         var new_status = $(this).html();
         changeStatus($(this), element_id, current_status, new_status);
         // Fire event trifferSetStatus
-        $(this).trigger('triggerSetStatus');
+        $(this).trigger('statusChange');
     });
 }
 
@@ -646,11 +647,10 @@ function addReference (trigger_element, element_id, ref_input) {
         }
     });
     if (has_updated) {
-        //Fire event updatedReferences
-        $(trigger_element).trigger('updatedReferences');
+        //Fire event referenceUpdate
+        $(trigger_element).trigger('referenceUpdate');
     }
 }
-
 
 
 function setItemButtonsAbilityByStatus (obj) {
@@ -758,7 +758,7 @@ function addObject (el, params){
     }
 
     // 3 Fire add event
-    $(el).trigger('triggerAdd', local_object);
+    $(el).trigger('objectAdd', local_object);
 
     // 3. update frontend,
     createNewHTMLObject(local_object);
@@ -781,8 +781,7 @@ function editObject(id) {
         local_object[attr_name] = prepareValueMapping(mapping_config, $(e).val());
     })
     // Trigger an event
-    $('#' + id).trigger('triggerUpdate');
-    console.log('Fired: updateObject');
+    $('#' + id).trigger('objectUpdate');
     /* 2. update frontend
     Update title and description of list item */
     $('#' + id + ' h5').text(local_object[config.v.titleElement]);
@@ -807,8 +806,8 @@ function deleteObject (trigger, element_id) {
         data_objects = {};
     }
     console.log('Session: Deleted object with ID: ' + element_id);
-    //Fire event triggerDel
-    $(trigger).trigger('triggerDel', element_id);
+    //Fire event objectDelete
+    $(trigger).trigger('objectDelete', element_id);
     // 3. Update Frontend
     $('#' + element_id).remove()
 }
