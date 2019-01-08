@@ -21,5 +21,11 @@
       "familyName": "Scheideler",
       "name": "Scheideler, Lars"
     }
-  ]
+  ],
+  "contributor": {
+    "@type": "Person",
+    "givenName": "Klaus",
+    "familyName": "Rettinghaus",
+    "name": "Rettinghaus, Klaus"
+  }
 }
