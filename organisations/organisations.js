@@ -30,13 +30,15 @@ function findAuthorityData (trigger, searchterm, element_id) {
             .toggleClass('fa-binoculars fa-sync-alt fa-spin')
             .html(cnt);
         // add buttons for each result
-        for (var key in organisation_gnd_results) {
+        var references = [];
+        for (var key in person_gnd_results) {
             if (Number(key) != 'NaN') {
-                //console.log(organisation_gnd_results[key]);
-                addReference(trigger, element_id, organisation_gnd_results[key].dnb);
+                //console.log(person_gnd_results[key]);
+                references.push(person_gnd_results[key].dnb);
             }
         }
-        console.log('results (type is organisation and has DNB entry): ' + cnt);
+        console.log('FindAuthorityData: results (type is person and has DNB entry): ' + cnt);
+        addReference(trigger, element_id, references);
     }).fail(function (jqxhr, textStatus, error) {
         var err = textStatus + ", " + error;
         console.log('Request Failed: ' + err);
