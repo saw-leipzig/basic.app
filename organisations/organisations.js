@@ -37,7 +37,7 @@ function findAuthorityData (trigger, searchterm, element_id) {
                 references.push(organisation_gnd_results[key].dnb);
             }
         }
-        console.log('FindAuthorityData: results (type is person and has DNB entry): ' + cnt);
+        console.log('FindAuthorityData: results (type is corporate and has DNB entry): ' + cnt);
         addReference(trigger, element_id, references);
     }).fail(function (jqxhr, textStatus, error) {
         var err = textStatus + ", " + error;
