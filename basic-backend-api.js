@@ -145,27 +145,26 @@ function getXMLStringFromLocalObjectByID (id) {
 
 
 // Add event listener for all API calls
-$('body').on('triggerAdd', function (e,data) {
+$('body').on('objectAdd', function (e,data) {
     APIAdd(data);
 })
-$('body').on('triggerDel', function (e, id) {
+$('body').on('objectDelete', function (e, id) {
     APIDelete(id);
 })
-$('body').on('triggerUpdate triggerSetStatus triggerSetPref triggerAddRef triggerAutoAdd', function (e) {
+$('body').on('objectUpdate statusChange preferredReferenceChange referenceUpdate', function (e) {
     APIUpdate(getIDFromEventListItem(e));
 })
 
-$('body').on('cardRefDelete cardSetPref cardShifting',function (e){
+$('body').on('cardReferenceDelete cardPreferredReferenceChange cardSwitch',function (e){
     APIUpdate(getIDFromEventModals(e));
 })
 
-$('body').on('mapSetPref', function (e) {
+$('body').on('mapPreferredReferenceChange', function (e) {
     APIUpdate(getIDFromEventMap(e));
 })
 $('body').on('basicAppConfigLoaded', function () {
     APIDatasets();
 })
-
 
 
 /* API functions */

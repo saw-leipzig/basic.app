@@ -13,7 +13,7 @@ basicPluginFilter.registerButton(plugin_filter_btns);
 // Initialize filter button
 enableButtonFilter('.btn-filter');
 // Initialize Listeners
-$('body').on('filterStatus triggerAdd triggerSetStatus triggerDel basicAppConfigLoaded datasetLoaded', function (e) {
+$('body').on('filteredStatus objectAdd statusChange objectDelete basicAppConfigLoaded datasetLoaded', function (e) {
     $('.btn-filter').each(function(){
         var idstr = 'btn-filter-';
         var status = $(this).get(0).id.substring(idstr.length);
@@ -22,8 +22,8 @@ $('body').on('filterStatus triggerAdd triggerSetStatus triggerDel basicAppConfig
         } else {
             $('.status-ref-' + status).removeClass('filtered-status');
         }
-        countObjectsByStatus();    
-    });    
+        countObjectsByStatus();
+    });
 })
 
 
@@ -31,7 +31,7 @@ $('body').on('filterStatus triggerAdd triggerSetStatus triggerDel basicAppConfig
 function enableButtonFilter (selector) {
     $(selector).on('click', function () {
         $(this).toggleClass('active');
-        $(this).trigger('filterStatus');
+        $(this).trigger('filteredStatus');
     });
 }
 

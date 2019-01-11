@@ -1,5 +1,5 @@
 function TEIImportPlugin() {
-    var plugin = this; 
+    var plugin = this;
 
     /* ----- Upload XML/TEI ----- */
     // Create and register TEI upload button
@@ -77,7 +77,7 @@ function TEIImportPlugin() {
         }
     });
     $('#modals').on('click', '#btn-add-from-tei', function (e){
-        // Make sure button is not disabled        
+        // Make sure button is not disabled
         if (!$(this).hasClass('disabled')) {
             plugin.addEntities(e);
         }
@@ -106,7 +106,7 @@ TEIImportPlugin.prototype.getEntitiesFromXML = function () {
         'application/xml',
         'text/xml'
     ]
-    
+
     var reader  = new FileReader();
 
     // Clear possible further validation results
@@ -207,7 +207,7 @@ TEIImportPlugin.prototype.getEntitiesFromXML = function () {
 
             }
             $('#modals').on('change', '#import-entities-form input[type="checkbox"]', function (e) {plugin.updateImportables(e)} );
-        } 
+        }
     }, false);
 
     if (file) {
@@ -266,6 +266,7 @@ TEIImportPlugin.prototype.importEntities = function (event) {
     return this;
 }
 
+
 TEIImportPlugin.prototype.addEntities = function (event) {
     var plugin = this;
     var file_form = $('#import-teidata-file-form');
@@ -277,7 +278,7 @@ TEIImportPlugin.prototype.addEntities = function (event) {
             var params = {};
             params[config.v.titleElement] = e.textContent;
             params[config.v.statusElement] = status;
-            console.log('TEI Import: Imported data is set to the status: "' + status + '".'); 
+            console.log('TEI Import: Imported data is set to the status: "' + status + '".');
             // Check if we already have references set, which we can import.
             // They should be in the 'ref'-attribute
             if (e.attributes.ref !== undefined && e.attributes.ref.value.startsWith(config.v.identifierBaseURL)) {
@@ -295,7 +296,7 @@ TEIImportPlugin.prototype.addEntities = function (event) {
     countObjectsByStatus();
     // Hide the modal dialog, it will be reseted automatically by event hidden.bs.modal
     $('#tei-file-upload-modal').modal('hide');
-    return this;  
+    return this;
 }
 
 var teiiep = new TEIImportPlugin();

@@ -1,6 +1,6 @@
 var plugin_filter_title_ipt_id = 'filter-title-ipt-regex';
-// Build filter input field
 
+// Build filter input field
 var plugin_search_input = $('<div class="input-group input-group-sm mt-2"></div>')
     // Add input
     .append('<input id="' + plugin_filter_title_ipt_id + '" type="text" class="form-control" placeholder="Start typing to filter results" aria-label="Start typing to filter results"/>')
@@ -35,7 +35,7 @@ var plugin_filter_title_btn_reset = $('<button id="filter-title-btn-reset" title
 // Initialize filter button
 enableSearchInput('#' + plugin_filter_title_ipt_id);
 // Initialize Listeners
-$('body').on('triggerAdd triggerSetStatus triggerDel basicAppConfigLoaded datasetLoaded pluginFilterTitleReset', function (e) {
+$('body').on('objectAdd statusChange objectDelete basicAppConfigLoaded datasetLoaded pluginFilterTitleReset', function (e) {
     filterByTitle($('#' + plugin_filter_title_ipt_id).val());
 })
 
@@ -59,6 +59,7 @@ function filterByTitle(search_query) {
     $('#plugin-filter-title-info-total').html($('.list-group-item').length);
     $('#plugin-filter-title-info-current').html($('.list-group-item').length - $('.filtered-title').length);
 }
+
 
 // while writing filter for titles
 function enableSearchInput (selector){

@@ -17,6 +17,7 @@ var fetched_objects = {
     seealso: []
 };
 
+
 $(document).ready(function () {
     initApplication(config);
 });
@@ -408,7 +409,7 @@ function enableButtonObjectFormSubmit (selector, delegate_selector) {
 
 
 /* ---  Logging API Events --- */
-$('body').on('triggerAdd triggerUpdate triggerAddRef triggerSetPref triggerSetStatus triggerAutoAdd triggerDel basicAppConfigLoaded',  function(e, data){
+$('body').on('objectAdd objectUpdate preferredReferenceChange statusChange referenceUpdate objectDelete basicAppConfigLoaded',  function(e, data){
     console.log('Fired ' + e.type);
 })
 
@@ -436,8 +437,6 @@ function enableButtonAddReference (selector, delegate_selector) {
                 // add button and set popover event
                 addReference(this, element_id, ref_id);
             }
-            // Fire event triggerAddRef
-            $(this).trigger('triggerAddRef');
         }
     });
 }
@@ -453,8 +452,8 @@ function enableButtonIdentifierToggling (selector, delegate_selector) {
                 var ref_id = $(this).attr("data-ref-id");
                 // toggle state: local, backend, frontend
                 togglePreferred(element_id, ref_id);
-                // Fire event triggerSetPref
-                $(this).trigger('triggerSetPref');
+                // Fire event preferredReferenceChange
+                $(this).trigger('preferredReferenceChange');
             }
         }
     });
@@ -485,7 +484,7 @@ function enableButtonStatus (selector, delegate_selector) {
         var new_status = $(this).html();
         changeStatus($(this), element_id, current_status, new_status);
         // Fire event trifferSetStatus
-        $(this).trigger('triggerSetStatus');
+        $(this).trigger('statusChange');
     });
 }
 
@@ -625,24 +624,33 @@ initIdentifierButtons('#result-container', '.btn-group-ads .btn');
 enableObjectFormReset('#object-modal');
 
 
-function addReference (trigger_element, element_id, ref_id) {
-    var selector = '#lbl-' + element_id + '_' + ref_id;
-    // Only update, if not already set
-    if ($(selector).length == 0) {
-        // 1. update local object
-        addRef2Data(element_id, ref_id);
-        // 2. update frontend
-        $(trigger_element).parents('.list-group-item').find('.btn-group-toggle')
-            .append('<label id="lbl-' + element_id + '_' + ref_id + '" data-ref-id="' + ref_id + '" data-content="Loading <i class=\'fas fa-sync-alt fa-spin\'></i>" class="btn">\
-                        <input name="ad_' + element_id + '" id="' + element_id + '_' + ref_id + '" autocomplete="off" type="radio">' + ref_id + '</input>\
-                    </label>');
-        //Fire event triggerAutoAdd
-        $(trigger_element).trigger('triggerAutoAdd');
-    } else {
-        console.log('Reference already exist.');
+function addReference (trigger_element, element_id, ref_input) {
+    // ensure we have an array for further processing
+    if (!Array.isArray(ref_input)) {
+        ref_input = [ref_input];
+    }
+    var has_updated = false;
+    ref_input.forEach(function(ref_id) {
+        var selector = '#lbl-' + element_id + '_' + ref_id;
+        // Only update, if not already set
+        if ($(selector).length == 0) {
+            has_updated = true;
+            // 1. update local object
+            addRef2Data(element_id, ref_id);
+            // 2. update frontend
+            $(trigger_element).parents('.list-group-item').find('.btn-group-toggle')
+                .append('<label id="lbl-' + element_id + '_' + ref_id + '" data-ref-id="' + ref_id + '" data-content="Loading <i class=\'fas fa-sync-alt fa-spin\'></i>" class="btn">\
+                            <input name="ad_' + element_id + '" id="' + element_id + '_' + ref_id + '" autocomplete="off" type="radio">' + ref_id + '</input>\
+                        </label>');
+        } else {
+            console.log('Reference already exist.');
+        }
+    });
+    if (has_updated) {
+        //Fire event referenceUpdate
+        $(trigger_element).trigger('referenceUpdate');
     }
 }
-
 
 
 function setItemButtonsAbilityByStatus (obj) {
@@ -750,7 +758,7 @@ function addObject (el, params){
     }
 
     // 3 Fire add event
-    $(el).trigger('triggerAdd', local_object);
+    $(el).trigger('objectAdd', local_object);
 
     // 3. update frontend,
     createNewHTMLObject(local_object);
@@ -773,8 +781,7 @@ function editObject(id) {
         local_object[attr_name] = prepareValueMapping(mapping_config, $(e).val());
     })
     // Trigger an event
-    $('#' + id).trigger('triggerUpdate');
-    console.log('Fired: updateObject');
+    $('#' + id).trigger('objectUpdate');
     /* 2. update frontend
     Update title and description of list item */
     $('#' + id + ' h5').text(local_object[config.v.titleElement]);
@@ -799,8 +806,8 @@ function deleteObject (trigger, element_id) {
         data_objects = {};
     }
     console.log('Session: Deleted object with ID: ' + element_id);
-    //Fire event triggerDel
-    $(trigger).trigger('triggerDel', element_id);
+    //Fire event objectDelete
+    $(trigger).trigger('objectDelete', element_id);
     // 3. Update Frontend
     $('#' + element_id).remove()
 }

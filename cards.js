@@ -17,7 +17,7 @@ function deleteCard (trigger) {
     // Update data and result list
     deleteIdentifier(ids.element_id, ids.ref_id);
     //Fire event cardDelete
-    $(trigger).trigger('cardRefDelete');
+    $(trigger).trigger('cardReferenceDelete');
     // Delete card in DOM
     card.remove();
 }
@@ -159,19 +159,10 @@ function constructCompareModalCards(selector){
     })
 }
 
-//Fired events by trigger
-$('#modals').on('cardRefDelete', function (e) {
-    console.log('Fired RefDelete');
-})
 
-
-$('#modals').on('cardSetPref', function (e) {
-    console.log('Fired SetPref');
-})
-
-
-$('#modals').on('cardShifting', function (e) {
-    console.log('Fired RefShifting');
+/* ---  Logging Events --- */
+$('body').on('cardReferenceDelete cardPreferredReferenceChange cardSwitch',  function(e, data){
+    console.log('Fired ' + e.type);
 })
 
 
@@ -216,26 +207,26 @@ function enableModalCardPreferredToggling(selector) {
                 card.toggleClass('bg-info text-white');
                 // toggle active class on button
                 $(this).toggleClass('active disabled');
-                //Fire event cardShifting
-                $(this).trigger('cardSetPref');
+                //Fire event cardPreferredReferenceChange
+                $(this).trigger('cardPreferredReferenceChange');
             }
         });
 }
 
 
-function enableModalCardShifting(selector) {
+function enableModalcardSwitch(selector) {
     $(selector)
         // right shift
         .on('click', '.btn-card-right', function () {
             shiftCard($(this), 'right')
-            //Fire event cardShifting
-            $(this).trigger('cardShifting');
+            //Fire event cardSwitch
+            $(this).trigger('cardSwitch');
         })
         // left shift
         .on('click', '.btn-card-left', function () {
             shiftCard($(this), 'left')
-            //Fire event cardShifting
-            $(this).trigger('cardShifting');
+            //Fire event cardSwitch
+            $(this).trigger('cardSwitch');
         });
 }
 
@@ -254,7 +245,7 @@ function enableModalCardEvents(selector) {
     // Enable toggling preferred state
     enableModalCardPreferredToggling(selector);
     // Enable shifting
-    enableModalCardShifting(selector);
+    enableModalcardSwitch(selector);
     // Enable delete
     enableModalCardDelete(selector);
 }
