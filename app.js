@@ -711,8 +711,12 @@ function addObject (el, params){
     // the first entry from config - mapping - localJSON Path is requierd //
     // 1. Create new local object
     var local_object = {};
-    // Set new ID
-    local_object.id = 'loc' + create_UUID();
+    // Set ID, if not given as parameter
+    if (params && params.id != undefined) {
+        local_object.id = params.id.replace(/\./gi, '');
+    } else {
+        local_object.id = 'loc' + create_UUID();
+    }
     // Set status (default status is configured), if not given as parameter
     if (params && params[config.v.statusElement] != undefined) {
         local_object[config.v.statusElement] = params[config.v.statusElement];
