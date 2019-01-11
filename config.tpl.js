@@ -1,6 +1,6 @@
 var config = {
     "app": {
-        "version": "1.0.3",
+        "version": "1.0.4",
         "config": {
             "use_corsanywhere": false,
             "footer": {
