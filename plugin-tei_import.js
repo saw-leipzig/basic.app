@@ -1,5 +1,15 @@
 function TEIImportPlugin() {
     var plugin = this;
+    this.importable_entities =[];
+    this.names_to_import = [];
+    this.ids_to_import = []; // local ids
+    this.context2elementname ={
+        'persons': 'persName',
+        'places' : 'placeName',
+        'organisations': 'orgName'
+    }
+    this.id_attribute_name = 'id';
+    this.reference_attribute_name = 'ref';
 
     /* ----- Upload XML/TEI ----- */
     // Create and register TEI upload button
@@ -30,6 +40,21 @@ function TEIImportPlugin() {
                 </label>';
         }
     });
+    // Build part for name parameters
+    var modal_tei_file_upload_names_html = '<div class="form-row">\
+                                                <div class="form-group col">\
+                                                    <label for="objectElementName"><small>Element name. <span class="text-muted">The name of the element, which holds importable object information.</span></small></label>\
+                                                    <input type="text" id="objectElementName" name="tei-import-element" class="modal-tei-upload-names-ipt form-control form-control-sm" value="' + this.context2elementname[context] + '">\
+                                                </div>\
+                                                <div class="form-group col">\
+                                                    <label for="objectReferenceAttribute"><small>Reference attribute name. <span class="text-muted">The name of the attribute, where external ID is stored.</span></small></label>\
+                                                    <input type="text" id="objectReferenceAttribute" name="tei-import-reference-attribute" class="modal-tei-upload-names-ipt form-control form-control-sm" value="' + this.reference_attribute_name + '">\
+                                                </div>\
+                                                <div class="form-group col">\
+                                                    <label for="objectIdAttribute"><small>ID attribute name. <span class="text-muted">The name of the attribute, where local ID is stored.</span></small></label>\
+                                                    <input type="text" id="objectIdAttribute" name="tei-import-id-attribute" class="modal-tei-upload-names-ipt form-control form-control-sm" value="' + this.id_attribute_name + '">\
+                                                </div>\
+                                            </div>';
     // Upload modal
     this.tei_modal_file_upload_html = '<div class="modal fade" id="tei-file-upload-modal" tabindex="-1" aria-hidden="true" role="dialog">\
                                           <div class="modal-dialog modal-lg" role="document">\
@@ -50,6 +75,7 @@ function TEIImportPlugin() {
                                                           <div id="import-teidata-file-form-statuus-btn-grp" class="btn-group btn-group-sm btn-group-toggle mb-2" data-toggle="buttons">\
                                                             '+ modal_tei_file_upload_status_html +'\
                                                           </div>\
+                                                          ' + modal_tei_file_upload_names_html + '\
                                                       </form>\
                                                       <form id="import-entities-form"></form>\
                                                   </div>\
@@ -62,13 +88,6 @@ function TEIImportPlugin() {
                                       </div>';
     $(this.tei_modal_file_upload_html).appendTo('#modals');
 
-    this.importable_entities =[];
-    this.names_to_import = [];
-    this.context2elementname ={
-        'persons': 'persName',
-        'places' : 'placeName',
-        'organisations': 'orgName'
-    }
     // register click event listener
     $('#modals').on('click', '#btn-import-from-tei', function (e){
         // Make sure button is not disabled
@@ -86,6 +105,9 @@ function TEIImportPlugin() {
         $('#uploadFileTEILabel').html(this.files[0].name);
         plugin.getEntitiesFromXML();
     });
+    $('#modals').on('change', '.modal-tei-upload-names-ipt', function (e){
+        plugin.getEntitiesFromXML();
+    });
     $('#modals').on('hidden.bs.modal', '#tei-file-upload-modal', function (e){
         $('#tei-file-upload-modal').replaceWith(plugin.tei_modal_file_upload_html);
     });
@@ -94,7 +116,6 @@ function TEIImportPlugin() {
 
 TEIImportPlugin.prototype.getEntitiesFromXML = function () {
     var plugin = this;
-    var context2elementname = plugin.context2elementname;
     var btn_import = document.querySelector('#btn-import-from-tei');
     var btn_add = document.querySelector('#btn-add-from-tei');
     var count_span = $('.found-tei-objects');
@@ -119,6 +140,11 @@ TEIImportPlugin.prototype.getEntitiesFromXML = function () {
     entities_form.empty();
     plugin.importable_entities = [];
     plugin.names_to_import = [];
+    var form_values = file_form.serializeArray();
+    plugin.context2elementname[context] = form_values.find(ipt => ipt.name == 'tei-import-element').value;
+    plugin.id_attribute_name = form_values.find(ipt => ipt.name == 'tei-import-id-attribute').value;
+    plugin.reference_attribute_name = form_values.find(ipt => ipt.name == 'tei-import-reference-attribute').value;
+    var context2elementname = plugin.context2elementname;
 
     reader.addEventListener("load", function () {
         console.log('TEI Import: File ' + file.name + ' loaded.');
@@ -140,29 +166,31 @@ TEIImportPlugin.prototype.getEntitiesFromXML = function () {
             var xml = $(xmlDoc);
             // TODO: check if its TEI
             // Get all elements
-            console.log(xml);
             var entities = xml.find(context2elementname[context]);
             // Uniquify by reference and name
             var unique_names = [];
             var found_ids = [];
+            var found_refs = [];
             var identified_entities = entities.filter(function (i, e) {
                 var name = e.textContent;
-                var id = e.getAttribute('ref');
-                // object is identically if it has the same id or the same name
+                var local_id = e.getAttribute(plugin.id_attribute_name);
+                var ref = e.getAttribute(plugin.reference_attribute_name);
+                // object is identically if it has the same id/ref or the same name
 
-                if (id != null) {
-                    if (found_ids.includes(id)) {
+                if (local_id != null ||  ref != null) {
+                    if (found_ids.includes(local_id) || found_refs.includes(ref)) {
                         return false;
                     } else {
-                        found_ids.push(id)
-                        unique_names.push(e.textContent)
+                        if (local_id != null) { found_ids.push(local_id) }
+                        if (ref != null) { found_refs.push(ref) }
+                        unique_names.push(name)
                         return true;
                     }
                 } else {
-                    if (unique_names.includes(e.textContent)) {
+                    if (unique_names.includes(name)) {
                         return false;
                     } else {
-                        unique_names.push(e.textContent)
+                        unique_names.push(name)
                         return true;
                     }
                 }
@@ -171,6 +199,7 @@ TEIImportPlugin.prototype.getEntitiesFromXML = function () {
 
             plugin.importable_entities = identified_entities;
             plugin.names_to_import = unique_names;
+            plugin.ids_to_import = found_ids;
 
             // Update import button
             count_span.html(plugin.importable_entities.length);
@@ -184,8 +213,11 @@ TEIImportPlugin.prototype.getEntitiesFromXML = function () {
                 var entities_btn_group = $('<div class="form-group"></div>').appendTo(entities_form)
                 plugin.importable_entities.each(function (i, e) {
                     var ref_html = '';
-                    if (e.attributes.ref && e.attributes.ref.value.startsWith(config.v.identifierBaseURL)) {
-                        ref_html = ' <span class="badge badge-dark">' + e.attributes.ref.value.substr(config.v.identifierBaseURL.length) + '</span>';
+                    if (e.attributes[plugin.id_attribute_name] && e.attributes[plugin.id_attribute_name].value != '') {
+                        ref_html += ' <span class="badge badge-warning">' + e.attributes[plugin.id_attribute_name].value + '</span>';
+                    }
+                    if (e.attributes[plugin.reference_attribute_name] && e.attributes[plugin.reference_attribute_name].value.startsWith(config.v.identifierBaseURL)) {
+                        ref_html += ' <span class="badge badge-dark">' + e.attributes[plugin.reference_attribute_name].value.substr(config.v.identifierBaseURL.length) + '</span>';
                     }
                     var chk_html = '<div class="form-check form-check-inline">\
                                       <input class="form-check-input" type="checkbox" value="' + e.textContent + '" id="import-entitiy-' + i + '" checked>\
@@ -222,6 +254,14 @@ TEIImportPlugin.prototype.getEntitiesFromXML = function () {
                 .after('<div class="invalid-feedback">' + msg + '</div>')
                 .addClass('is-invalid');
         }
+    } else {
+        // No file choosen yet: abort
+        var msg = 'Please select a file first.';
+        console.log('TEI Import: ' + msg);
+        // Bootstrap form validation
+        file_input
+            .after('<div class="invalid-feedback">' + msg + '</div>')
+            .addClass('is-invalid');
     }
     return plugin;
 }
@@ -279,13 +319,19 @@ TEIImportPlugin.prototype.addEntities = function (event) {
             params[config.v.titleElement] = e.textContent;
             params[config.v.statusElement] = status;
             console.log('TEI Import: Imported data is set to the status: "' + status + '".');
+            // Check if we already have IDs set, which we can import.
+            // They should be in the 'key'-attribute
+            if (e.attributes[plugin.id_attribute_name] !== undefined) {
+                // TODO: this structure must be configurable and should not be fixed in the code.
+                params.id = e.attributes[plugin.id_attribute_name].value;
+            }
             // Check if we already have references set, which we can import.
             // They should be in the 'ref'-attribute
-            if (e.attributes.ref !== undefined && e.attributes.ref.value.startsWith(config.v.identifierBaseURL)) {
+            if (e.attributes[plugin.reference_attribute_name] !== undefined && e.attributes[plugin.reference_attribute_name].value.startsWith(config.v.identifierBaseURL)) {
                 // TODO: this structure must be configurable and should not be fixed in the code, because this is
                 // specific to the exist-db JSON export.
                 params[config.v.identifierElement] = {
-                    '#text': e.attributes.ref.textContent,
+                    '#text': e.attributes[plugin.reference_attribute_name].value,
                     'preferred': 'YES'
                 };
             }
