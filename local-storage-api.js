@@ -171,6 +171,9 @@ LocalStorageAdapter.prototype.load = function () {
         console.log('Local Storage API: ' + objects_array.length + ' object(s) loaded (context: ' + ctx + ', dataset: ' + ds + ')');
         // Update frontend info
         updateFrontendDatasetInformation(this.last_updated, objects_array.length);
+        // Usually this event is already triggered by setDataset, but listening filter
+        // presuppose actual data_objects, which will be set in load function.
+        $('body').trigger('datasetLoaded');
     } else {
         console.log('Local Storage API (ERROR): Context or dataset is null. Nothing loaded.');
     }
