@@ -32,19 +32,29 @@ basicPluginLocalStorage.render([plugin_ls_datasets, plugin_ls_dataset_info, plug
 // Build button add dataset name
 var ls_dataset_btn_add = $('<button id="ls-dataset-btn-add" title="Add new local dataset." type="button"></button>')
     // Add classes
-    .addClass('btn btn-outline-light')
+    .addClass('btn btn-outline-light disabled')
     // Add plus icon
     .append('<span class="fas fa-plus"></span>')
     .appendTo('#app-plugin-ls .input-group-append')
     .on('click', function () {
-        // Reset data objects, to start with a clean dataset
-        data_objects = {};
-        // Reset frontend also
-        $('#result-container .list-group-item').remove();
-        // Set new dataset and store localy
-        basicLSA.setDataset($('#ls-dataset-ipt-name').val()).save();
-        // Rebuild dropdown menu
-        buildDatasetDropdownMenu(basicLSA.getAvailableDatasets(), $('#ls-dataset-ipt-name').val());
+        if (!$(this).hasClass('disabled')) {
+            // Get new name from input field, with removed leading and trailing whitespace
+            var new_dataset_name = $('#ls-dataset-ipt-name').val().trim();
+            // Check if a dataset with such name already exist and only create it if not.
+            if (!basicLSA.getAvailableDatasets().includes(new_dataset_name)) {
+                // Reset data objects, to start with a clean dataset
+                data_objects = {};
+                // Reset frontend also
+                $('#result-container .list-group-item').remove();
+                // Set new dataset and store localy
+                basicLSA.setDataset(new_dataset_name).save();
+                // Rebuild dropdown menu
+                buildDatasetDropdownMenu(basicLSA.getAvailableDatasets(), $('#ls-dataset-ipt-name').val());
+            } else {
+                // TODO: Give feedback to user, that dataset already exist
+                console.log('Local Storage API: Can\'t create new dataset, because dataset "' + new_dataset_name + '"" already exist.');
+            }
+        }
     });
 
 
@@ -213,6 +223,15 @@ LocalStorageAdapter.prototype.setDataset = function (ds) {
 /* Instantiate LSA */
 var basicLSA = new LocalStorageAdapter(context);
 
+
+// Add listener for dataset creation
+$('#ls-dataset-ipt-name').on('keyup', function () {
+    if ($(this).val().trim().length) {
+        ls_dataset_btn_add.removeClass('disabled');
+    } else {
+        ls_dataset_btn_add.addClass('disabled');
+    }
+});
 
 // Add listener for all API related events
 $('body').on('objectAdd objectDelete objectUpdate statusChange preferredReferenceChange referenceUpdate cardReferenceDelete cardPreferredReferenceChange cardSwitch mapPreferredReferenceChange', function (e, data) {
