@@ -547,7 +547,7 @@ function enableButtonDelete (selector, delegate_selector) {
 /* Reset form if modal is hiding */
 function enableObjectFormReset (selector) {
     $(selector).on('hidden.bs.modal', function () {
-        $('#object-form')[0].reset();
+        $('#object-form .form-control').val('')
     });
 }
 
