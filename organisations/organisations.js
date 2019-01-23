@@ -34,7 +34,7 @@ function findAuthorityData (trigger, searchterm, element_id) {
         for (var key in organisation_gnd_results) {
             if (Number(key) != 'NaN') {
                 //console.log(person_gnd_results[key]);
-                references.push(organisation_gnd_results[key].dnb);
+                references.push(organisation_gnd_results[key].dnb.toUpperCase());
             }
         }
         console.log('FindAuthorityData: results (type is corporate and has DNB entry): ' + cnt);
