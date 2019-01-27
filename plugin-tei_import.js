@@ -27,7 +27,7 @@ function TEIImportPlugin() {
     basicPluginActions.registerButton(this.btn_action_tei_upload);
 
 
-    // Build the statuus buttons
+    // Build the status buttons
     var modal_tei_file_upload_status_html = '';
     config.app.config.status.available.forEach(function (status) {
         if(status == config.app.config.status.default){
