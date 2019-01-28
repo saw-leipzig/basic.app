@@ -22,7 +22,7 @@ function CSVImportExportPlugin() {
     })
     basicPluginActions.registerButton(this.btn_csv_down);
 
-    // Build the statuus buttons
+    // Build the status buttons
     var modal_csv_file_upload_status_html = '';
     config.app.config.status.available.forEach(function (status) {
         if(status == config.app.config.status.default){
@@ -52,7 +52,7 @@ function CSVImportExportPlugin() {
                                                         <label for="uploadFileCSV" class="custom-file-label" id="uploadFileCSVLabel">CSV-file to load data from</label>\
                                                       </div>\
                                                       <small class="form-text">Select status. <span class="text-muted">The selected status will be set on all imported/added entities.</span></small>\
-                                                      <div id="import-teidata-file-form-statuus-btn-grp" class="btn-group btn-group-sm btn-group-toggle mb-2" data-toggle="buttons">\
+                                                      <div id="import-teidata-file-form-status-btn-grp" class="btn-group btn-group-sm btn-group-toggle mb-2" data-toggle="buttons">\
                                                         '+ modal_csv_file_upload_status_html +'\
                                                       </div>\
                                                       <small class="form-text">Select delimiter. <span class="text-muted">This character will be used to seperate multiple values in one cell, e.g. names or identifier. Ensure it\'s not the same character used for cell seperation in your CSV-file.</span></small>\
@@ -404,7 +404,7 @@ CSVImportExportPlugin.prototype.mergeObjectsWithCSV = function() {
     var entities_form = $('#merge-csvdata-form');
     var file = document.querySelector('#mergeFileCSV').files[0];
     var context2columnnames = plugin.context2columnnames;
-    var preselected_statuus = ['safe'];
+    var preselected_status = ['safe'];
 
     // Clear possible further validation results
     file_form.find('.is-valid, .is-invalid').removeClass('is-valid is-invalid');
@@ -438,19 +438,19 @@ CSVImportExportPlugin.prototype.mergeObjectsWithCSV = function() {
                                         <input type="radio" name="csv-merge-method" value="soft" autocomplete="off"> Soft\
                                     </label>')
                             .appendTo(entities_form);
-                        // STATUUS
+                        // STATUS
                         $(entities_form).append('<small class="form-text">Select statu(u)s to merge. <span class="text-muted">Only objects with the selected status will be merged.</span></small>');
                         var status_buttons = $('<div class="btn-group btn-group-sm btn-group-toggle mb-2" data-toggle="buttons"></div>')
                             .appendTo(entities_form);
                         config.app.config.status.available.forEach(function (status) {
-                            if (preselected_statuus.includes(status)) {
+                            if (preselected_status.includes(status)) {
                                 status_buttons.append('<label class="btn btn-secondary active">\
-                                                        <input type="checkbox" name="csv-statuus" value="' + status + '" autocomplete="off" checked>\
+                                                        <input type="checkbox" name="csv-status" value="' + status + '" autocomplete="off" checked>\
                                                         ' + status + '\
                                                     </label>')
                             } else {
                                 status_buttons.append('<label class="btn btn-secondary">\
-                                                        <input type="checkbox" name="csv-statuus" value="' + status + '" autocomplete="off">\
+                                                        <input type="checkbox" name="csv-status" value="' + status + '" autocomplete="off">\
                                                         ' + status + '\
                                                     </label>')
                             }
@@ -508,14 +508,14 @@ CSVImportExportPlugin.prototype.mergeCSV = function() {
     var settings_array = entities_form.serializeArray();
     var context2columnnames = plugin.context2columnnames;
     var method = '';
-    var statuus = [];
+    var status = [];
     var delimiter = '';
     var mode = '';
     settings_array.forEach(function (e) {
         if (e.name == 'csv-merge-method') {
             method = e.value;
-        } else if (e.name == 'csv-statuus') {
-            statuus.push(e.value);
+        } else if (e.name == 'csv-status') {
+            status.push(e.value);
         } else if (e.name == 'csv-merge-delimiter') {
             delimiter = e.value;
         } else if (e.name == 'csv-merge-mode') {
@@ -560,7 +560,7 @@ CSVImportExportPlugin.prototype.mergeCSV = function() {
                             obj = getLocalObjectByAlias(name);
                         }
                         // Check if object is in correct state
-                        if (obj !== undefined && statuus.includes(obj[config.v.statusElement])) {
+                        if (obj !== undefined && status.includes(obj[config.v.statusElement])) {
                             // Get preferred ID from local object
                             var preferred_id = getPreferredIdentifierFromObject(obj);
                             // if plain mode is choosen, remove base URL from preferred ID
