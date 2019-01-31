@@ -40,8 +40,9 @@ var ls_dataset_btn_add = $('<button id="ls-dataset-btn-add" title="Add new local
         if (!$(this).hasClass('disabled')) {
             // Get new name from input field, with removed leading and trailing whitespace
             var new_dataset_name = $('#ls-dataset-ipt-name').val().trim();
+            var available_datasets = basicLSA.getAvailableDatasets();
             // Check if a dataset with such name already exist and only create it if not.
-            if (!basicLSA.getAvailableDatasets().includes(new_dataset_name)) {
+            if (available_datasets == undefined || (Array.isArray(available_datasets) && !available_datasets.includes(new_dataset_name))) {
                 // Reset data objects, to start with a clean dataset
                 data_objects = {};
                 // Reset frontend also
