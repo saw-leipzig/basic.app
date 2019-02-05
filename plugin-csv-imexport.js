@@ -3,7 +3,7 @@ function CSVImportExportPlugin() {
     /* ----- Upload CSV ----- */
     // Create and register CSV upload button
     this.btn_csv_up = $('<button class="btn btn-outline-light" id="btn-upload-csv" type="button" data-toggle="modal" data-target="#csv-file-upload-modal">\
-                                <span class="fas fa-file-upload"></span> Import from CSV\
+                                <span class="fas fa-file-csv"></span> Import from CSV (csv2cmi)\
                             </button>');
     this.btn_csv_up.on('click', function(e){
         // Hide plugins
@@ -14,7 +14,7 @@ function CSVImportExportPlugin() {
 
     // Create and register CSV download button
     this.btn_csv_down = $('<button class="btn btn-outline-light" id="btn-download-csv" type="button" data-toggle="modal" data-target="#csv-file-merge-modal">\
-                                <span class="fas fa-file-download"></span> Merge with CSV\
+                                <span class="fas fa-file-csv"></span> Merge with CSV (csv2cmi)\
                             </button>');
     this.btn_csv_down.on('click', function(e){
         // Hide plugins
@@ -40,12 +40,13 @@ function CSVImportExportPlugin() {
                                       <div class="modal-dialog modal-lg" role="document">\
                                           <div class="modal-content">\
                                               <div class="modal-header">\
-                                                  <h5 class="modal-title">Import from CSV</h5>\
+                                                  <h5 class="modal-title">Import from CSV (csv2cmi)</h5>\
                                                   <button type="button" class="close" data-dismiss="modal" aria-label="Close">\
                                                       <span aria-hidden="true">✖</span>\
                                                   </button>\
                                               </div>\
                                               <div class="modal-body">\
+                                                  <p>With the <em>csv2cmi CSV Import</em>-Plugin you can load your local data, stored in a specific comma separated value file (*.csv), into the app. To correctly extract entity data (names and identifier), your document structure has to fulfill the requirements, specified by the tool <em>csv2cmi<em> (more details at <a href="https://github.com/saw-leipzig/csv2cmi" target="_blank">Github repository</a>).</p>\
                                                   <form id="import-csvdata-file-form">\
                                                       <div class="custom-file mb-2">\
                                                         <input type="file" class="custom-file-input" id="uploadFileCSV">\
@@ -82,12 +83,13 @@ function CSVImportExportPlugin() {
                                       <div class="modal-dialog modal-lg" role="document">\
                                           <div class="modal-content">\
                                               <div class="modal-header">\
-                                                  <h5 class="modal-title">Merge with local CSV</h5>\
+                                                  <h5 class="modal-title">Merge with local CSV (csv2cmi)</h5>\
                                                   <button type="button" class="close" data-dismiss="modal" aria-label="Close">\
                                                       <span aria-hidden="true">✖</span>\
                                                   </button>\
                                               </div>\
                                               <div class="modal-body">\
+                                                  <p>With the <em>csv2cmi CSV Merge</em>-Plugin you can merge the app data with your local data, stored in a specific comma separated value file (*.csv). To correctly merge/update entity data (names and identifier), your document structure has to fulfill the requirements, specified by the tool <em>csv2cmi<em> (more details at <a href="https://github.com/saw-leipzig/csv2cmi" target="_blank">Github repository</a>).</p>\
                                                   <form id="merge-csvdata-file-form">\
                                                       <div class="custom-file mb-2">\
                                                         <input type="file" class="custom-file-input" id="mergeFileCSV">\
