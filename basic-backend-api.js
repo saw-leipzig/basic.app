@@ -127,7 +127,7 @@ function getXMLStringFromLocalObjectByID (id) {
             container.append(ref_element);
         });
         // Add elements, configured in mapping, except title, because we did that already
-        asArray(config.app.config.mapping[context]).forEach(function (c) {
+        asArray(config.m).forEach(function (c) {
             if (c.localJSONPath && local_object[c.localJSONPath] && c.localJSONPath != config.v.titleElement) {
                 if (Array.isArray(local_object[c.localJSONPath])) {
                     local_object[c.localJSONPath].forEach(function(i) {

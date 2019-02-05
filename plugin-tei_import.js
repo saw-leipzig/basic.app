@@ -27,7 +27,7 @@ function TEIImportPlugin() {
     basicPluginActions.registerButton(this.btn_action_tei_upload);
 
 
-    // Build the statuus buttons
+    // Build the status buttons
     var modal_tei_file_upload_status_html = '';
     config.app.config.status.available.forEach(function (status) {
         if(status == config.app.config.status.default){
@@ -72,7 +72,7 @@ function TEIImportPlugin() {
                                                             <label for="uploadFileTEI" class="custom-file-label" id="uploadFileTEILabel">TEI-file to load data from</label>\
                                                           </div>\
                                                           <small class="form-text">Select status. <span class="text-muted">The selected status will be set on all imported/added entities.</span></small>\
-                                                          <div id="import-teidata-file-form-statuus-btn-grp" class="btn-group btn-group-sm btn-group-toggle mb-2" data-toggle="buttons">\
+                                                          <div id="import-teidata-file-form-status-btn-grp" class="btn-group btn-group-sm btn-group-toggle mb-2" data-toggle="buttons">\
                                                             '+ modal_tei_file_upload_status_html +'\
                                                           </div>\
                                                           ' + modal_tei_file_upload_names_html + '\

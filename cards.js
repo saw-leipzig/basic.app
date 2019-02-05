@@ -123,7 +123,7 @@ function prepareCardData(local_object, obj, id) {
         // Get configured attributes
         ret.attributes = deepFind(obj, 'JSONPath');
     } else {
-        var x = config.app.config.mapping[context].length;
+        var x = config.m.length;
         for (var i = 0; i < x; i++) {
             ret.attributes.push({key: undefined, value: undefined});
         }
