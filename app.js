@@ -33,6 +33,7 @@ function initApplication (config) {
         // shorten some config paths
         config.v = config.app.config.view[context];
         config.a = config.app.config.api[context];
+        config.m = config.app.config.mapping[context];
         console.log('Config loaded.');
         // config is loaded trigger a event
         $('body').trigger('basicAppConfigLoaded');
@@ -83,7 +84,7 @@ function getLocalObjectByAlias (alias) {
 // get the value using the path_key from config template
 function deepFind (obj, path_key) {
     // Dynamic attributes
-    var attributes = config.app.config.mapping[context];
+    var attributes = config.m;
     var attr_array =[];
     attributes.forEach(function (e) {
         var dn = e.displayName;
@@ -360,7 +361,7 @@ function getPreferredIdentifierFromObject (obj) {
 
 
 function initModalObjectFormFields () {
-    var attributes = config.app.config.mapping[context];
+    var attributes = config.m;
     var form = $('#object-form #object-form-container');
     if (Array.isArray(attributes)) {
         attributes.forEach(function (e) {
@@ -520,7 +521,7 @@ function enableButtonEdit (selector, delegate_selector) {
         var recipient = $(this).attr('id') // Extract info from data-* attributes
         var data_id = recipient.substring(recipient.indexOf('_') + 1);
         var local_object = getLocalObjectById(data_id);
-        var attributes = config.app.config.mapping[context];
+        var attributes = config.m;
         attributes.forEach(function (e) {
             if (e.localJSONPath) {
                 $('#ipt-' + e.localJSONPath).val(prepareValueForEdit(local_object[e.localJSONPath]));
@@ -724,7 +725,7 @@ function addObject (el, params){
         local_object[config.v.statusElement] = config.app.config.status.default;
     }
     // Add configured attributes to object
-    var attributes = config.app.config.mapping[context];
+    var attributes = config.m;
     attributes.forEach(function (e) {
         if (e.localJSONPath) {
             if (params === null) {
@@ -779,7 +780,7 @@ function editObject(id) {
     var local_object = getLocalObjectById(id);
     $('#object-form').find('.object-form-input').each(function (i, e) {
         var attr_name = $(e).attr('name');
-        var mapping_config = config.app.config.mapping[context].find(function (mc){
+        var mapping_config = config.m.find(function (mc){
             return mc.localJSONPath == attr_name;
         });
         local_object[attr_name] = prepareValueMapping(mapping_config, $(e).val());
