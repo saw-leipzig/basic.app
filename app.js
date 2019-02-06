@@ -743,14 +743,10 @@ function addObject (el, params){
             if (params === null) {
                 if ($('#ipt-' + e.localJSONPath).val()) {
                     local_object[e.localJSONPath] = prepareValueMapping(e, $('#ipt-' + e.localJSONPath).val());
-                } else {
-                    local_object[e.localJSONPath] = null;
                 }
             } else {
                 if (params[e.localJSONPath]) {
                     local_object[e.localJSONPath] = prepareValueMapping(e, params[e.localJSONPath]);
-                } else {
-                    local_object[e.localJSONPath] = null;
                 }
             }
         }
@@ -793,18 +789,29 @@ function editObject(id, params) {
     if (params != undefined && typeof params == 'object') {
         Object.entries(params).forEach(function (entry) {
             var attr_name = entry[0];
-            var mapping_config = config.m.find(function (mc){
-                return mc.localJSONPath == attr_name;
-            });
-            local_object[attr_name] = prepareValueMapping(mapping_config, entry[1]);
+            if (entry[1].toString().trim() != '') {
+                // update property
+                var mapping_config = config.m.find(function (mc){
+                    return mc.localJSONPath == attr_name;
+                });
+                local_object[attr_name] = prepareValueMapping(mapping_config, entry[1]);
+            } else {
+                // delete property
+                delete local_object[attr_name];
+            }
         });
     } else {
         $('#object-form').find('.object-form-input').each(function (i, e) {
             var attr_name = $(e).attr('name');
-            var mapping_config = config.m.find(function (mc){
-                return mc.localJSONPath == attr_name;
-            });
-            local_object[attr_name] = prepareValueMapping(mapping_config, $(e).val());
+            if ($(e).val().toString().trim() != '') {
+                var mapping_config = config.m.find(function (mc){
+                    return mc.localJSONPath == attr_name;
+                });
+                local_object[attr_name] = prepareValueMapping(mapping_config, $(e).val());
+            } else {
+                // delete property
+                delete local_object[attr_name];
+            }
         })
     }
     // Trigger an event
