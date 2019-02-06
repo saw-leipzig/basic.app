@@ -790,13 +790,13 @@ function addObject (el, params){
 
 function editObject(id, params) {
     var local_object = getLocalObjectById(id);
-    if (params != undefined && Array.isArray(params)) {
-        params.forEach(function (param) {
-            var attr_name = param.key;
+    if (params != undefined && typeof params == 'object') {
+        Object.entries(params).forEach(function (entry) {
+            var attr_name = entry[0];
             var mapping_config = config.m.find(function (mc){
                 return mc.localJSONPath == attr_name;
             });
-            local_object[attr_name] = prepareValueMapping(mapping_config, param.value);
+            local_object[attr_name] = prepareValueMapping(mapping_config, entry[1]);
         });
     } else {
         $('#object-form').find('.object-form-input').each(function (i, e) {

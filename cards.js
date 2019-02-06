@@ -223,12 +223,10 @@ function enableModalCardValueCopy(selector) {
                             return e.id === ids.ref_id;
                         })
                         var obj = fetched_obj.data;
-                        params = [{
-                            key: local_attribute,
-                            value: deepFind(obj, 'JSONPath', true).find(function (e) {
-                                return e.key == label;
-                            }).value
-                        }];
+                        var params = {};
+                        params[local_attribute] = deepFind(obj, 'JSONPath', true).find(function (e) {
+                            return e.key == label;
+                        }).value;
                         editObject(ids.element_id, params);
                         // Update base card attribute
                         var list_item = $('#card-' + ids.element_id + '_' + ids.element_id).find('li[data-content-label="' + label + '"]');
