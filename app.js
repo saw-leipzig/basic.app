@@ -82,7 +82,8 @@ function getLocalObjectByAlias (alias) {
 
 
 // get the value using the path_key from config template
-function deepFind (obj, path_key) {
+function deepFind (obj, path_key, allow_arrays) {
+    var allow_arrays = allow_arrays || false;
     // Dynamic attributes
     var attributes = config.m;
     var attr_array =[];
@@ -101,7 +102,11 @@ function deepFind (obj, path_key) {
                         current = current.map(function (e) {
                             return e[paths[i]];
                         });
-                        current = current.join(', ');
+                        if (!allow_arrays) {
+                            current = current.join(', ');
+                        } else {
+                            break;
+                        }
                     } else {
                         current = undefined;
                         break;
@@ -110,7 +115,12 @@ function deepFind (obj, path_key) {
                     // end of path reached and node is an array, so this should be a collection
                     // of simple values and could be joined nicely.
                     // TODO: handle typespecific, string, dates, objects?
-                    current = current[paths[i]].join(', ');
+                    if (!allow_arrays) {
+                        current = current[paths[i]].join(', ');
+                    } else {
+                        current = current[paths[i]];
+                        break;
+                    }
                 } else {
                     current = current[paths[i]];
                 }
@@ -683,7 +693,7 @@ function changeStatus (trigger_element, element_id, current_status, new_status){
 
 
 function prepareValueMapping (mapping_config, mapping_value) {
-    var ret = mapping_value;
+    var ret = mapping_value.toString();
     if (mapping_config.multiple){
         if (typeof mapping_value === 'string') {
             var value_arr = mapping_value.split('\n');
@@ -692,6 +702,8 @@ function prepareValueMapping (mapping_config, mapping_value) {
                     return v != '';
                 });
             }
+        } else if (Array.isArray(mapping_value)) {
+            ret = mapping_value;
         }
     }
     return ret;
@@ -776,15 +788,25 @@ function addObject (el, params){
 }
 
 
-function editObject(id) {
+function editObject(id, params) {
     var local_object = getLocalObjectById(id);
-    $('#object-form').find('.object-form-input').each(function (i, e) {
-        var attr_name = $(e).attr('name');
-        var mapping_config = config.m.find(function (mc){
-            return mc.localJSONPath == attr_name;
+    if (params != undefined && Array.isArray(params)) {
+        params.forEach(function (param) {
+            var attr_name = param.key;
+            var mapping_config = config.m.find(function (mc){
+                return mc.localJSONPath == attr_name;
+            });
+            local_object[attr_name] = prepareValueMapping(mapping_config, param.value);
         });
-        local_object[attr_name] = prepareValueMapping(mapping_config, $(e).val());
-    })
+    } else {
+        $('#object-form').find('.object-form-input').each(function (i, e) {
+            var attr_name = $(e).attr('name');
+            var mapping_config = config.m.find(function (mc){
+                return mc.localJSONPath == attr_name;
+            });
+            local_object[attr_name] = prepareValueMapping(mapping_config, $(e).val());
+        })
+    }
     // Trigger an event
     $('#' + id).trigger('objectUpdate');
     /* 2. update frontend

@@ -266,6 +266,15 @@ a.link-seealso {
     box-shadow: 0 0 0 0.2rem rgba(7, 175, 255, 0.5);
     z-index: 100;
 }
+#modalCardCopyButton {
+  position: absolute;
+  right: 1px;
+  top: 0px;
+  vertical-align: middle;
+  font-size: smaller;
+  height: 100%;
+  padding: .1rem .25rem;
+}
 
 
 /* Thin out the quickguide title */
