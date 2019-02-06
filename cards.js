@@ -191,6 +191,56 @@ function enableModalCardZoom(selector) {
 }
 
 
+function enableModalCardValueCopy(selector) {
+    var local_attributes = config.m.filter(function (c) {
+        return c.localJSONPath != undefined;
+    });
+    var local_labels = local_attributes.map(function (c) {
+        return c.displayName;
+    });
+    var delegate_selector = '.text-truncate';
+    $(selector)
+        .on('mouseenter', delegate_selector, function() {
+            var data = $(this).text();
+            var label = $(this).attr('data-content-label');
+            var card = $(this).parents('.card-reference');
+            // Ignore local data, unconfigured local attributes and empty values
+            if (card.length && local_labels.includes(label) && data != '-') {
+                var copy_btn = $('<button id="modalCardCopyButton" type="button" class="btn btn-sm btn-outline-secondary" title="Copy value of &quot;' + label + '&quot; to local object."><small class="fas fa-copy"></small></button>');
+                $(this).append(copy_btn);
+                copy_btn
+                    .on('click', function (e) {
+                        // Prevent fixing the card zoom, triggered by click event
+                        e.stopPropagation();
+                        // Copy value to local object (update)
+                        var attribute_object = local_attributes.find(function (c) {
+                            return c.displayName == label;
+                        });
+                        var local_attribute = attribute_object.localJSONPath;
+                        var ids = getIdsFromCard(card);
+                        // Use original fetched data instead of displayed value
+                        var fetched_obj = fetched_objects.objects.find(function (e) {
+                            return e.id === ids.ref_id;
+                        })
+                        var obj = fetched_obj.data;
+                        var params = {};
+                        params[local_attribute] = deepFind(obj, 'JSONPath', true).find(function (e) {
+                            return e.key == label;
+                        }).value;
+                        editObject(ids.element_id, params);
+                        // Update base card attribute
+                        var list_item = $('#card-' + ids.element_id + '_' + ids.element_id).find('li[data-content-label="' + label + '"]');
+                        list_item.children('small').html(data);
+                        list_item.removeClass('list-group-item-secondary');
+                    });
+            }
+        })
+        .on('mouseleave', delegate_selector, function () {
+            $('#modalCardCopyButton').remove();
+        })
+}
+
+
 function enableModalCardPreferredToggling(selector) {
     $(selector)
         .on('click', '.btn-card-preferred', function () {
@@ -248,11 +298,16 @@ function enableModalCardEvents(selector) {
     enableModalcardSwitch(selector);
     // Enable delete
     enableModalCardDelete(selector);
+    // Enable value copy
+    enableModalCardValueCopy(selector);
 }
 
 
-constructCompareModalCards('#compare-modal');
-enableModalCardEvents('#modal-cards');
+// Init after config is loaded
+$('body').on('basicAppConfigLoaded', function () {
+    constructCompareModalCards('#compare-modal');
+    enableModalCardEvents('#modal-cards');
+});
 
 
 function addCard (container, id, local_object) {

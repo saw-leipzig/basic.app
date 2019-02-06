@@ -130,7 +130,7 @@ CSVGenericImportExportPlugin.prototype.render = function () {
         // Hide plugins
         $('#app-content-plugins-area').collapse('hide');
         // Render import modal and open
-        var title = 'Generic CSV Import';
+        var title = '<span class="fas fa-file-csv"></span> Generic CSV Import';
         var doc = 'With the <em>Generic CSV Import</em>-Plugin you can load your local data, stored in a comma separated value file (*.csv), into the app. Each row of your table-like data structure contains one dataset (all data according to one entity). The first row has to contain your column labels. You\'ll need them to map your data model to the configured app data model.';
         plugin.mode = 'import';
         plugin
@@ -147,7 +147,7 @@ CSVGenericImportExportPlugin.prototype.render = function () {
         // Hide plugins
         $('#app-content-plugins-area').collapse('hide');
         // Render merge modal and open
-        var title = 'Generic CSV Merge';
+        var title = '<span class="fas fa-file-csv"></span> Generic CSV Merge';
         var doc = 'With the <em>Generic CSV Merge</em>-Plugin you can merge the app data with your local data (based on IDs), stored in a comma separated value file (*.csv) and download the result as (new) CSV-file. Each row of your table-like data structure contains one dataset (all data according to one entity). The first row has to contain your column labels. You\'ll need them to map your data model to the configured app data model.';
         plugin.mode = 'merge';
         plugin
