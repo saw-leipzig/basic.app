@@ -174,11 +174,14 @@ LocalStorageAdapter.prototype.load = function () {
         });
         data_objects = stored_obj.data_objects;
         this.last_updated = stored_obj.last_updated;
-        // TODO: Clear results if already exist
         $('#result-container .list-group-item').remove();
         // Create result list representation for each entry with global createNewHTMLObject()
+        // and activate id management
         var objects_array = asArray(data_objects[config.a.JSONContainer]);
-        objects_array.forEach(function (obj) {createNewHTMLObject(obj)});
+        objects_array.forEach(function (obj) {
+            idm.add(obj.id);
+            createNewHTMLObject(obj);
+        });
         console.log('Local Storage API: ' + objects_array.length + ' object(s) loaded (context: ' + ctx + ', dataset: ' + ds + ')');
         // Update frontend info
         updateFrontendDatasetInformation(this.last_updated, objects_array.length);

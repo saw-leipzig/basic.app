@@ -1,10 +1,10 @@
 /* Cards */
 function getIdsFromCard (card) {
     var ids = card.attr('id').substring('card-'.length);
-    var element_id = ids.substring(0, ids.indexOf('_'));
+    var fid = ids.substring(0, ids.indexOf('_'));
     var ref_id = ids.substring(ids.indexOf('_') + 1);
     return {
-        element_id: element_id,
+        fid: fid,
         ref_id: ref_id
     }
 }
@@ -15,7 +15,7 @@ function deleteCard (trigger) {
     // Get ids
     var ids = getIdsFromCard(card);
     // Update data and result list
-    deleteIdentifier(ids.element_id, ids.ref_id);
+    deleteIdentifier(ids.fid, ids.ref_id);
     //Fire event cardDelete
     $(trigger).trigger('cardReferenceDelete');
     // Delete card in DOM
@@ -69,11 +69,11 @@ function getCardHTML (cardid, title, attributes, links, classes) {
 }
 
 
-function prepareCardData(local_object, obj, id) {
-    var cardid = local_object.id + '_' + id;
+function prepareCardData(local_object, obj, ref_id) {
+    var cardid = idm.getFrontendId(local_object.id) + '_' + ref_id;
     var ret = {
         cardid: cardid,
-        id: id,
+        id: ref_id,
         attributes: [],
         links: [],
         additional_classes: ['card-reference']
@@ -85,7 +85,7 @@ function prepareCardData(local_object, obj, id) {
             return e.preferred === 'YES'
         });
         // TODO: API constrainet: #text
-        if (pref_ref_object != undefined && pref_ref_object[ '#text'] === config.v.identifierBaseURL + id) {
+        if (pref_ref_object != undefined && pref_ref_object[ '#text'] === config.v.identifierBaseURL + ref_id) {
             pref_ref = 'YES';
         } else {
             pref_ref = 'NO'
@@ -110,11 +110,11 @@ function prepareCardData(local_object, obj, id) {
     if (obj !== undefined && obj !== null) {
         addLinksFromObjectToCollection(obj, ret.links);
     } else {
-        // if there is no fetched object, we still have a identifier and could therefor
+        // if there is no fetched object, we still have an identifier and could therefor
         // create a base link
         ret.links.push({
             'name': config.v.identifierAbbreviation,
-            'url': config.v.identifierBaseURL + id
+            'url': config.v.identifierBaseURL + ref_id
         });
     }
 
@@ -136,22 +136,23 @@ function constructCompareModalCards(selector){
     $(selector).on('show.bs.modal', function (event) {
         var button = $(event.relatedTarget) // Button that triggered the modal
         var recipient = button.attr('id') // Extract info from data-* attributes
-        var data_id = recipient.substring(recipient.indexOf('_') + 1);
+        var fid = recipient.substring(recipient.indexOf('_') + 1);
+        var oid = idm.getObjectId(fid);
         var list_group_item = button.parents('.list-group-item');
         // parenting list group element
         var title = list_group_item.find('h5').text();
         // Name of our reference object
         var related_entries = list_group_item.find('.btn-group-ads>label');
         // Related authority data
-        var local_object = getLocalObjectById(data_id);
+        var local_object = getLocalObjectById(oid);
         var modal = $(this);
         modal.find('.modal-title').text('Authority Data Comparison: ' + title);
         // Clear card deck
         modal.find('#modal-cards').empty();
         // Create first card with reference data
-        modal.find('#modal-cards').append(getCardHTMLFromDataID(data_id, local_object));
+        modal.find('#modal-cards').append(getCardHTMLFromDataID(fid, local_object));
         // Add state button to footer
-        //modal.find('.modal-footer').prepend($('#' + data_id + ' div.input-group-prepend:not(.btn-group)').children().clone());
+        //modal.find('.modal-footer').prepend($('#' + fid + ' div.input-group-prepend:not(.btn-group)').children().clone());
         // Create card for each related entry
         related_entries.each(function () {
             addCard(modal.find('#modal-cards'), $(this).attr('data-ref-id'), local_object);
@@ -227,9 +228,9 @@ function enableModalCardValueCopy(selector) {
                         params[local_attribute] = deepFind(obj, 'JSONPath', true).find(function (e) {
                             return e.key == label;
                         }).value;
-                        editObject(ids.element_id, params);
+                        editObject(idm.getObjectId(ids.fid), params);
                         // Update base card attribute
-                        var list_item = $('#card-' + ids.element_id + '_' + ids.element_id).find('li[data-content-label="' + label + '"]');
+                        var list_item = $('#card-' + ids.fid + '_' + ids.fid).find('li[data-content-label="' + label + '"]');
                         list_item.children('small').html(data);
                         list_item.removeClass('list-group-item-secondary');
                     });
@@ -248,7 +249,7 @@ function enableModalCardPreferredToggling(selector) {
                 var card = $(this).parents('.card');
                 var ids = getIdsFromCard(card);
                 // 1. update local object, backend and frontend (list)
-                togglePreferred(ids.element_id, ids.ref_id);
+                togglePreferred(idm.getObjectId(ids.fid), ids.ref_id);
                 // 2. update cards
                 // remove classes on preferred object
                 $('.card.bg-info.text-white').removeClass('bg-info text-white');
@@ -310,9 +311,9 @@ $('body').on('basicAppConfigLoaded', function () {
 });
 
 
-function addCard (container, id, local_object) {
+function addCard (container, ref_id, local_object) {
     var fetched_obj = fetched_objects.objects.find(function (e) {
-        return e.id === id
+        return e.id === ref_id
     })
     if (fetched_obj !== undefined) {
         var obj = fetched_obj.data;
@@ -327,7 +328,7 @@ function addCard (container, id, local_object) {
             corsanywhere_url = 'https://cors-anywhere.herokuapp.com/';
         }
         // compose API GET-URL for object with ID
-        var source_url = corsanywhere_url + config.a.authorityDataBaseURL + id.toUpperCase();
+        var source_url = corsanywhere_url + config.a.authorityDataBaseURL + ref_id.toUpperCase();
         console.log('Request external object: ', source_url);
         $.getJSON(source_url)
             .done(function (result) {
@@ -345,19 +346,19 @@ function addCard (container, id, local_object) {
                 } else {
                     // Cache object if not already done
                     var fetched_obj = fetched_objects.objects.find(function (e) {
-                        return e.id === id
+                        return e.id === ref_id
                     })
                     if (fetched_obj === undefined) {
                         fetched_objects.objects.push({
-                            "id": id, "data": result
+                            "id": ref_id, "data": result
                         });
-                        console.log('Added object ' + id + ' to fetched objects.');
+                        console.log('Added object ' + ref_id + ' to fetched objects.');
                     }
 
                     obj = result;
                 }
                 // Update Card
-                var prepared = prepareCardData(local_object, obj, id)
+                var prepared = prepareCardData(local_object, obj, ref_id)
                 $('#card-' + prepared.cardid).replaceWith(getCardHTML(prepared.cardid, prepared.id, prepared.attributes, prepared.links, prepared.additional_classes));
                 // Load additional data from seealso webservice
                 loadSeealsoResources(prepared.cardid, prepared.id);
@@ -366,22 +367,21 @@ function addCard (container, id, local_object) {
                 console.log('Request failed: ' + source_url);
                 var obj = null;
                 // Update Card
-                var prepared = prepareCardData(local_object, obj, id)
+                var prepared = prepareCardData(local_object, obj, ref_id)
                 $('#card-' + prepared.cardid).replaceWith(getCardHTML(prepared.cardid, prepared.id, prepared.attributes, prepared.links, prepared.additional_classes));
             });
     }
-    var prepared = prepareCardData(local_object, obj, id)
+    var prepared = prepareCardData(local_object, obj, ref_id)
     // Add card to container (DOM)
     container.append(getCardHTML(prepared.cardid, prepared.id, prepared.attributes, prepared.links, prepared.additional_classes));
     // Load additional data from seealso webservice
-    loadSeealsoResources(prepared.cardid, id);
+    loadSeealsoResources(prepared.cardid, ref_id);
 }
 
 
-function getCardHTMLFromDataID (id, local_object) {
+function getCardHTMLFromDataID (fid, local_object) {
     var attributes = deepFind(local_object, 'localJSONPath');
-    //TODO: API constraint: id
-    var cardid = local_object.id + '_' + id;
+    var cardid = idm.getFrontendId(local_object.id) + '_' + fid;
     return getCardHTML(cardid, 'Own data', attributes, [], ['text-white', ' bg-dark']);
 }
 
@@ -402,13 +402,13 @@ function shiftCard (trigger, direction) {
         card_to_swap_with.replaceWith(card_to_shift);
         card_to_swap_with.insertBefore(card_to_shift);
         // shift identifier in data and list view
-        shiftIdentifier(ids.element_id, ids.ref_id, direction);
+        shiftIdentifier(ids.fid, ids.ref_id, direction);
     } else if (direction == 'left' && card_to_shift_idx > 0) {
         var card_to_swap_with = card_to_shift.prev();
         // swapping cards
         card_to_swap_with.replaceWith(card_to_shift);
         card_to_swap_with.insertAfter(card_to_shift);
         // shift identifier in data and list view
-        shiftIdentifier(ids.element_id, ids.ref_id, direction);
+        shiftIdentifier(ids.fid, ids.ref_id, direction);
     }
 }

@@ -186,10 +186,16 @@ ImportExportPlugin.prototype.getObjectsFromJSON = function() {
 
 
 ImportExportPlugin.prototype.importObjects = function(event) {
-    data_objects = {};
-    $('#result-container .list-group-item').remove();
-    console.log('JSON Import/Export: Existing data objects removed.');
+    // Delete existing objects
+    var ids_to_delete = asArray(data_objects[config.a.JSONContainer]).map(obj => obj.id);
+    console.log('JSON Import/Export: Deleting ' + ids_to_delete.length + ' data objects.');
+    ids_to_delete.forEach(function (id) {
+        deleteObject(event.target, id);
+    });
+    console.log('JSON Import/Export: Existing data objects deleted.');
+    // Add all new entities
     this.addObjects(event);
+    return this;
 }
 
 

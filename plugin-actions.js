@@ -44,7 +44,7 @@ BasicAppPlugin.prototype.render = function (content) {
 }
 
 
-// if dataset are loaded remove class to show the sections
+// if dataset is loaded remove class to show the sections
 $('body').on('datasetLoaded',  function (e) {
     $('.plugin-hidden').removeClass('plugin-hidden').show();
 })

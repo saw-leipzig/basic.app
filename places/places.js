@@ -8,7 +8,7 @@ basicPluginActions.registerButton(btn_action_add);
 
 
 // Load JSON data for the authoritydata identifier
-function findAuthorityData (trigger, searchterm, element_id) {
+function findAuthorityData (trigger, searchterm, fid) {
     var geo_url_suggest = config.a.geo_url_suggest;
     var cnt = 0;
     var params = [];
@@ -42,7 +42,7 @@ function findAuthorityData (trigger, searchterm, element_id) {
             }
         }
         console.log('FindAuthorityData: results (type is place and has GEO entry): ' + cnt);
-        addReference(trigger, element_id, references);
+        addReference(trigger, fid, references);
     }).fail(function (jqxhr, textStatus, error) {
         var err = textStatus + ", " + error;
         console.log('Request Failed: ' + err);
@@ -70,7 +70,7 @@ function addLinksFromObjectToCollection(obj, collection){
 }
 
 
-function loadSeealsoResources (cardid, id) {
+function loadSeealsoResources (cardid, ref_id) {
     // Not available for places
 }
 

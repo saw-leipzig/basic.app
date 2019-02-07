@@ -6,9 +6,9 @@ var arrayOfLatLng = [];
 // Add button to input-group after list-item is created
 $('#result-container').on('listItemCreated', function (e) {
     var list_item = $(e.target);
-    var id = list_item.attr('id');
+    var fid = list_item.attr('id');
     var btn_group = list_item.find('.input-group .input-group-append');
-    var btn_map_view = $('<button id="btn-map_'+ id + '" type="button"></button>')
+    var btn_map_view = $('<button id="btn-map_'+ fid + '" type="button"></button>')
         //class="btn btn-map btn-outline-secondary">
         .append('<span class="fas fa-map"></span>')
         .attr('aria-label', 'Show map view of data set.')
@@ -38,7 +38,7 @@ var map_modal_html = '<div class="modal fade" id="map-modal" tabindex="-1" aria-
 var map_modal = $(map_modal_html).appendTo('#modals');
 
 
-function contentForMarkers(id, element_id, data){
+function contentForMarkers(data){
     var pop_html = '';
     // add definition items for each attribution
     deepFind(data, 'JSONPath').forEach(function (i) {
@@ -57,14 +57,14 @@ function contentForMarkers(id, element_id, data){
 
 
 // write the button in different colours if preferred
-function markerButtonSetPreferred(selector, id, greenIcon, greyIcon, data){
+function markerButtonSetPreferred(selector, greenIcon, greyIcon){
     if($(selector).hasClass('active')){
         $(selector).on('click', function () {
             var ids = $(this).attr('id').substring($(this).attr('id').indexOf('-') + 1);
-            var element_id = ids.substring(0, ids.indexOf('_'));
-            var geo_id = ids.substring(ids.indexOf('_') + 1);
+            var fid = ids.substring(0, ids.indexOf('_'));
+            var ref_id = ids.substring(ids.indexOf('_') + 1);
             // 1. update local object
-            togglePreferredRef2Data(element_id, geo_id);
+            togglePreferredRef2Data(idm.getObjectId(fid), ref_id);
             //Fire event mapPreferredReferenceChange
             $(this).trigger('mapPreferredReferenceChange');
             // 3. update frontend
@@ -79,7 +79,7 @@ function markerButtonSetPreferred(selector, id, greenIcon, greyIcon, data){
                 }
             });
             // 3.1 update result list buttons
-            $('#' + element_id + ' label.btn.active').removeClass('active');
+            $('#' + fid + ' label.btn.active').removeClass('active');
             $('#lbl-' + ids).addClass('active');
 
         });
@@ -111,19 +111,19 @@ function createMap (cluster) {
 
 
 // get marker for every fetched object
-function getMarker (element_id, id, obj, cluster) {
+function getMarker (fid, obj, cluster) {
      // Get local_object for preferred
-     var id = obj.id;
+     var ref_id = obj.id;
      var lat = obj.data['lat'];
      var lng = obj.data['lng'];
      // Get local object with ID
-     var local_object = getLocalObjectById(element_id);
+     var local_object = getLocalObjectById(idm.getObjectId(fid));
      // Is current object set as preferred ?
      if (Array.isArray(local_object[config.v.identifierElement])) {
          var pref_ref_object = local_object[config.v.identifierElement].find(function (e) {
              return e.preferred === 'YES'
          });
-         if (pref_ref_object != undefined && pref_ref_object['#text'] === config.v.identifierBaseURL + id) {
+         if (pref_ref_object != undefined && pref_ref_object['#text'] === config.v.identifierBaseURL + ref_id) {
              pref_ref = 'YES';
          } else {
              pref_ref = 'NO'
@@ -150,7 +150,7 @@ function getMarker (element_id, id, obj, cluster) {
         if (map === null) {
             createMap(cluster);
         }
-        var marker_id = element_id + '_' + id;
+        var marker_id = fid + '_' + ref_id;
         var marker = new L.Marker([lat, lng]);
         marker._myId = marker_id;
         marker.bindPopup();
@@ -161,15 +161,12 @@ function getMarker (element_id, id, obj, cluster) {
             marker.setIcon(greenIcon);
         }
         marker.on('popupopen', function (e) {
-            var marker_id = e.target._myId;
-            var element_id = marker_id.substring(0, marker_id.indexOf('_'));
-            var geo_id = marker_id.substring(marker_id.indexOf('_') + 1);
              // Is current object set as preferred ?
              if (Array.isArray(local_object[config.v.identifierElement])) {
                  var pref_ref_object = local_object[config.v.identifierElement].find(function (e) {
                      return e.preferred === 'YES'
                  });
-                 if (pref_ref_object != undefined && pref_ref_object[ '#text'] === config.v.identifierBaseURL + id) {
+                 if (pref_ref_object != undefined && pref_ref_object[ '#text'] === config.v.identifierBaseURL + ref_id) {
                      pref_ref = 'YES';
                  } else {
                      pref_ref = 'NO'
@@ -178,12 +175,12 @@ function getMarker (element_id, id, obj, cluster) {
                  var pref_ref = local_object[config.v.identifierElement].preferred;
              }
             // create popup content
-            var pop_html = contentForMarkers(geo_id,element_id,obj.data);
+            var pop_html = contentForMarkers(obj.data);
             var btn_html = $('<button type="button" \
                                           class="btn btn-success btn-sm" \
-                                          id="mapMarkerPref-'+ element_id + '_' + geo_id + '" \
-                                          data-geo-id="'+ geo_id +'">\
-                                          Set ' + geo_id + ' preferred\
+                                          id="mapMarkerPref-'+ fid + '_' + ref_id + '" \
+                                          data-geo-id="'+ ref_id +'">\
+                                          Set ' + ref_id + ' preferred\
                                        </button>');
             if (pref_ref == 'NO') {
                 btn_html.addClass('active');
@@ -192,7 +189,7 @@ function getMarker (element_id, id, obj, cluster) {
 
             }
             e.popup.setContent(pop_html + btn_html[0].outerHTML);
-            markerButtonSetPreferred('#mapMarkerPref-' + element_id + '_' + id, id, greenIcon, greyIcon, obj.data)
+            markerButtonSetPreferred('#mapMarkerPref-' + fid + '_' + ref_id, greenIcon, greyIcon)
             var px = map.project(e.popup._latlng); // find the pixel location on the map where the popup anchor is
             px.y -= e.popup._container.clientHeight/2 // find the height of the popup container, divide by 2, subtract from the Y axis of marker location
             map.panTo(map.unproject(px),{animate: true}); // pan to new center
@@ -212,26 +209,26 @@ function getMarker (element_id, id, obj, cluster) {
 
 
 // Fetch objects via AJAX JSON call for every reference ID if not exist
-function fetchObject(data_id, id, cluster){
+function fetchObject(fid, ref_id, cluster){
     // Object wasn't loaded jet, do so
     // diplay loading state, e.g. spinner icon
     //$(label_obj).toggleClass('btn-loading');
     // compose the Cultegraph Link with the GND - ID
-    var geo_json_url = config.a.authorityDataBaseURL + id;
+    var geo_json_url = config.a.authorityDataBaseURL + ref_id;
     console.log('Request external object: ', geo_json_url);
     $.getJSON(geo_json_url)
     .done(function (result) {
         // Cache object if not already done
         var fetched_obj = fetched_objects.objects.find(function (e) {
-            return e.id === id
+            return e.id === ref_id
         })
         if (fetched_obj === undefined) {
             fetched_objects.objects.push({
-                "id": id, "data": result
+                "id": ref_id, "data": result
             });
-            console.log('Added object ' + id + ' to fetched objects.');
+            console.log('Added object ' + ref_id + ' to fetched objects.');
         }
-        getMarker(data_id, id, {"id": id, "data": result}, cluster);
+        getMarker(fid, {"id": ref_id, "data": result}, cluster);
     })
     .fail(function (result) {
         console.log('Request failed: ' + geo_json_url);
@@ -243,14 +240,14 @@ function fetchObject(data_id, id, cluster){
 $('#modals').on('shown.bs.modal', '#map-modal', function (event) {
     var button = $(event.relatedTarget) // Button that triggered the modal
     var recipient = button.attr('id') // Extract info from data-* attributes
-    var data_id = recipient.substring(recipient.indexOf('_') + 1);
-    var list_group_item = $('#' + data_id);
+    var fid = recipient.substring(recipient.indexOf('_') + 1);
+    var oid = idm.getObjectId(fid);
     // parenting list group element
-    var place_name = list_group_item.find('h5').text();
+    var list_group_item = $('#' + fid);
     // Name of our reference place
-    var related_entries = list_group_item.find('.btn-group-ads>label');
+    var place_name = list_group_item.find('h5').text();
     // Related authority data
-    id = related_entries.attr('data-ref-id');
+    var related_entries = list_group_item.find('.btn-group-ads>label');
 
     // Write Map
     var modal = $('#map-modal');
@@ -267,20 +264,20 @@ $('#modals').on('shown.bs.modal', '#map-modal', function (event) {
     var markers = new L.MarkerClusterGroup();
     // get fetched Obejcts and write marker
     related_entries.each(function () {
-        var id = $(this).attr('data-ref-id');
+        var ref_id = $(this).attr('data-ref-id');
         var fetched_obj = fetched_objects.objects.find(function (e) {
-            return e.id === id
+            return e.id === ref_id
         })
 
         if (fetched_obj){
-            getMarker(data_id, id, fetched_obj, markers);
+            getMarker(fid, fetched_obj, markers);
         } else {
-            fetchObject(data_id, id, markers);
+            fetchObject(fid, ref_id, markers);
         }
     });
     // Write the title
     modal = $(this);
-    modal.find('.modal-title').text('Autority Data Map: ' + place_name).append(' <small>(local ID: ' + data_id + ')</small>');
+    modal.find('.modal-title').text('Autority Data Map: ' + place_name).append(' <small>(local ID: ' + oid + ')</small>');
     // clear former collected geodata
     arrayOfLatLng = [];
 });
