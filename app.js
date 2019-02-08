@@ -16,6 +16,7 @@ var fetched_objects = {
     objects: [],
     seealso: []
 };
+var idm = new IdentityManager();
 
 
 $(document).ready(function () {
@@ -137,22 +138,11 @@ function deepFind (obj, path_key, allow_arrays) {
 }
 
 
-function create_UUID(){
-    var dt = new Date().getTime();
-    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-        var r = (dt + Math.random()*16)%16 | 0;
-        dt = Math.floor(dt/16);
-        return (c=='x' ? r :(r&0x3|0x8)).toString(16);
-    });
-    return uuid;
-}
-
-
-function replaceLocalIDInFrontend(old_id, new_id) {
-    var list_item = $('#' + old_id);
+function replaceLocalIDInFrontend(old_fid, new_fid) {
+    var list_item = $('#' + old_fid);
     // Work around: Delete old, create new
     list_item.remove();
-    createNewHTMLObject(getLocalObjectById(new_id));
+    createNewHTMLObject(getLocalObjectById(new_fid));
 }
 
 
@@ -165,6 +155,8 @@ function dataToString (data) {
 
 
 function createNewHTMLObject(data){
+    // As local objects exist before frontend representation, an id mapping is already there
+    var fid = idm.getFrontendId(data.id);
     if(config.v.descriptionElement !== undefined && data[config.v.descriptionElement] != null){
         description_html = '<p class="mb-1">' + dataToString(data[config.v.descriptionElement]) + '</p>';
     } else {
@@ -183,15 +175,15 @@ function createNewHTMLObject(data){
     left_status.forEach(function (stat) {
         status_buttons.push('<button class="dropdown-item" type="button">' + stat + '</button>');
     })
-    var status_dropdown_html = '<button id="btn-status-' + data.id + '" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="btn btn-status dropdown-toggle">' + status + '</button><div class="dropdown-menu" aria-labelledby="'+ data.id + '">' + status_buttons.join('') + '</div>'
+    var status_dropdown_html = '<button id="btn-status-' + fid + '" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="btn btn-status dropdown-toggle">' + status + '</button><div class="dropdown-menu" aria-labelledby="'+ fid + '">' + status_buttons.join('') + '</div>'
 
-    var input_gnd_html = '<input id="ipt-new-' + data.id + '" type="text" class="form-control form-control-gray" name="' + data.id + '" placeholder="new Identifier URL" />'
-    var input_search_html = '<input id="ipt-search_' + data.id + '" type="text" class="form-control form-control-gray" placeholder="Search for" />'
+    var input_gnd_html = '<input id="ipt-new-' + fid + '" type="text" class="form-control form-control-gray" name="' + fid + '" placeholder="new Identifier URL" />'
+    var input_search_html = '<input id="ipt-search_' + fid + '" type="text" class="form-control form-control-gray" placeholder="Search for" />'
     var button_add_html = '<button type="button" aria-label="Add Identifier-URL" title="Add given identifier" class="btn btn-add-gnd btn-outline-secondary"><span class="fas fa-plus"></span></button>'
-    var button_edit_html = '<button id="btn-edit_' + data.id + '" type="button" data-toggle="modal" data-target="#object-modal" title="Edit" class="btn btn-edit btn-outline-secondary"><span class="fas fa-edit"></span></button>';
-    var button_autoadd_html = '<button id="btn-auto-ad_' + data.id + '" type="button" aria-label="Try to automatically match authority data" data-api-search="' + data[config.v.titleElement] + '" title="Autofill: Click to search for: ' + data[config.v.titleElement] + '" class="btn btn-auto-ad btn-outline-secondary"><span class="fas fa-binoculars"></span></button>';
-    var button_compare_html = '<button id="btn-compare_' + data.id + '" type="button" aria-label="Show tabular view of fetched data." data-toggle="modal" data-target="#compare-modal" title="Open card view" class="btn btn-compare btn-outline-secondary"><span class="fas fa-table"></span></button>';
-    var button_del_html = '<button id="btn-delete_' + data.id + '" type="button" aria-label="Delete." title="Delete" class="btn btn-delete btn-outline-secondary"><span class="fas fa-trash"></span></button>';
+    var button_edit_html = '<button id="btn-edit_' + fid + '" type="button" data-toggle="modal" data-target="#object-modal" title="Edit" class="btn btn-edit btn-outline-secondary"><span class="fas fa-edit"></span></button>';
+    var button_autoadd_html = '<button id="btn-auto-ad_' + fid + '" type="button" aria-label="Try to automatically match authority data" data-api-search="' + data[config.v.titleElement] + '" title="Autofill: Click to search for: ' + data[config.v.titleElement] + '" class="btn btn-auto-ad btn-outline-secondary"><span class="fas fa-binoculars"></span></button>';
+    var button_compare_html = '<button id="btn-compare_' + fid + '" type="button" aria-label="Show tabular view of fetched data." data-toggle="modal" data-target="#compare-modal" title="Open card view" class="btn btn-compare btn-outline-secondary"><span class="fas fa-table"></span></button>';
+    var button_del_html = '<button id="btn-delete_' + fid + '" type="button" aria-label="Delete." title="Delete" class="btn btn-delete btn-outline-secondary"><span class="fas fa-trash"></span></button>';
     var ads_buttons = [];
     asArray(data[config.v.identifierElement]).forEach(function (ref_data) {
         var ref_id = ref_data['#text'].substring(config.v.identifierBaseURL.length);
@@ -199,9 +191,9 @@ function createNewHTMLObject(data){
         if (ref_data['preferred'] == 'YES') {
             pref_class = 'active';
         }
-        ads_buttons.push('<label id="lbl-' + data.id + '_' + ref_id + '" data-ref-id="' + ref_id + '" data-content="Loading <i class=\'fas fa-sync-alt fa-spin\'></i>" class="btn ' + pref_class + '"><input name="ad_' + data.id + '" id="' + data.id + '_' + ref_id + '" type="radio">' + ref_id + '</input></label>')
+        ads_buttons.push('<label id="lbl-' + fid + '_' + ref_id + '" data-ref-id="' + ref_id + '" data-content="Loading <i class=\'fas fa-sync-alt fa-spin\'></i>" class="btn ' + pref_class + '"><input name="ad_' + fid + '" id="' + fid + '_' + ref_id + '" type="radio">' + ref_id + '</input></label>')
     })
-    var list_item_html = '<div class="list-group-item status-ref status-ref-' + status + '" id="'+ data.id +'">\
+    var list_item_html = '<div class="list-group-item status-ref status-ref-' + status + '" id="'+ fid +'">\
                             ' + title_html + '\
                             <div class="input-group input-group-sm">\
                                 <div class="input-group-prepend">\
@@ -217,7 +209,7 @@ function createNewHTMLObject(data){
                                     + button_compare_html
                                     + '</div>\
                             </div>\
-                            <div id="ads-' + data.id + '" class="btn-group btn-group-sm btn-group-toggle btn-group-ads">' + ads_buttons.join('') + '</div>\
+                            <div id="ads-' + fid + '" class="btn-group btn-group-sm btn-group-toggle btn-group-ads">' + ads_buttons.join('') + '</div>\
                         </div>';
     var list_item = $(list_item_html);
     $("#result-container div.list-group").prepend(list_item);
@@ -304,8 +296,8 @@ function loadPopoverContent (label_obj){
 }
 
 
-function addRef2Data (element_id, ref_id) {
-    var obj = getLocalObjectById(element_id);
+function addRef2Data (oid, ref_id) {
+    var obj = getLocalObjectById(oid);
     var id_element = config.v.identifierElement;
     var ref_obj = obj[id_element];
     if (! Array.isArray(ref_obj)) {
@@ -326,8 +318,8 @@ function addRef2Data (element_id, ref_id) {
 }
 
 
-function togglePreferredRef2Data (element_id, ref_id) {
-    var obj = getLocalObjectById(element_id);
+function togglePreferredRef2Data (oid, ref_id) {
+    var obj = getLocalObjectById(oid);
     if (Array.isArray(obj[config.v.identifierElement])) {
         var ref_new_idx = obj[config.v.identifierElement].findIndex(function (ref) {
             // TODO: API Model constrain: #text
@@ -350,13 +342,14 @@ function togglePreferredRef2Data (element_id, ref_id) {
 }
 
 
-function togglePreferred (id, ref_id) {
+function togglePreferred (oid, ref_id) {
     // 1. update local object
-    togglePreferredRef2Data(id, ref_id);
+    togglePreferredRef2Data(oid, ref_id);
     // 2. update frontend
     // toggle button state in list
-    $('#' + id + ' label.btn.active').removeClass('active');
-    $('#lbl-' + id + '_' + ref_id).addClass('active');
+    var fid = idm.getFrontendId(oid);
+    $('#' + fid + ' label.btn.active').removeClass('active');
+    $('#lbl-' + fid + '_' + ref_id).addClass('active');
 }
 
 
@@ -403,12 +396,12 @@ function initModalObjectFormFields () {
 // Add or edit object
 function enableButtonObjectFormSubmit (selector, delegate_selector) {
     $(selector).on('click', delegate_selector, function () {
-        var id = $('#ipt-id').val();
+        var oid = $('#ipt-id').val();
         if (data_objects) {
             //console.log(local_object);
-            if (id != '') {
+            if (oid != '') {
                 // 1. update local object
-                editObject(id);
+                editObject(oid);
             } else {
                 addObject(this);
             }
@@ -429,8 +422,8 @@ function enableButtonAddReference (selector, delegate_selector) {
     $(selector).on('click', delegate_selector, function () {
         if (! $(this).hasClass('disabled')) {
             // Get values like element id, new url
-            var element_id = $(this).parents('.list-group-item'). get (0).id;
-            var raw_value = $('#ipt-new-' + element_id).val();
+            var fid = $(this).parents('.list-group-item').get(0).id;
+            var raw_value = $('#ipt-new-' + fid).val();
             // Simple Validation
             if (raw_value == '') {
                 // no input was given, maybe give a hint on that
@@ -446,7 +439,7 @@ function enableButtonAddReference (selector, delegate_selector) {
                 var ref_id = raw_value.substring(config.v.identifierBaseURL.length)
                 console.log('REF-ID: ' + ref_id);
                 // add button and set popover event
-                addReference(this, element_id, ref_id);
+                addReference(this, fid, ref_id);
             }
         }
     });
@@ -458,11 +451,11 @@ function enableButtonIdentifierToggling (selector, delegate_selector) {
         if (! $(this).hasClass('disabled')) {
             if (! $(this).hasClass('active')) {
                 // button is not already active, so
-                var id_composition = $(this). get (0).id.substring($(this). get (0).id.indexOf('-') + 1);
-                var element_id = id_composition.substring(0, id_composition.indexOf('_'));
+                var id_composition = $(this).get(0).id.substring($(this).get(0).id.indexOf('-') + 1);
+                var fid = id_composition.substring(0, id_composition.indexOf('_'));
                 var ref_id = $(this).attr("data-ref-id");
                 // toggle state: local, backend, frontend
-                togglePreferred(element_id, ref_id);
+                togglePreferred(idm.getObjectId(fid), ref_id);
                 // Fire event preferredReferenceChange
                 $(this).trigger('preferredReferenceChange');
             }
@@ -490,10 +483,10 @@ function enableButtonIdentifierPopover (selector, delegate_selector) {
 /* Status dropdown */
 function enableButtonStatus (selector, delegate_selector) {
     $(selector).on('click', delegate_selector, function () {
-        var element_id = $(this).parent().attr('aria-labelledby');
-        var current_status = $('#btn-status-' + element_id).html();
+        var fid = $(this).parent().attr('aria-labelledby');
+        var current_status = $('#btn-status-' + fid).html();
         var new_status = $(this).html();
-        changeStatus($(this), element_id, current_status, new_status);
+        changeStatus($(this), fid, current_status, new_status);
         // Fire event trifferSetStatus
         $(this).trigger('statusChange');
     });
@@ -510,8 +503,8 @@ function enableButtonAutoAdd (selector, delegate_selector){
                 .html('');
             //$(this).html('Searching...');
             var btn = $(this);
-            var element_id = $(this).attr('id').substring($(this).attr('id').indexOf('_') + 1);
-            var search_value = $('#ipt-search_' + element_id).val();
+            var fid = $(this).attr('id').substring($(this).attr('id').indexOf('_') + 1);
+            var search_value = $('#ipt-search_' + fid).val();
             if (search_value) {
                 // use input as query
                 var searchterm = search_value;
@@ -519,7 +512,7 @@ function enableButtonAutoAdd (selector, delegate_selector){
                 // Simple name based search query
                 var searchterm = $(this).parents('.list-group-item').find('h5').text();
             }
-            findAuthorityData(btn, searchterm, element_id);
+            findAuthorityData(btn, searchterm, fid);
         }
     });
 }
@@ -529,8 +522,8 @@ function enableButtonAutoAdd (selector, delegate_selector){
 function enableButtonEdit (selector, delegate_selector) {
     $(selector).on('click', delegate_selector, function () {
         var recipient = $(this).attr('id') // Extract info from data-* attributes
-        var data_id = recipient.substring(recipient.indexOf('_') + 1);
-        var local_object = getLocalObjectById(data_id);
+        var fid = recipient.substring(recipient.indexOf('_') + 1);
+        var local_object = getLocalObjectById(idm.getObjectId(fid));
         var attributes = config.m;
         attributes.forEach(function (e) {
             if (e.localJSONPath) {
@@ -547,8 +540,8 @@ function enableButtonDelete (selector, delegate_selector) {
         var trigger = $(this);
         confirmModal(trigger,function(result){
             if (result) {
-                var element_id = trigger.parents('.list-group-item').get(0).id;
-                deleteObject(trigger, element_id);
+                var fid = trigger.parents('.list-group-item').get(0).id;
+                deleteObject(trigger, idm.getObjectId(fid));
             }
         });
     });
@@ -567,7 +560,7 @@ function enableObjectFormReset (selector) {
 function enableButtonFilter (selector) {
     $(selector).on('click', function () {
         var idstr = 'btn-filter-';
-        var status = $(this). get (0).id.substring(idstr.length);
+        var status = $(this).get(0).id.substring(idstr.length);
         $(this).toggleClass('active');
         if ($(this).hasClass('active')) {
             $('.status-ref-' + status).css('display', 'none');
@@ -604,7 +597,7 @@ function initAppFooter () {
                     </div>\
                 </div>';
     var footer = $(f_html);
-    console.log('init');
+    console.log('Footer initialized.');
     $('#footer').append(footer);
 }
 
@@ -635,23 +628,23 @@ initIdentifierButtons('#result-container', '.btn-group-ads .btn');
 enableObjectFormReset('#object-modal');
 
 
-function addReference (trigger_element, element_id, ref_input) {
+function addReference (trigger_element, fid, ref_input) {
     // ensure we have an array for further processing
     if (!Array.isArray(ref_input)) {
         ref_input = [ref_input];
     }
     var has_updated = false;
     ref_input.forEach(function(ref_id) {
-        var selector = '#lbl-' + element_id + '_' + ref_id;
+        var selector = '#lbl-' + fid + '_' + ref_id;
         // Only update, if not already set
         if ($(selector).length == 0) {
             has_updated = true;
             // 1. update local object
-            addRef2Data(element_id, ref_id);
+            addRef2Data(idm.getObjectId(fid), ref_id);
             // 2. update frontend
             $(trigger_element).parents('.list-group-item').find('.btn-group-toggle')
-                .append('<label id="lbl-' + element_id + '_' + ref_id + '" data-ref-id="' + ref_id + '" data-content="Loading <i class=\'fas fa-sync-alt fa-spin\'></i>" class="btn">\
-                            <input name="ad_' + element_id + '" id="' + element_id + '_' + ref_id + '" autocomplete="off" type="radio">' + ref_id + '</input>\
+                .append('<label id="lbl-' + fid + '_' + ref_id + '" data-ref-id="' + ref_id + '" data-content="Loading <i class=\'fas fa-sync-alt fa-spin\'></i>" class="btn">\
+                            <input name="ad_' + fid + '" id="' + fid + '_' + ref_id + '" autocomplete="off" type="radio">' + ref_id + '</input>\
                         </label>');
         } else {
             console.log('Reference already exist.');
@@ -665,25 +658,26 @@ function addReference (trigger_element, element_id, ref_input) {
 
 
 function setItemButtonsAbilityByStatus (obj) {
+    var fid = idm.getFrontendId(obj.id);
     if (obj[config.v.statusElement] == 'safe') {
-        $('#' + obj.id + ' label.btn, #' + obj.id + ' input.form-control, #' + obj.id + ' .input-group > .input-group-append > button').addClass('disabled');
-        $('#' + obj.id + ' input.form-control').attr('disabled', 'disabled');
+        $('#' + fid + ' label.btn, #' + fid + ' input.form-control, #' + fid + ' .input-group > .input-group-append > button').addClass('disabled');
+        $('#' + fid + ' input.form-control').attr('disabled', 'disabled');
     } else if (obj[config.v.statusElement] == 'unchecked' || obj[config.v.statusElement] == 'unsafe' || obj[config.v.statusElement] == 'unavailable') {
-        $('#' + obj.id + ' label.btn, #' + obj.id + ' input.form-control, #' + obj.id + ' .input-group > .input-group-append > button').removeClass('disabled');
-        $('#' + obj.id + ' input.form-control').removeAttr('disabled');
+        $('#' + fid + ' label.btn, #' + fid + ' input.form-control, #' + fid + ' .input-group > .input-group-append > button').removeClass('disabled');
+        $('#' + fid + ' input.form-control').removeAttr('disabled');
     }
 }
 
 
-function changeStatus (trigger_element, element_id, current_status, new_status){
+function changeStatus (trigger_element, fid, current_status, new_status){
     // 1. update local_object
-    var local_object = getLocalObjectById(element_id);
+    var local_object = getLocalObjectById(idm.getObjectId(fid));
     // Set new status in local object
     local_object[config.v.statusElement] = new_status;
     // 2. update frontend
     // update button and status attribute of list group
-    $('#btn-status-' + element_id).html(local_object[config.v.statusElement]);
-    $('#' + element_id).removeClass('status-ref-' + current_status).addClass('status-ref-' + local_object[config.v.statusElement]);
+    $('#btn-status-' + fid).html(local_object[config.v.statusElement]);
+    $('#' + fid).removeClass('status-ref-' + current_status).addClass('status-ref-' + local_object[config.v.statusElement]);
     // update dropdown menu, by replacing content of current link with old status.
     // May disable button
     setItemButtonsAbilityByStatus(local_object);
@@ -725,67 +719,74 @@ function addObject (el, params){
     // 1. Create new local object
     var local_object = {};
     // Set ID, if not given as parameter
+    var ids = false;
     if (params && params.id != undefined) {
-        local_object.id = params.id.replace(/\./gi, '');
+        ids = idm.add(params.id);
     } else {
-        local_object.id = 'loc' + create_UUID();
+        ids = idm.add(); // new id will be generated
     }
-    // Set status (default status is configured), if not given as parameter
-    if (params && params[config.v.statusElement] != undefined) {
-        local_object[config.v.statusElement] = params[config.v.statusElement];
-    } else {
-        local_object[config.v.statusElement] = config.app.config.status.default;
-    }
-    // Add configured attributes to object
-    var attributes = config.m;
-    attributes.forEach(function (e) {
-        if (e.localJSONPath) {
-            if (params === null) {
-                if ($('#ipt-' + e.localJSONPath).val()) {
-                    local_object[e.localJSONPath] = prepareValueMapping(e, $('#ipt-' + e.localJSONPath).val());
-                }
-            } else {
-                if (params[e.localJSONPath]) {
-                    local_object[e.localJSONPath] = prepareValueMapping(e, params[e.localJSONPath]);
+    // Add new id mapping
+    if (ids) {
+        local_object.id = ids[1];
+        // Set status (default status is configured), if not given as parameter
+        if (params && params[config.v.statusElement] != undefined) {
+            local_object[config.v.statusElement] = params[config.v.statusElement];
+        } else {
+            local_object[config.v.statusElement] = config.app.config.status.default;
+        }
+        // Add configured attributes to object
+        var attributes = config.m;
+        attributes.forEach(function (e) {
+            if (e.localJSONPath) {
+                if (params === null) {
+                    if ($('#ipt-' + e.localJSONPath).val()) {
+                        local_object[e.localJSONPath] = prepareValueMapping(e, $('#ipt-' + e.localJSONPath).val());
+                    }
+                } else {
+                    if (params[e.localJSONPath]) {
+                        local_object[e.localJSONPath] = prepareValueMapping(e, params[e.localJSONPath]);
+                    }
                 }
             }
+        })
+        // Add existing reference to object (this is for importing)
+        if (params !== null && config.v.identifierElement !== undefined && params[config.v.identifierElement] !== undefined) {
+            local_object[config.v.identifierElement] = params[config.v.identifierElement];
         }
-    })
-    // Add existing reference to object (this is for importing)
-    if (params !== null && config.v.identifierElement !== undefined && params[config.v.identifierElement] !== undefined) {
-        local_object[config.v.identifierElement] = params[config.v.identifierElement];
-    }
 
-    // 2. add new object (JSON) to local objects,
-    if (Array.isArray(data_objects[config.a.JSONContainer])) {
-        // at least 2 persons already exist
-        data_objects[config.a.JSONContainer].push(local_object);
-    } else if (data_objects[config.a.JSONContainer]) {
-        // exactly one person exist
-        var existing_person = data_objects[config.a.JSONContainer];
-        data_objects[config.a.JSONContainer] = [existing_person];
-        data_objects[config.a.JSONContainer].push(local_object);
+        // 2. add new object (JSON) to local objects,
+        if (Array.isArray(data_objects[config.a.JSONContainer])) {
+            // at least 2 persons already exist
+            data_objects[config.a.JSONContainer].push(local_object);
+        } else if (data_objects[config.a.JSONContainer]) {
+            // exactly one person exist
+            var existing_person = data_objects[config.a.JSONContainer];
+            data_objects[config.a.JSONContainer] = [existing_person];
+            data_objects[config.a.JSONContainer].push(local_object);
+        } else {
+            // no person exist
+            data_objects[config.a.JSONContainer] = local_object;
+        }
+
+        // 3 Fire add event
+        $(el).trigger('objectAdd', local_object);
+
+        // 3. update frontend,
+        createNewHTMLObject(local_object);
+        // 4. updates done then close modal
+        $('#object-modal').modal('hide');
+        $('#app-content-plugins-area').collapse('hide');
+
+        // return new object
+        return local_object;
     } else {
-        // no person exist
-        data_objects[config.a.JSONContainer] = local_object;
+        // TODO: Throw error, an object with id already exist
     }
-
-    // 3 Fire add event
-    $(el).trigger('objectAdd', local_object);
-
-    // 3. update frontend,
-    createNewHTMLObject(local_object);
-    // 4. updates done then close modal
-    $('#object-modal').modal('hide');
-    $('#app-content-plugins-area').collapse('hide');
-
-    // return new object
-    return local_object;
 }
 
 
-function editObject(id, params) {
-    var local_object = getLocalObjectById(id);
+function editObject(oid, params) {
+    var local_object = getLocalObjectById(oid);
     if (params != undefined && typeof params == 'object') {
         Object.entries(params).forEach(function (entry) {
             var attr_name = entry[0];
@@ -814,24 +815,25 @@ function editObject(id, params) {
             }
         })
     }
+    var fid = idm.getFrontendId(oid);
     // Trigger an event
-    $('#' + id).trigger('objectUpdate');
+    $('#' + fid).trigger('objectUpdate');
     /* 2. update frontend
     Update title and description of list item */
-    $('#' + id + ' h5').text(local_object[config.v.titleElement]);
-    $('#' + id + ' p').text(dataToString(local_object[config.v.descriptionElement]));
+    $('#' + fid + ' h5').text(local_object[config.v.titleElement]);
+    $('#' + fid + ' p').text(dataToString(local_object[config.v.descriptionElement]));
     // Close modal,
     $('#object-modal').modal('hide');
 }
 
 
-function deleteObject (trigger, element_id) {
+function deleteObject (trigger, oid) {
     // 1. Update local object
     if (Array.isArray(data_objects[config.a.JSONContainer])) {
         var obj_idx = data_objects[config.a.JSONContainer].findIndex(function (obj) {
             if (obj !== undefined)
             {
-                return obj.id === element_id
+                return obj.id === oid
             }
         });
         data_objects[config.a.JSONContainer].splice(obj_idx, 1);
@@ -839,11 +841,14 @@ function deleteObject (trigger, element_id) {
         // there is only one object left, so reset data_objects
         data_objects = {};
     }
-    console.log('Session: Deleted object with ID: ' + element_id);
+    console.log('Session: Deleted object with ID: ' + oid);
     //Fire event objectDelete
-    $(trigger).trigger('objectDelete', element_id);
+    $(trigger).trigger('objectDelete', oid);
     // 3. Update Frontend
-    $('#' + element_id).remove()
+    var fid = idm.getFrontendId(oid);
+    $('#' + fid).remove()
+    // 4. Delete id mapping
+    idm.delete(fid);
 }
 
 
@@ -867,7 +872,6 @@ function getCardHTML (cardid, fn, attributes, links, classes) {
     }
     var button_group = '<div class="btn-group btn-group-sm btn-group-card-header" role="group">' + header_buttons.join('') + '</div>';
     var card_header = '<div class="card-header">' + button_group + '</div>';
-    //var card_body = '<div class="card-body"><h5 class="card-title">' + obj.fullname + '</h5></div>';
     var card_body = '';
     // Put resource links in card footer
     link_items = '';
@@ -894,13 +898,13 @@ function getCardHTML (cardid, fn, attributes, links, classes) {
 }
 
 
-function shiftIdentifier (element_id, ref_id, direction) {
-    var obj = getLocalObjectById(element_id);
+function shiftIdentifier (fid, ref_id, direction) {
+    var obj = getLocalObjectById(idm.getObjectId(fid));
     var id_to_shift_idx = obj[config.v.identifierElement].findIndex(function (el) {
         // TODO: API constraint: #text
         return el['#text'] == config.v.identifierBaseURL + ref_id;
     })
-    var button_to_shift = $('#lbl-' + element_id + '_' + ref_id);
+    var button_to_shift = $('#lbl-' + fid + '_' + ref_id);
     if (direction == 'right') {
         // 1. update local object
         obj[config.v.identifierElement].splice(id_to_shift_idx + 2, 0, obj[config.v.identifierElement][id_to_shift_idx]) // Copy element after next element
@@ -921,9 +925,9 @@ function shiftIdentifier (element_id, ref_id, direction) {
 }
 
 
-function deleteIdentifier (element_id, ref_id) {
+function deleteIdentifier (fid, ref_id) {
     // 1. delete in local object
-    var obj = getLocalObjectById(element_id);
+    var obj = getLocalObjectById(idm.getObjectId(fid));
     if (Array.isArray(obj[config.v.identifierElement])) {
         var id_to_delete_idx = obj[config.v.identifierElement].findIndex(function (el) {
             // TODO: API constraint: #text
@@ -935,7 +939,7 @@ function deleteIdentifier (element_id, ref_id) {
         delete obj[config.v.identifierElement];
     }
     // 2. delete in frontend (list item)
-    $('#lbl-' + element_id + '_' + ref_id).remove();
+    $('#lbl-' + fid + '_' + ref_id).remove();
 }
 
 
@@ -965,3 +969,104 @@ function confirmModal (selector, callback) {
         callback: callback
     });
 }
+
+
+/*
+    Identity Manager (IDM)
+    The IDM provides an index of mapped local and foreign IDs and methods to manage them.
+    It is used to seperate local, especially frontend, JQuery-secure IDs from external
+    ID schemata, which may break the element access by CSS-selectors.
+*/
+function IdentityManager () {
+    this.object_ids = new Set();
+    this.frontend_ids = new Set();
+    this.id_map = new Set();
+}
+
+
+IdentityManager.prototype.add = function(object_id) {
+    // Generate new frontend id
+    var frontend_id = 'fid' + this.create_UUID();
+    // Use new frontend id as object id if not provided
+    if (object_id === undefined || object_id.toString().trim() === '') {
+        object_id = frontend_id;
+    }
+    if (!this.object_ids.has(object_id)) {
+        // Add id pair to id map
+        this.object_ids.add(object_id);
+        this.frontend_ids.add(frontend_id);
+        this.id_map.add([frontend_id, object_id]);
+
+        return [frontend_id, object_id];
+    }
+};
+
+
+IdentityManager.prototype.delete = function(frontend_id) {
+    var object_id = this.getObjectId(frontend_id);
+    // remove ids from index and map
+    this.object_ids.delete(object_id);
+    this.frontend_ids.delete(frontend_id);
+    this.id_map.delete(this.getMappingByFrontendId(frontend_id));
+    return object_id;
+};
+
+
+IdentityManager.prototype.getFrontendId = function(object_id) {
+    var frontend_id;
+    for (let ids of this.id_map.values()) {
+        if (ids[1] == object_id) {
+            frontend_id = ids[0];
+            break;
+        }
+    }
+    return frontend_id;
+};
+
+
+IdentityManager.prototype.getObjectId = function(frontend_id) {
+    var object_id;
+    for (let ids of this.id_map.values()) {
+        if (ids[0] == frontend_id) {
+            object_id = ids[1];
+            break;
+        }
+    }
+    return object_id;
+};
+
+
+IdentityManager.prototype.getMappingByFrontendId = function(frontend_id) {
+    var mapping;
+    for (let ids of this.id_map.values()) {
+        if (ids[0] == frontend_id) {
+            mapping = ids;
+            break;
+        }
+    }
+    return mapping;
+};
+
+
+IdentityManager.prototype.update = function(frontend_id, old_object_id, new_object_id) {
+    if (this.object_ids.has(old_object_id) && !this.object_ids.has(new_object_id)) {
+        this.object_ids.delete(old_object_id);
+        this.object_ids.add(new_object_id);
+        this.id_map.delete(this.getMappingByFrontendId(frontend_id));
+        this.id_map.add([frontend_id, new_object_id]);
+        return [frontend_id, new_object_id];
+    }
+}
+
+
+IdentityManager.prototype.create_UUID = function (){
+    var dt = new Date().getTime();
+    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = (dt + Math.random()*16)%16 | 0;
+        dt = Math.floor(dt/16);
+        return (c=='x' ? r :(r&0x3|0x8)).toString(16);
+    });
+    return uuid;
+}
+
+

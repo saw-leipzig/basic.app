@@ -66,7 +66,7 @@ function addDatasetsToDOM (result) {
     console.log('REST-API: ' + cnt + ' datasets available.');
 }
 
-
+// @return: frontend id
 function getIDFromEventListItem (event) {
     var et = $(event.target);
     if (et.hasClass('list-group-item')) {
@@ -77,20 +77,22 @@ function getIDFromEventListItem (event) {
 }
 
 
+// @return: frontend id
 function getIDFromEventModals (event) {
     var et = $(event.target);
     var card = et.parents('.card-reference');
     var ids = card.attr('id').substring('card-'.length);
-    var element_id = ids.substring(0, ids.indexOf('_'));
-    return element_id;
+    var fid = ids.substring(0, ids.indexOf('_'));
+    return fid;
 }
 
 
+// @return: frontend id
 function getIDFromEventMap (event){
     var et = $(event.target);
     var ids = et.attr('id').substring('mapMarkerPref-'.length);
-    var element_id = ids.substring(0, ids.indexOf('_'));
-    return element_id;
+    var fid = ids.substring(0, ids.indexOf('_'));
+    return fid;
 }
 
 
@@ -100,10 +102,10 @@ function getXMLElementString (element_name, content) {
 }
 
 
-function getXMLStringFromLocalObjectByID (id) {
-    if (id != '') {
+function getXMLStringFromLocalObjectByID (oid) {
+    if (oid != '') {
         // get instance of local object
-        var local_object = getLocalObjectById(id);
+        var local_object = getLocalObjectById(oid);
         // Create XML container as JQuery object
         var container_xml = getXMLElementString(config.a.JSONContainer);
         var xml_doc = $.parseXML(container_xml);
@@ -148,19 +150,19 @@ function getXMLStringFromLocalObjectByID (id) {
 $('body').on('objectAdd', function (e,data) {
     APIAdd(data);
 })
-$('body').on('objectDelete', function (e, id) {
-    APIDelete(id);
+$('body').on('objectDelete', function (e, oid) {
+    APIDelete(oid);
 })
 $('body').on('objectUpdate statusChange preferredReferenceChange referenceUpdate', function (e) {
-    APIUpdate(getIDFromEventListItem(e));
+    APIUpdate(idm.getObjectId(getIDFromEventListItem(e)));
 })
 
 $('body').on('cardReferenceDelete cardPreferredReferenceChange cardSwitch',function (e){
-    APIUpdate(getIDFromEventModals(e));
+    APIUpdate(idm.getObjectId(getIDFromEventModals(e)));
 })
 
 $('body').on('mapPreferredReferenceChange', function (e) {
-    APIUpdate(getIDFromEventMap(e));
+    APIUpdate(idm.getObjectId(getIDFromEventMap(e)));
 })
 $('body').on('basicAppConfigLoaded', function () {
     APIDatasets();
@@ -174,37 +176,38 @@ function APIAdd(obj){
         //Update ID of Local Object
         var old_id = obj.id;
         getLocalObjectById(obj.id).id =  data.response.id;
-        replaceLocalIDInFrontend(old_id, data.response.id);
+        // Update id mapping
+        idm.update(idm.getFrontendId(old_id), old_id, data.response.id);
         console.log('REST-API: Added object with new ID: ' + data.response.id);
     });
 
 }
 
 
-function APIUpdate (id) {
+function APIUpdate (oid) {
     var query = '?' + jQuery.param(query_dataset);
     $.ajax({
-        url: config.app.config.baseURL + config.a.RESTAPI + id + query,
+        url: config.app.config.baseURL + config.a.RESTAPI + oid + query,
         type: 'PUT',
         headers: {
             "Content-Type": "application/xml",
             "charset": "utf-8"
         },
-        data: getXMLStringFromLocalObjectByID(id),
+        data: getXMLStringFromLocalObjectByID(oid),
         success: function () {
-            console.log('REST-API: Updated object with ID: ' + id);
+            console.log('REST-API: Updated object with ID: ' + oid);
         }
     });
 }
 
 
-function APIDelete (id) {
+function APIDelete (oid) {
     var query = '?' + jQuery.param(query_dataset);
     $.ajax({
-        url: config.app.config.baseURL + config.a.RESTAPI + id + query,
+        url: config.app.config.baseURL + config.a.RESTAPI + oid + query,
         type: 'DELETE',
         success: function () {
-            console.log('REST-API: Deleted object with ID: ' + id);
+            console.log('REST-API: Deleted object with ID: ' + oid);
         }
     });
 }
@@ -236,8 +239,11 @@ function APIDatasets () {
                 data_objects = result;
             }
             console.log('REST-API: ' + cnt + ' object(s) loaded.');
-            // Create result list representation
-            asArray(data_objects[config.a.JSONContainer]).reverse().forEach(function (obj) {createNewHTMLObject(obj)});
+            // Create result list representation and activate id management
+            asArray(data_objects[config.a.JSONContainer]).reverse().forEach(function (obj) {
+                idm.add(obj.id);
+                createNewHTMLObject(obj);
+            });
             // Set current dataset
             $('#xml-dataset-current').html(cds);
             // dataset loaded

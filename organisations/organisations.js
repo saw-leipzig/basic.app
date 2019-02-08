@@ -7,7 +7,7 @@ btn_action_add.on('click', function(e){
 basicPluginActions.registerButton(btn_action_add);
 
 
-function findAuthorityData (trigger, searchterm, element_id) {
+function findAuthorityData (trigger, searchterm, fid) {
     var viaf_url_suggest = 'http://www.viaf.org/viaf/AutoSuggest?query=';
     var cnt = 0;
     // To prevend CORS warnings add '&callback=?' to the URL as suggested here http://api.jquery.com/jQuery.getJSON/
@@ -33,12 +33,11 @@ function findAuthorityData (trigger, searchterm, element_id) {
         var references = [];
         for (var key in organisation_gnd_results) {
             if (Number(key) != 'NaN') {
-                //console.log(person_gnd_results[key]);
                 references.push(organisation_gnd_results[key].dnb.toUpperCase());
             }
         }
         console.log('FindAuthorityData: results (type is corporate and has DNB entry): ' + cnt);
-        addReference(trigger, element_id, references);
+        addReference(trigger, fid, references);
     }).fail(function (jqxhr, textStatus, error) {
         var err = textStatus + ", " + error;
         console.log('Request Failed: ' + err);
@@ -74,7 +73,7 @@ function addLinksFromObjectToCollection(obj, collection){
 }
 
 
-function loadSeealsoResources (cardid, id) {
+function loadSeealsoResources (cardid, ref_id) {
     /* Try to add further resources via beacon seealso service.
      *
      * https://beacon.findbuch.de/seealso/pnd-aks
@@ -89,16 +88,16 @@ function loadSeealsoResources (cardid, id) {
     if (use_corsanywhere) {
         corsanywhere_url = 'https://cors-anywhere.herokuapp.com/';
     }
-    var seealso_url = corsanywhere_url + 'https://beacon.findbuch.de/seealso/pnd-aks?format=seealso&id=' + id.toUpperCase() + '&callback';
+    var seealso_url = corsanywhere_url + 'https://beacon.findbuch.de/seealso/pnd-aks?format=seealso&id=' + ref_id.toUpperCase() + '&callback';
     // Only request data if not already done!
     // This is important, because prepareCardData is called twice if data wasn't fetched yet
-    var fetched = fetched_objects.seealso.find(function (s){ return s.id == id });
+    var fetched = fetched_objects.seealso.find(function (s){ return s.id == ref_id });
     if (fetched == undefined) {
-        fetched_objects.seealso.push({id: id, data: []});
+        fetched_objects.seealso.push({id: ref_id, data: []});
         console.log('Request external object: ', seealso_url);
         $.getJSON(seealso_url)
             .done(function (result) {
-                fetched_objects.seealso.find(function (s){ return s.id == id }).data = result;
+                fetched_objects.seealso.find(function (s){ return s.id == ref_id }).data = result;
                 addFindbuchLinksToCard(cardid, result);
         });
     } else if (fetched.data.length) {
@@ -110,9 +109,9 @@ function loadSeealsoResources (cardid, id) {
 
 function enableModalCardSeealso(selector) {
     $(selector).on('click', '.btn-card-seealso', function () {
-        var id = $(this).attr('id').substring($(this).attr('id').indexOf('_') + 1);
+        var ref_id = $(this).attr('id').substring($(this).attr('id').indexOf('_') + 1);
         var fetched_obj = fetched_objects.seealso.find(function (e) {
-            return e.id === id
+            return e.id === ref_id
         })
         var seealso_names = fetched_obj.data[1];
         var seealso_description = fetched_obj.data[2];
