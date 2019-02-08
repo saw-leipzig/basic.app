@@ -1,18 +1,15 @@
-// Configure additional API specific parameters
-// TODO: Possibly this could be in a seperate config file (?)
-config.app.config.baseURL = 'http://localhost:9080/exist/apps/basic/';
-config.app.config.api.persons.datasets = "api/datasets/";
-config.app.config.api.persons.RESTAPI = "api/persons/";
-config.app.config.api.places.datasets = "api/datasets/";
-config.app.config.api.places.RESTAPI = "api/places/";
-config.app.config.api.organisations.datasets = "api/datasets/";
-config.app.config.api.organisations.RESTAPI = "api/organisations/";
-
-
-// Get or set base URL
-if (config.app.config.baseURL.length == 0) {
-    config.app.config.baseURL = window.location.origin + window.location.pathname;
-}
+/**
+ * This storage plugin requires additional parameter configured in config.js to work properly.
+ *
+ * config.app.config.baseURL = 'http://localhost:9080/exist/apps/basic/';
+ * config.app.config.api.persons.datasets = "api/datasets/";
+ * config.app.config.api.persons.RESTAPI = "api/persons/";
+ * config.app.config.api.places.datasets = "api/datasets/";
+ * config.app.config.api.places.RESTAPI = "api/places/";
+ * config.app.config.api.organisations.datasets = "api/datasets/";
+ * config.app.config.api.organisations.RESTAPI = "api/organisations/";
+ *
+ */
 
 
 // Current dataset - cds (backend XML storage)
