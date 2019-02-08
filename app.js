@@ -20,6 +20,7 @@ var idm = new IdentityManager();
 
 
 $(document).ready(function () {
+    idm.init();
     initApplication(config);
 });
 
@@ -978,9 +979,18 @@ function confirmModal (selector, callback) {
     ID schemata, which may break the element access by CSS-selectors.
 */
 function IdentityManager () {
+    this.object_ids;
+    this.frontend_ids;
+    this.id_map;
+}
+
+
+IdentityManager.prototype.init = function() {
     this.object_ids = new Set();
     this.frontend_ids = new Set();
     this.id_map = new Set();
+    console.log('IdentityManager: Initialized.');
+    return this;
 }
 
 
