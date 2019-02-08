@@ -1052,7 +1052,7 @@ IdentityManager.prototype.update = function(frontend_id, old_object_id, new_obje
     if (this.object_ids.has(old_object_id) && !this.object_ids.has(new_object_id)) {
         this.object_ids.delete(old_object_id);
         this.object_ids.add(new_object_id);
-        this.id_map.delete([frontend_id, old_object_id]);
+        this.id_map.delete(this.getMappingByFrontendId(frontend_id));
         this.id_map.add([frontend_id, new_object_id]);
         return [frontend_id, new_object_id];
     }
