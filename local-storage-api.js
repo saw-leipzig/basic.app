@@ -174,7 +174,10 @@ LocalStorageAdapter.prototype.load = function () {
         });
         data_objects = stored_obj.data_objects;
         this.last_updated = stored_obj.last_updated;
+        // Clear frontend
         $('#result-container .list-group-item').remove();
+        // Reset identity manager
+        idm.init();
         // Create result list representation for each entry with global createNewHTMLObject()
         // and activate id management
         var objects_array = asArray(data_objects[config.a.JSONContainer]);
