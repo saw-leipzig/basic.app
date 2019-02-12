@@ -553,7 +553,7 @@ CSVImportExportPlugin.prototype.mergeCSV = function() {
                 names.forEach(function (name, idx) {
                     var id = ids[idx];
                     // Don't replace/add anything in 'soft' mode if an ID is already given
-                    if (name != undefined && name.trim() != '' && !(method == 'soft' && id.trim() != '')) {
+                    if (name != undefined && name.trim() != '' && !(method == 'soft' && id && id.trim() != '')) {
                         // Get matching object
                         // Default case is matching with preferred name (titleElement)
                         var obj = getLocalObjectByTitle(name);
