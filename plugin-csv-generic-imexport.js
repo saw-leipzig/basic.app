@@ -30,7 +30,6 @@ CSVGenericImportExportPlugin.prototype.log = function (msg, type, data) {
 CSVGenericImportExportPlugin.prototype.init = function () {
     var plugin = this;
     // Set initial values
-    plugin.preselected_status = ['safe'];
     plugin.allowed_mimetypes = [
         'text/csv'
     ];
@@ -133,6 +132,7 @@ CSVGenericImportExportPlugin.prototype.render = function () {
         var title = '<span class="fas fa-file-csv"></span> Generic CSV Import';
         var doc = 'With the <em>Generic CSV Import</em>-Plugin you can load your local data, stored in a comma separated value file (*.csv), into the app. Each row of your table-like data structure contains one dataset (all data according to one entity). The first row has to contain your column labels. You\'ll need them to map your data model to the configured app data model.';
         plugin.mode = 'import';
+        plugin.preselected_status = ['unchecked'];
         plugin
             .renderModal(title, doc)
             .renderModalFooter();
@@ -150,6 +150,7 @@ CSVGenericImportExportPlugin.prototype.render = function () {
         var title = '<span class="fas fa-file-csv"></span> Generic CSV Merge';
         var doc = 'With the <em>Generic CSV Merge</em>-Plugin you can merge the app data with your local data (based on IDs), stored in a comma separated value file (*.csv) and download the result as (new) CSV-file. Each row of your table-like data structure contains one dataset (all data according to one entity). The first row has to contain your column labels. You\'ll need them to map your data model to the configured app data model.';
         plugin.mode = 'merge';
+        plugin.preselected_status = ['safe'];
         plugin
             .renderModal(title, doc)
             .renderModalFooter();
