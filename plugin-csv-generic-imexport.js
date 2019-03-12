@@ -368,7 +368,12 @@ CSVGenericImportExportPlugin.prototype.renderEntitiesForm = function () {
         if (e[plugin.mapping['id']].trim()) {
             ref_html += ' <span class="badge badge-warning">' + e[plugin.mapping['id']].trim() + '</span>';
         }
-        if (e[plugin.mapping[config.v.identifierElement]] && e[plugin.mapping[config.v.identifierElement]].startsWith(config.v.identifierBaseURL)) {
+        if (e[plugin.mapping[config.v.identifierElement]]) {
+            // It should be possible to import plain IDs. So if there is an ID, not starting with the configured
+            // base URL, add them to the importable value
+            if (!e[plugin.mapping[config.v.identifierElement]].startsWith(config.v.identifierBaseURL)) {
+                e[plugin.mapping[config.v.identifierElement]] = config.v.identifierBaseURL + e[plugin.mapping[config.v.identifierElement]].trim()
+            }
             ref_html += ' <span class="badge badge-dark">' + config.v.identifierAbbreviation + ': ' + e[plugin.mapping[config.v.identifierElement]].substr(config.v.identifierBaseURL.length) + '</span>';
         }
         var chk_html = '<div class="form-check form-check-inline">\
