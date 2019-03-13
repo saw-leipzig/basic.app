@@ -1,22 +1,59 @@
-function ImportExportPlugin() {
+function JSONImportExportPlugin() {
+    this.prefix = this.constructor.name.toLowerCase();
+
     var plugin = this;
     /* ----- Download JSON ----- */
     // Create and register JSON download button
-    this.btn_json_down = $('<button class="btn btn-outline-light" id="btn-download-json" type="button">\
-                                <span class="fas fa-file-download"></span> Download JSON\
+    var btn_json_down = $('<button class="btn btn-outline-light" id="' + this.prefix + '-btn-download" type="button" data-toggle="modal" data-target="#' + this.prefix + '-modal-download">\
+                                <span class="fas fa-file-upload"></span> Backup as JSON\
                             </button>');
-    this.btn_json_down.on('click', function(e){
-        plugin.downloadJSON(data_objects, 'basic-' + context);
+    btn_json_down.on('click', function(e){
+        plugin.updateDownloadableObjectsCounter();
         // Hide plugins
         $('#app-content-plugins-area').collapse('hide');
     })
-    basicPluginActions.registerButton(this.btn_json_down);
+    basicPluginActions.registerButton(btn_json_down);
+
+    // Create download options modal
+    var modal_down_doc = 'All data managed by the tool can be downloaded as a plain text file, containing those data in <em>JavaScript Simple Object Notation</em> (JSON). The backuped data could be imported or added to all equally configured instances of the tool. Please note, that only the current context, e.g. <em>persons</em>, is used, so, if you need backup of your other contexts, e.g. <em>places</em>, as well, you have to do it seperatly.';
+    var modal_html = '<div class="modal fade" id="' + this.prefix + '-modal-download" tabindex="-1" aria-hidden="true" role="dialog">\
+                                      <div class="modal-dialog modal-lg" role="document">\
+                                          <div class="modal-content">\
+                                              <div class="modal-header">\
+                                                  <h5 class="modal-title">Backup data</h5>\
+                                                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">\
+                                                      <span aria-hidden="true">✖</span>\
+                                                  </button>\
+                                              </div>\
+                                              <div class="modal-body">\
+                                                  <p>' + modal_down_doc + '</p>\
+                                                  <form id="' + this.prefix + '-settings-form"></form>\
+                                              </div>\
+                                              <div class="modal-footer">\
+                                                <button type="button" class="btn btn-primary" id="' + this.prefix + '-btn-backup">\
+                                                    Download selected data</button>\
+                                              </div>\
+                                          </div>\
+                                      </div>\
+                                  </div>';
+    $(modal_html).appendTo('#modals')
+    // Create settings form
+    // METHOD [all|visible]
+    var method_description = $('<small class="form-text">Select backup method. <span class="text-muted">You can either download all data or just those data according to visible (not hidden by an active filter) objects.</span></small>');
+    var method_buttons = $('<div class="btn-group btn-group-sm btn-group-toggle mb-2" data-toggle="buttons"></div>')
+        .append('<label class="btn btn-secondary active">\
+                    <input type="radio" name="json-backup-method" value="all" autocomplete="off" checked> All objects <span class="badge badge-light found-objects">0</span>\
+                </label>')
+        .append('<label class="btn btn-secondary">\
+                    <input type="radio" name="json-backup-method" value="visible" autocomplete="off"> Visible objects only <span class="badge badge-light found-visible-objects">0</span>\
+                </label>')
+    $('#' + this.prefix + '-settings-form').append(method_description, method_buttons);
 
 
     /* ----- Upload JSON ----- */
     // Create and register JSON upload button
     this.btn_json_up = $('<button class="btn btn-outline-light" id="btn-upload-json" type="button" data-toggle="modal" data-target="#json-file-upload-modal">\
-                                <span class="fas fa-file-upload"></span> Upload JSON\
+                                <span class="fas fa-file-upload"></span> Restore from JSON\
                             </button>');
     this.btn_json_up.on('click', function(e){
         // Hide plugins
@@ -66,6 +103,11 @@ function ImportExportPlugin() {
 
 
     // register click event listener
+    $('#modals').on('click', '#' + this.prefix + '-btn-backup', function (){
+        if (!$(this).hasClass('disabled')) {
+            plugin.backup();
+        }
+    });
     $('#modals').on('click', '#btn-import-from-json', function (e){
         if (!$(this).hasClass('disabled')) {
             plugin.importObjects(e);
@@ -92,7 +134,47 @@ function ImportExportPlugin() {
 }
 
 
-ImportExportPlugin.prototype.downloadJSON = function(exportObj, exportName) {
+JSONImportExportPlugin.prototype.updateDownloadableObjectsCounter = function() {
+    cnt_all = data_objects[config.a.JSONContainer].length;
+    cnt_vis = $('#result-container div.list-group-item').filter('*:not([class*="filtered-"])').length
+
+    $('#' + this.prefix + '-settings-form span.badge.found-objects').html(cnt_all);
+    $('#' + this.prefix + '-settings-form span.badge.found-visible-objects').html(cnt_vis);
+    return this;
+}
+
+
+JSONImportExportPlugin.prototype.backup = function() {
+    // Get selected method
+    var settings_form = $('#' + this.prefix + '-settings-form');
+    var settings_array = settings_form.serializeArray();
+    var method = '';
+    settings_array.forEach(function (e) {
+        if (e.name == 'json-backup-method') {
+            method = e.value;
+        }
+    });
+    if (method == 'visible') {
+        // Get all visible (not filtered) items
+        var visible_items = $('#result-container div.list-group-item').filter('*:not([class*="filtered-"])');
+        // Create new data container with visible objects only
+        var visible_objects = {};
+        visible_objects[config.a.JSONContainer] = [];
+        visible_items.each(function () {
+            visible_objects[config.a.JSONContainer].push(getLocalObjectById(idm.getObjectId(this.id)));
+        });
+        this.downloadJSON(visible_objects, 'basic-' + context + '-filtered');
+    } else {
+        // Default case is all is
+        this.downloadJSON(data_objects, 'basic-' + context);
+    }
+    // Hide the modal dialog
+    $('#' + this.prefix + '-modal-download').modal('hide');
+    return this;
+}
+
+
+JSONImportExportPlugin.prototype.downloadJSON = function(exportObj, exportName) {
     var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj));
     var downloadAnchorNode = document.createElement('a');
     downloadAnchorNode.setAttribute("href",     dataStr);
@@ -100,10 +182,11 @@ ImportExportPlugin.prototype.downloadJSON = function(exportObj, exportName) {
     document.body.appendChild(downloadAnchorNode); // required for firefox
     downloadAnchorNode.click();
     downloadAnchorNode.remove();
+    return this;
 }
 
 
-ImportExportPlugin.prototype.getObjectsFromJSON = function() {
+JSONImportExportPlugin.prototype.getObjectsFromJSON = function() {
     var btn_import = $('#btn-import-from-json');
     var btn_add = $('#btn-add-from-json');
     var count_span = $('.found-json-objects');
@@ -185,7 +268,7 @@ ImportExportPlugin.prototype.getObjectsFromJSON = function() {
 }
 
 
-ImportExportPlugin.prototype.importObjects = function(event) {
+JSONImportExportPlugin.prototype.importObjects = function(event) {
     // Delete existing objects
     var ids_to_delete = asArray(data_objects[config.a.JSONContainer]).map(obj => obj.id);
     console.log('JSON Import/Export: Deleting ' + ids_to_delete.length + ' data objects.');
@@ -199,7 +282,7 @@ ImportExportPlugin.prototype.importObjects = function(event) {
 }
 
 
-ImportExportPlugin.prototype.addObjects = function(event) {
+JSONImportExportPlugin.prototype.addObjects = function(event) {
     console.log('JSON Import/Export: Adding objects ...');
 
     var importable_objects = asArray(import_object[config.a.JSONContainer]);
@@ -213,4 +296,4 @@ ImportExportPlugin.prototype.addObjects = function(event) {
 }
 
 
-var iep = new ImportExportPlugin();
+var iep = new JSONImportExportPlugin();
