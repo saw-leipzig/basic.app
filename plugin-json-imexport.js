@@ -5,7 +5,7 @@ function JSONImportExportPlugin() {
     /* ----- Download JSON ----- */
     // Create and register JSON download button
     var btn_json_down = $('<button class="btn btn-outline-light" id="' + this.prefix + '-btn-download" type="button" data-toggle="modal" data-target="#' + this.prefix + '-modal-download">\
-                                <span class="fas fa-file-upload"></span> Backup as JSON\
+                                <span class="fas fa-file-download"></span> Backup <span class="text-muted">as JSON</span>\
                             </button>');
     btn_json_down.on('click', function(e){
         plugin.updateDownloadableObjectsCounter();
@@ -53,7 +53,7 @@ function JSONImportExportPlugin() {
     /* ----- Upload JSON ----- */
     // Create and register JSON upload button
     this.btn_json_up = $('<button class="btn btn-outline-light" id="btn-upload-json" type="button" data-toggle="modal" data-target="#json-file-upload-modal">\
-                                <span class="fas fa-file-upload"></span> Restore from JSON\
+                                <span class="fas fa-file-upload"></span> Restore <span class="text-muted">from JSON</span>\
                             </button>');
     this.btn_json_up.on('click', function(e){
         // Hide plugins

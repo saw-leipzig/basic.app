@@ -17,7 +17,7 @@ function TEIImportPlugin() {
         // Add classes
         .addClass('btn btn-outline-light')
         // Add button content
-        .append('<span class="fas fa-file-upload"></span> Upload TEI-XML')
+        .append('<span class="fas fa-file-code"></span> Import <span class="text-muted">from XML</span>')
         // Register events for action button
         .on('click', function () {
             // Hide plugins

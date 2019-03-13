@@ -123,7 +123,7 @@ CSVGenericImportExportPlugin.prototype.render = function () {
     var plugin = this;
     // Create and register CSV import button
     var btn_csv = $('<button class="btn btn-outline-light" id="btn-upload-' + this.prefix + '" type="button">\
-                        <span class="fas fa-file-csv"></span> Import from CSV (generic)\
+                        <span class="fas fa-file-csv"></span> Import <span class="text-muted">from CSV</span> <span class="badge badge-light">generic</span>\
                     </button>');
     btn_csv.on('click', function(e){
         // Hide plugins
@@ -141,7 +141,7 @@ CSVGenericImportExportPlugin.prototype.render = function () {
 
     // Create and register CSV merge button
     var btn_csv_merge = $('<button class="btn btn-outline-light" id="btn-merge-' + this.prefix + '" type="button">\
-                        <span class="fas fa-file-csv"></span> Merge with CSV (generic)\
+                        <span class="fas fa-file-csv"></span> Merge <span class="text-muted">with CSV</span> <span class="badge badge-light">generic</span>\
                     </button>');
     btn_csv_merge.on('click', function(e){
         // Hide plugins
