@@ -38,23 +38,7 @@ var ls_dataset_btn_add = $('<button id="ls-dataset-btn-add" title="Add new local
     .appendTo('#app-plugin-ls .input-group-append')
     .on('click', function () {
         if (!$(this).hasClass('disabled')) {
-            // Get new name from input field, with removed leading and trailing whitespace
-            var new_dataset_name = $('#ls-dataset-ipt-name').val().trim();
-            var available_datasets = basicLSA.getAvailableDatasets();
-            // Check if a dataset with such name already exist and only create it if not.
-            if (available_datasets == undefined || (Array.isArray(available_datasets) && !available_datasets.includes(new_dataset_name))) {
-                // Reset data objects, to start with a clean dataset
-                data_objects = {};
-                // Reset frontend also
-                $('#result-container .list-group-item').remove();
-                // Set new dataset and store localy
-                basicLSA.setDataset(new_dataset_name).save();
-                // Rebuild dropdown menu
-                buildDatasetDropdownMenu(basicLSA.getAvailableDatasets(), $('#ls-dataset-ipt-name').val());
-            } else {
-                // TODO: Give feedback to user, that dataset already exist
-                console.log('Local Storage API: Can\'t create new dataset, because dataset "' + new_dataset_name + '"" already exist.');
-            }
+            basicLSA.createDataset();
         }
     });
 
@@ -198,6 +182,33 @@ LocalStorageAdapter.prototype.load = function () {
 };
 
 
+LocalStorageAdapter.prototype.createDataset = function () {
+    // Get new name from input field, with removed leading and trailing whitespace
+    var new_dataset_name = $('#ls-dataset-ipt-name').val().trim();
+    var available_datasets = basicLSA.getAvailableDatasets();
+    // Check if a dataset with such name already exist and only create it if not.
+    if (available_datasets == undefined || (Array.isArray(available_datasets) && !available_datasets.includes(new_dataset_name))) {
+        // Reset data objects, to start with a clean dataset
+        data_objects = {};
+        // Reset frontend also
+        $('#result-container .list-group-item').remove();
+        // Set new dataset and store localy
+        console.log('Local Storage API: New dataset "' + new_dataset_name + '" created.');
+        basicLSA.setDataset(new_dataset_name).save();
+        // Rebuild dropdown menu
+        buildDatasetDropdownMenu(basicLSA.getAvailableDatasets(), $('#ls-dataset-ipt-name').val());
+        // Clear input field
+        $('#ls-dataset-ipt-name').val('');
+        // Disable add button
+        $('#ls-dataset-btn-add').addClass('disabled');
+    } else {
+        // TODO: Give feedback to user, that dataset already exist
+        console.log('Local Storage API: Can\'t create new dataset, because dataset "' + new_dataset_name + '"" already exist.');
+    }
+
+}
+
+
 LocalStorageAdapter.prototype.getAvailableDatasets = function () {
     var ctx = this.ctx;
     if (ctx != null) {
@@ -232,11 +243,17 @@ var basicLSA = new LocalStorageAdapter(context);
 
 
 // Add listener for dataset creation
-$('#ls-dataset-ipt-name').on('keyup', function () {
+$('#ls-dataset-ipt-name').on('keyup', function (e) {
+    // Enable/disable add button
     if ($(this).val().trim().length) {
         ls_dataset_btn_add.removeClass('disabled');
     } else {
         ls_dataset_btn_add.addClass('disabled');
+    }
+    // Trigger click event, if hitting the enter key
+    // Number 13 is the "Enter" key on the keyboard
+    if (e.keyCode === 13) {
+        ls_dataset_btn_add.click();
     }
 });
 
