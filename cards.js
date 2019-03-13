@@ -23,26 +23,30 @@ function deleteCard (trigger) {
 }
 
 
-function getCardHTML (cardid, title, attributes, links, classes) {
+function getCardHTML (cardid, title, attributes, links, classes, status) {
     // Card header, with buttons for preferred, moving and delete
     var header_buttons = [];
+    // If status is safe, disable buttons
+    var disabled = '';
+    if (status == 'safe') {
+        disabled = ' disabled';
+    }
     // If links is empty, it should be the reference data set
     if (links.length) {
-        header_buttons.push('<button type="button" class="btn btn-secondary btn-card-left"><i class="fas fa-angle-left"></i></button>');
+        header_buttons.push('<button type="button" class="btn btn-secondary btn-card-left' + disabled + '"><i class="fas fa-angle-left"></i></button>');
         // preferred button
-        var classes_pref = 'btn btn-secondary btn-card-preferred';
+        var classes_pref = 'btn btn-secondary btn-card-preferred' + disabled;
         if (classes.indexOf('bg-info') >= 0) {
             classes_pref = 'btn btn-secondary btn-card-preferred active disabled';
         }
         header_buttons.push('<button type="button" class="' + classes_pref + '">' + title + '</button>');
-        header_buttons.push('<button type="button" class="btn btn-secondary btn-card-delete"><i class="fas fa-times"></i></button>');
-        header_buttons.push('<button type="button" class="btn btn-secondary btn-card-right"><i class="fas fa-angle-right"></i></button>');
+        header_buttons.push('<button type="button" class="btn btn-secondary btn-card-delete' + disabled + '"><i class="fas fa-times"></i></button>');
+        header_buttons.push('<button type="button" class="btn btn-secondary btn-card-right' + disabled + '"><i class="fas fa-angle-right"></i></button>');
     } else {
         header_buttons.push('<button type="button" class="btn btn-secondary disabled">' + title + '</button>');
     }
     var button_group = '<div class="btn-group btn-group-sm btn-group-card-header" role="group">' + header_buttons.join('') + '</div>';
     var card_header = '<div class="card-header">' + button_group + '</div>';
-    //var card_body = '<div class="card-body"><h5 class="card-title">' + obj.fullname + '</h5></div>';
     var card_body = '';
     // Put resource links in card footer
     link_items = '';
@@ -76,7 +80,8 @@ function prepareCardData(local_object, obj, ref_id) {
         id: ref_id,
         attributes: [],
         links: [],
-        additional_classes: ['card-reference']
+        additional_classes: ['card-reference'],
+        status: local_object[config.v.statusElement]
     };
     // Highlight preferred dataset
     if (Array.isArray(local_object[config.v.identifierElement])) {
@@ -205,35 +210,39 @@ function enableModalCardValueCopy(selector) {
             var data = $(this).text();
             var label = $(this).attr('data-content-label');
             var card = $(this).parents('.card-reference');
-            // Ignore local data, unconfigured local attributes and empty values
-            if (card.length && local_labels.includes(label) && data != '-') {
-                var copy_btn = $('<button id="modalCardCopyButton" type="button" class="btn btn-sm btn-outline-secondary" title="Copy value of &quot;' + label + '&quot; to local object."><small class="fas fa-copy"></small></button>');
-                $(this).append(copy_btn);
-                copy_btn
-                    .on('click', function (e) {
-                        // Prevent fixing the card zoom, triggered by click event
-                        e.stopPropagation();
-                        // Copy value to local object (update)
-                        var attribute_object = local_attributes.find(function (c) {
-                            return c.displayName == label;
+            // Apply only to reference cards
+            if (card.length) {
+                var ids = getIdsFromCard(card);
+                var is_safe = getLocalObjectById(idm.getObjectId(ids.fid))[config.v.statusElement] == 'safe';
+                // Ignore local data, unconfigured local attributes and empty values
+                if (!is_safe && local_labels.includes(label) && data != '-') {
+                    var copy_btn = $('<button id="modalCardCopyButton" type="button" class="btn btn-sm btn-outline-secondary" title="Copy value of &quot;' + label + '&quot; to local object."><small class="fas fa-copy"></small></button>');
+                    $(this).append(copy_btn);
+                    copy_btn
+                        .on('click', function (e) {
+                            // Prevent fixing the card zoom, triggered by click event
+                            e.stopPropagation();
+                            // Copy value to local object (update)
+                            var attribute_object = local_attributes.find(function (c) {
+                                return c.displayName == label;
+                            });
+                            var local_attribute = attribute_object.localJSONPath;
+                            // Use original fetched data instead of displayed value
+                            var fetched_obj = fetched_objects.objects.find(function (e) {
+                                return e.id === ids.ref_id;
+                            })
+                            var obj = fetched_obj.data;
+                            var params = {};
+                            params[local_attribute] = deepFind(obj, 'JSONPath', true).find(function (e) {
+                                return e.key == label;
+                            }).value;
+                            editObject(idm.getObjectId(ids.fid), params);
+                            // Update base card attribute
+                            var list_item = $('#card-' + ids.fid + '_' + ids.fid).find('li[data-content-label="' + label + '"]');
+                            list_item.children('small').html(data);
+                            list_item.removeClass('list-group-item-secondary');
                         });
-                        var local_attribute = attribute_object.localJSONPath;
-                        var ids = getIdsFromCard(card);
-                        // Use original fetched data instead of displayed value
-                        var fetched_obj = fetched_objects.objects.find(function (e) {
-                            return e.id === ids.ref_id;
-                        })
-                        var obj = fetched_obj.data;
-                        var params = {};
-                        params[local_attribute] = deepFind(obj, 'JSONPath', true).find(function (e) {
-                            return e.key == label;
-                        }).value;
-                        editObject(idm.getObjectId(ids.fid), params);
-                        // Update base card attribute
-                        var list_item = $('#card-' + ids.fid + '_' + ids.fid).find('li[data-content-label="' + label + '"]');
-                        list_item.children('small').html(data);
-                        list_item.removeClass('list-group-item-secondary');
-                    });
+                }
             }
         })
         .on('mouseleave', delegate_selector, function () {
@@ -245,7 +254,7 @@ function enableModalCardValueCopy(selector) {
 function enableModalCardPreferredToggling(selector) {
     $(selector)
         .on('click', '.btn-card-preferred', function () {
-            if (!$(this).hasClass('active')) {
+            if (!$(this).hasClass('active') && !$(this).hasClass('disabled')) {
                 var card = $(this).parents('.card');
                 var ids = getIdsFromCard(card);
                 // 1. update local object, backend and frontend (list)
@@ -269,15 +278,19 @@ function enableModalcardSwitch(selector) {
     $(selector)
         // right shift
         .on('click', '.btn-card-right', function () {
-            shiftCard($(this), 'right')
-            //Fire event cardSwitch
-            $(this).trigger('cardSwitch');
+            if (!$(this).hasClass('disabled')) {
+                shiftCard($(this), 'right')
+                //Fire event cardSwitch
+                $(this).trigger('cardSwitch');
+            }
         })
         // left shift
         .on('click', '.btn-card-left', function () {
-            shiftCard($(this), 'left')
-            //Fire event cardSwitch
-            $(this).trigger('cardSwitch');
+            if (!$(this).hasClass('disabled')) {
+                shiftCard($(this), 'left')
+                //Fire event cardSwitch
+                $(this).trigger('cardSwitch');
+            }
         });
 }
 
@@ -285,7 +298,9 @@ function enableModalcardSwitch(selector) {
 function enableModalCardDelete(selector) {
     $(selector)
         .on('click', '.btn-card-delete', function () {
-            deleteCard($(this));
+            if (!$(this).hasClass('disabled')) {
+                deleteCard($(this));
+            }
         });
 }
 
@@ -359,7 +374,7 @@ function addCard (container, ref_id, local_object) {
                 }
                 // Update Card
                 var prepared = prepareCardData(local_object, obj, ref_id)
-                $('#card-' + prepared.cardid).replaceWith(getCardHTML(prepared.cardid, prepared.id, prepared.attributes, prepared.links, prepared.additional_classes));
+                $('#card-' + prepared.cardid).replaceWith(getCardHTML(prepared.cardid, prepared.id, prepared.attributes, prepared.links, prepared.additional_classes, prepared.status));
                 // Load additional data from seealso webservice
                 loadSeealsoResources(prepared.cardid, prepared.id);
             })
@@ -368,12 +383,12 @@ function addCard (container, ref_id, local_object) {
                 var obj = null;
                 // Update Card
                 var prepared = prepareCardData(local_object, obj, ref_id)
-                $('#card-' + prepared.cardid).replaceWith(getCardHTML(prepared.cardid, prepared.id, prepared.attributes, prepared.links, prepared.additional_classes));
+                $('#card-' + prepared.cardid).replaceWith(getCardHTML(prepared.cardid, prepared.id, prepared.attributes, prepared.links, prepared.additional_classes, prepared.status));
             });
     }
     var prepared = prepareCardData(local_object, obj, ref_id)
     // Add card to container (DOM)
-    container.append(getCardHTML(prepared.cardid, prepared.id, prepared.attributes, prepared.links, prepared.additional_classes));
+    container.append(getCardHTML(prepared.cardid, prepared.id, prepared.attributes, prepared.links, prepared.additional_classes, prepared.status));
     // Load additional data from seealso webservice
     loadSeealsoResources(prepared.cardid, ref_id);
 }
@@ -382,7 +397,7 @@ function addCard (container, ref_id, local_object) {
 function getCardHTMLFromDataID (fid, local_object) {
     var attributes = deepFind(local_object, 'localJSONPath');
     var cardid = idm.getFrontendId(local_object.id) + '_' + fid;
-    return getCardHTML(cardid, 'Own data', attributes, [], ['text-white', ' bg-dark']);
+    return getCardHTML(cardid, 'Own data', attributes, [], ['text-white', ' bg-dark'], local_object[config.v.statusElement]);
 }
 
 
