@@ -116,7 +116,6 @@ function deepFind (obj, path_key, allow_arrays) {
                 } else if (i + 1 == paths.length && Array.isArray(current[paths[i]])) {
                     // end of path reached and node is an array, so this should be a collection
                     // of simple values and could be joined nicely.
-                    // TODO: handle typespecific, string, dates, objects?
                     if (!allow_arrays) {
                         current = current[paths[i]].join(', ');
                     } else {
