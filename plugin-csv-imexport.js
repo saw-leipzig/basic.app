@@ -3,7 +3,7 @@ function CSVImportExportPlugin() {
     /* ----- Upload CSV ----- */
     // Create and register CSV upload button
     this.btn_csv_up = $('<button class="btn btn-outline-light" id="btn-upload-csv" type="button" data-toggle="modal" data-target="#csv-file-upload-modal">\
-                                <span class="fas fa-file-csv"></span> Import from CSV (csv2cmi)\
+                                <span class="fas fa-file-csv"></span> Import <span class="text-muted">from CSV</span> <span class="badge badge-light">csv2cmi</span>\
                             </button>');
     this.btn_csv_up.on('click', function(e){
         // Hide plugins
@@ -14,7 +14,7 @@ function CSVImportExportPlugin() {
 
     // Create and register CSV download button
     this.btn_csv_down = $('<button class="btn btn-outline-light" id="btn-download-csv" type="button" data-toggle="modal" data-target="#csv-file-merge-modal">\
-                                <span class="fas fa-file-csv"></span> Merge with CSV (csv2cmi)\
+                                <span class="fas fa-file-csv"></span> Merge <span class="text-muted">with CSV</span> <span class="badge badge-light">csv2cmi</span>\
                             </button>');
     this.btn_csv_down.on('click', function(e){
         // Hide plugins
@@ -553,7 +553,7 @@ CSVImportExportPlugin.prototype.mergeCSV = function() {
                 names.forEach(function (name, idx) {
                     var id = ids[idx];
                     // Don't replace/add anything in 'soft' mode if an ID is already given
-                    if (name != undefined && name.trim() != '' && !(method == 'soft' && id.trim() != '')) {
+                    if (name != undefined && name.trim() != '' && !(method == 'soft' && id && id.trim() != '')) {
                         // Get matching object
                         // Default case is matching with preferred name (titleElement)
                         var obj = getLocalObjectByTitle(name);

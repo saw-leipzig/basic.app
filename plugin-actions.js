@@ -7,6 +7,21 @@ function BasicAppPlugin (id, title, icon_classes, container_selector, dataset_de
 }
 
 
+BasicAppPlugin.prototype.log = function (msg, type, data) {
+    var type_str = '';
+    if (type != undefined) {
+        type_str = ' (' + type + ')';
+    }
+    var entry = this.constructor.name + type_str + ': ' + msg;
+    if (data != undefined) {
+        console.log(entry, data);
+    } else {
+        console.log(entry);
+    }
+    return this;
+};
+
+
 BasicAppPlugin.prototype.renderPluginBase = function () {
     this.plugin = $('<div id="' + this.id + '"></div>');
     this.plugin
@@ -51,7 +66,7 @@ $('body').on('datasetLoaded',  function (e) {
 
 
 function ActionButtonPlugin (id, title, icon_classes, container_selector) {
-    BasicAppPlugin.call(this, id, title, icon_classes, container_selector)
+    BasicAppPlugin.call(this, id, title, icon_classes, container_selector);
     this.buttons = [];
 }
 ActionButtonPlugin.prototype = Object.create(BasicAppPlugin.prototype);
@@ -68,8 +83,9 @@ ActionButtonPlugin.prototype.render = function () {
 ActionButtonPlugin.prototype.registerButton = function (btn) {
     // TODO: Check if it is a button and add
     this.buttons.push(btn);
-    // Add to button group
-    this.plugin.find('.btn-group').append(btn);
+    // Add to first button group, which is the plugin button group.
+    // Other button groups could exist inside, e.g. as dropdowns.
+    this.plugin.find('.btn-group').first().append(btn);
     return this;
 }
 

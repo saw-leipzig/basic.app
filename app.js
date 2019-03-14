@@ -116,7 +116,6 @@ function deepFind (obj, path_key, allow_arrays) {
                 } else if (i + 1 == paths.length && Array.isArray(current[paths[i]])) {
                     // end of path reached and node is an array, so this should be a collection
                     // of simple values and could be joined nicely.
-                    // TODO: handle typespecific, string, dates, objects?
                     if (!allow_arrays) {
                         current = current[paths[i]].join(', ');
                     } else {
@@ -854,51 +853,6 @@ function deleteObject (trigger, oid) {
 
 
 /* Modals */
-function getCardHTML (cardid, fn, attributes, links, classes) {
-    // Card header, with buttons for preferred, moving and delete
-    var header_buttons = [];
-    // If links is empty, it should be the reference data set
-    if (links.length) {
-        header_buttons.push('<button type="button" class="btn btn-secondary btn-card-left"><i class="fas fa-angle-left"></i></button>');
-        // preferred button
-        var classes_pref = 'btn btn-secondary btn-card-preferred';
-        if (classes.indexOf('bg-info') >= 0) {
-            classes_pref = 'btn btn-secondary btn-card-preferred active disabled';
-        }
-        header_buttons.push('<button type="button" class="' + classes_pref + '">' + fn + '</button>');
-        header_buttons.push('<button type="button" class="btn btn-secondary btn-card-delete"><i class="fas fa-times"></i></button>');
-        header_buttons.push('<button type="button" class="btn btn-secondary btn-card-right"><i class="fas fa-angle-right"></i></button>');
-    } else {
-        header_buttons.push('<button type="button" class="btn btn-secondary disabled">' + fn + '</button>');
-    }
-    var button_group = '<div class="btn-group btn-group-sm btn-group-card-header" role="group">' + header_buttons.join('') + '</div>';
-    var card_header = '<div class="card-header">' + button_group + '</div>';
-    var card_body = '';
-    // Put resource links in card footer
-    link_items = '';
-    links.forEach(function (link) {
-        link_items = link_items + '<a href="' + link.url + '" class="badge badge-light" target="_blank" title="Open ' + link.url + ' in new tab.">' + link.name + '</a>';
-    });
-    var card_footer = '<div class="card-footer">' + link_items + '</div>';
-    // Create attribute list
-    var list_items = '';
-    attributes.forEach(function (attribute_object) {
-        var attribute = attribute_object.value;
-        var attribute_classes = ['list-group-item', 'text-truncate', 'modal-card-zoom'];
-        var attribute_content = '-';
-        if (attribute === undefined || attribute == 0) {
-            attribute_classes.push('list-group-item-secondary');
-        } else {
-            attribute_content = attribute;
-        }
-        list_items = list_items + '<li class="' + attribute_classes.join(' ') + '" data-content-label="' + attribute_object.key + '"><small>' + attribute_content + '</small></li>';
-    });
-    var card_attr_list = '<ul class="list-group list-group-flush text-dark">' + list_items + '</ul>';
-    var card = '<div id="card-' + cardid + '" class="card ' + classes.join(" ") + '">' + card_header + card_body + card_attr_list + card_footer + '</div>';
-    return card;
-}
-
-
 function shiftIdentifier (fid, ref_id, direction) {
     var obj = getLocalObjectById(idm.getObjectId(fid));
     var id_to_shift_idx = obj[config.v.identifierElement].findIndex(function (el) {

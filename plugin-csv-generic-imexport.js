@@ -30,7 +30,6 @@ CSVGenericImportExportPlugin.prototype.log = function (msg, type, data) {
 CSVGenericImportExportPlugin.prototype.init = function () {
     var plugin = this;
     // Set initial values
-    plugin.preselected_status = ['safe'];
     plugin.allowed_mimetypes = [
         'text/csv'
     ];
@@ -124,7 +123,7 @@ CSVGenericImportExportPlugin.prototype.render = function () {
     var plugin = this;
     // Create and register CSV import button
     var btn_csv = $('<button class="btn btn-outline-light" id="btn-upload-' + this.prefix + '" type="button">\
-                        <span class="fas fa-file-csv"></span> Import from CSV (generic)\
+                        <span class="fas fa-file-csv"></span> Import <span class="text-muted">from CSV</span> <span class="badge badge-light">generic</span>\
                     </button>');
     btn_csv.on('click', function(e){
         // Hide plugins
@@ -133,6 +132,7 @@ CSVGenericImportExportPlugin.prototype.render = function () {
         var title = '<span class="fas fa-file-csv"></span> Generic CSV Import';
         var doc = 'With the <em>Generic CSV Import</em>-Plugin you can load your local data, stored in a comma separated value file (*.csv), into the app. Each row of your table-like data structure contains one dataset (all data according to one entity). The first row has to contain your column labels. You\'ll need them to map your data model to the configured app data model.';
         plugin.mode = 'import';
+        plugin.preselected_status = ['unchecked'];
         plugin
             .renderModal(title, doc)
             .renderModalFooter();
@@ -141,7 +141,7 @@ CSVGenericImportExportPlugin.prototype.render = function () {
 
     // Create and register CSV merge button
     var btn_csv_merge = $('<button class="btn btn-outline-light" id="btn-merge-' + this.prefix + '" type="button">\
-                        <span class="fas fa-file-csv"></span> Merge with CSV (generic)\
+                        <span class="fas fa-file-csv"></span> Merge <span class="text-muted">with CSV</span> <span class="badge badge-light">generic</span>\
                     </button>');
     btn_csv_merge.on('click', function(e){
         // Hide plugins
@@ -150,6 +150,7 @@ CSVGenericImportExportPlugin.prototype.render = function () {
         var title = '<span class="fas fa-file-csv"></span> Generic CSV Merge';
         var doc = 'With the <em>Generic CSV Merge</em>-Plugin you can merge the app data with your local data (based on IDs), stored in a comma separated value file (*.csv) and download the result as (new) CSV-file. Each row of your table-like data structure contains one dataset (all data according to one entity). The first row has to contain your column labels. You\'ll need them to map your data model to the configured app data model.';
         plugin.mode = 'merge';
+        plugin.preselected_status = ['safe'];
         plugin
             .renderModal(title, doc)
             .renderModalFooter();
@@ -367,7 +368,12 @@ CSVGenericImportExportPlugin.prototype.renderEntitiesForm = function () {
         if (e[plugin.mapping['id']].trim()) {
             ref_html += ' <span class="badge badge-warning">' + e[plugin.mapping['id']].trim() + '</span>';
         }
-        if (e[plugin.mapping[config.v.identifierElement]] && e[plugin.mapping[config.v.identifierElement]].startsWith(config.v.identifierBaseURL)) {
+        if (e[plugin.mapping[config.v.identifierElement]]) {
+            // It should be possible to import plain IDs. So if there is an ID, not starting with the configured
+            // base URL, add them to the importable value
+            if (!e[plugin.mapping[config.v.identifierElement]].startsWith(config.v.identifierBaseURL)) {
+                e[plugin.mapping[config.v.identifierElement]] = config.v.identifierBaseURL + e[plugin.mapping[config.v.identifierElement]].trim()
+            }
             ref_html += ' <span class="badge badge-dark">' + config.v.identifierAbbreviation + ': ' + e[plugin.mapping[config.v.identifierElement]].substr(config.v.identifierBaseURL.length) + '</span>';
         }
         var chk_html = '<div class="form-check form-check-inline">\
