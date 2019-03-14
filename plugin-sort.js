@@ -41,7 +41,7 @@ SimpleSortPlugin.prototype.init = function () {
             if (!$(this).hasClass('disabled')) {
                 // TODO: Indicate we are working, if sorting takes some time
                 plugin.toggleButtonActivity(this);
-                plugin.sort(config.v.idElement);
+                plugin.sort('id');
                 plugin.toggleButtonActivity(this);
             }
         });
