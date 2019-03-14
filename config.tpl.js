@@ -32,30 +32,30 @@ var config = {
             "view": {
                 "persons": {
                     "titleElement": "name",
-                    "descriptionElement": "description",
+                    "descriptionElement": "alternateName",
                     "statusElement": "status",
-                    "identifierElement": "ref",
+                    "identifierElement": "identifier",
                     "identifierAbbreviation": "DNB",
                     "identifierBaseURL": "http://d-nb.info/gnd/",
-                    "aliasElement": "alias"
+                    "aliasElement": "alternateName"
                 },
                 "places": {
                     "titleElement": "name",
-                    "descriptionElement": "description",
+                    "descriptionElement": "alternateName",
                     "statusElement": "status",
-                    "identifierElement": "ref",
+                    "identifierElement": "identifier",
                     "identifierAbbreviation": "GEO",
                     "identifierBaseURL": "http://www.geonames.org/",
-                    "aliasElement": "alias"
+                    "aliasElement": "alternateName"
                 },
                 "organisations":{
                     "titleElement": "name",
-                    "descriptionElement": "description",
+                    "descriptionElement": "alternateName",
                     "statusElement": "status",
-                    "identifierElement": "ref",
+                    "identifierElement": "identifier",
                     "identifierAbbreviation": "DNB",
                     "identifierBaseURL": "http://d-nb.info/gnd/",
-                    "aliasElement": "alias"
+                    "aliasElement": "alternateName"
                 }
 
             },
@@ -78,47 +78,58 @@ var config = {
                         "JSONPath": "pseudonym.preferredName",
                         "localJSONPath": "pseudonym"
                     }, {
-                        "displayName": "Namensvariante",
+                        "displayName": "Alternate Names",
                         "JSONPath": "variantName",
-                        "localJSONPath": "alias",
+                        "localJSONPath": "alternateName",
                         "multiple": true
                     }, {
-                        "displayName": "Geschlecht",
-                        "JSONPath": "gender.label"
+                        "displayName": "Gender",
+                        "JSONPath": "gender.label",
+                        "localJSONPath": "gender"
                     }, {
-                        "displayName": "Geburtsdatum",
+                        "displayName": "Date of Birth",
                         "JSONPath": "dateOfBirth",
-                        "localJSONPath": "birth_date"
+                        "localJSONPath": "birthDate"
                     }, {
-                        "displayName": "Geburtsort",
+                        "displayName": "Place of Birth",
                         "JSONPath": "placeOfBirth.preferredName",
-                        "localJSONPath": "birth_place"
+                        "localJSONPath": "birthPlace"
                     }, {
-                        "displayName": "Sterbedatum",
+                        "displayName": "Date of Death",
                         "JSONPath": "dateOfDeath",
-                        "localJSONPath": "death_date"
+                        "localJSONPath": "deathDate"
                     }, {
-                        "displayName": "Sterbeort",
+                        "displayName": "Place of Death",
                         "JSONPath": "placeOfDeath.preferredName",
-                        "localJSONPath": "death_place"
+                        "localJSONPath": "deathPlace"
                     }, {
-                        "displayName": "Wirkungszeit",
-                        "JSONPath": "periodOfActivity"
+                        "displayName": "Period of Activity",
+                        "JSONPath": "periodOfActivity",
+                        "localJSONPath": "periodOfActivity"
                     }, {
-                        "displayName": "Wirkungsort",
-                        "JSONPath": "placeOfActivity.preferredName"
+                        "displayName": "Place of Activity",
+                        "JSONPath": "placeOfActivity.preferredName",
+                        "localJSONPath": "placeOfActivity"
                     }, {
-                        "displayName": "Beruf(e)",
-                        "JSONPath": "professionOrOccupation.preferredName"
+                        "displayName": "Profession",
+                        "JSONPath": "professionOrOccupation.preferredName",
+                        "localJSONPath": "hasOccupation",
+                        "multiple": true
                     }, {
-                        "displayName": "Organisation",
-                        "JSONPath": "affiliation.preferredName"
+                        "displayName": "Affiliation",
+                        "JSONPath": "affiliation.preferredName",
+                        "localJSONPath": "affiliation",
+                        "multiple": true
                     }, {
-                        "displayName": "Weitere Angaben",
-                        "JSONPath": "biographicalOrHistoricalInformation"
+                        "displayName": "Further Information",
+                        "JSONPath": "biographicalOrHistoricalInformation",
+                        "localJSONPath": "description"
                     }, {
-                        "displayName": "Taufdatum",
-                        "localJSONPath": "baptism_date"
+                        "displayName": "Date of Baptism",
+                        "localJSONPath": "baptismDate"
+                    }, {
+                        "displayName": "Place of Burial",
+                        "localJSONPath": "burialPlace"
                     }
                 ],
                 "places":[ {
@@ -126,28 +137,32 @@ var config = {
                         "JSONPath": "name",
                         "localJSONPath": "name"
                     },{
-                        "displayName": "Namensvariante",
+                        "displayName": "Alternate Names",
                         "JSONPath": "alternateNames.name",
-                        "localJSONPath": "alias",
+                        "localJSONPath": "alternateName",
                         "multiple": true
                     },{
-                        "displayName": "Breitengrad",
-                        "JSONPath": "lat"
+                        "displayName": "Latitude",
+                        "JSONPath": "lat",
+                        "localJSONPath": "latitude"
                     },{
-                        "displayName": "Längengrad",
-                        "JSONPath": "lng"
+                        "displayName": "Longitude",
+                        "JSONPath": "lng",
+                        "localJSONPath": "longitude"
                     },{
-                        "displayName": "Art der Stätte",
+                        "displayName": "Class of Place",
                         "JSONPath": "fclName"
                     },{
-                        "displayName": "Code der Stätte",
+                        "displayName": "Code of Place",
                         "JSONPath": "fcode"
                     },{
-                        "displayName": "Land",
-                        "JSONPath": "countryName"
+                        "displayName": "Country",
+                        "JSONPath": "countryName",
+                        "localJSONPath": "addressCountry"
                     },{
-                        "displayName": "Kontinent",
-                        "JSONPath": "continentCode"
+                        "displayName": "Code of Continent",
+                        "JSONPath": "continentCode",
+                        "localJSONPath": "continentCode"
                     }
                 ],
                 "organisations":[ {
@@ -155,25 +170,30 @@ var config = {
                         "JSONPath": "preferredName",
                         "localJSONPath": "name"
                     },{
-                        "displayName": "Namensvariante",
+                        "displayName": "Alternate Names",
                         "JSONPath": "variantName",
-                        "localJSONPath": "alias",
+                        "localJSONPath": "alternateName",
                         "multiple": true
                     },{
-                        "displayName": "Ort",
-                        "JSONPath": "placeOfBusiness.preferredName"
+                        "displayName": "Location",
+                        "JSONPath": "placeOfBusiness.preferredName",
+                        "localJSONPath": "location"
                     },{
-                        "displayName": "Wirkungsraum",
+                        "displayName": "Associated Place",
                         "JSONPath": "associatedPlace.preferredName"
                     },{
-                        "displayName": "Art der Organisation",
-                        "JSONPath": "isA.preferredName"
+                        "displayName": "Type of Organization",
+                        "JSONPath": "isA.preferredName",
+                        "localJSONPath": "additionalType",
+                        "multiple": true
                     },{
-                        "displayName": "Vorgänger Organisation",
-                        "JSONPath": "predecessor.preferredName"
+                        "displayName": "Predecessor",
+                        "JSONPath": "predecessor.preferredName",
+                        "localJSONPath": "predecessor"
                     },{
-                        "displayName": "Nachfolger Organisation",
-                        "JSONPath": "successor.preferredName"
+                        "displayName": "Successor",
+                        "JSONPath": "successor.preferredName",
+                        "localJSONPath": "successor"
                     }
                 ]
             },
