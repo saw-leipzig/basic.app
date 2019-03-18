@@ -192,6 +192,8 @@ LocalStorageAdapter.prototype.createDataset = function () {
         data_objects = {};
         // Reset frontend also
         $('#result-container .list-group-item').remove();
+        // Reset identity manager
+        idm.init();
         // Set new dataset and store localy
         console.log('Local Storage API: New dataset "' + new_dataset_name + '" created.');
         basicLSA.setDataset(new_dataset_name).save();
