@@ -60,8 +60,8 @@ CSVGenericImportExportPlugin.prototype.init = function () {
         // If all required attributes are set, let's display the importable entities
         var map_id = $('#' + plugin.prefix + '-id').val();
         var map_title = $('#' + plugin.prefix + '-' + config.v.titleElement).val();
-        var map_reference = $('#' + plugin.prefix + '-' + config.v.identifierElement).val();
-        var required_values = [map_id, map_reference];
+        //var map_reference = $('#' + plugin.prefix + '-' + config.v.identifierElement).val();
+        var required_values = [map_id];
         if (plugin.mode == 'import') {
             required_values.push(map_title);
         }
@@ -299,7 +299,7 @@ CSVGenericImportExportPlugin.prototype.renderMappingForm = function () {
     var plugin = this;
     var mapping_form = $('#' + plugin.prefix + '-mapping-form');
     var map_form_description_html ='<small class="form-text">Configure value mapping: <span class="text-muted">Please choose your local corresponding label for each attribute you want to import/export (at least the required ones). To give you a little help, the mapping form will show you an example value next to the choosen label, which is extracted from your first data row.</span></small>';
-    var required_attributes = ['id', config.v.identifierElement];
+    var required_attributes = ['id'];
     if (plugin.mode == 'import') {
         required_attributes.push(config.v.titleElement);
     }
@@ -316,8 +316,15 @@ CSVGenericImportExportPlugin.prototype.renderMappingForm = function () {
                             </div>');
     });
     mapping_form.append('<hr/>');
+    // As identifier elements are not part of the configurable modal and no required attributes
+    // we need to add it manually here
+    var id_conf = [{
+        displayName: 'Identifier', // Maybe this could be configurable?
+        localJSONPath: config.v.identifierElement
+    }];
     // Create further mappable selects from config
-    config.m.forEach(function (e) {
+    var attributes = id_conf.concat(config.m);
+    attributes.forEach(function (e) {
         if (e.localJSONPath && !required_attributes.includes(e.localJSONPath)) {
             var select_html = '<div class="form-group row">\
                                     <label for="' + plugin.prefix + '-' + e.localJSONPath + '" class="col-sm-4 col-form-label text-right"><small>' + e.displayName + '</small></label>\
