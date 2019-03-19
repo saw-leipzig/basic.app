@@ -321,6 +321,7 @@ function addRef2Data (oid, ref_id) {
 function togglePreferredRef2Data (oid, ref_id) {
     var obj = getLocalObjectById(oid);
     if (Array.isArray(obj[config.v.identifierElement])) {
+        // references > 1
         var ref_new_idx = obj[config.v.identifierElement].findIndex(function (ref) {
             // TODO: API Model constrain: #text
             return ref['#text'] === config.v.identifierBaseURL + ref_id
@@ -332,12 +333,18 @@ function togglePreferredRef2Data (oid, ref_id) {
         // Set preferred on new id
         obj[config.v.identifierElement][ref_new_idx].preferred = 'YES';
         // Remove preferred on old id, if exist
+        // If new_index = old_index this will also unprefer, like we want it to do
         if (ref_old_idx >= 0) {
             obj[config.v.identifierElement][ref_old_idx].preferred = 'NO';
         }
     } else {
-        // Set preferred on new id
-        obj[config.v.identifierElement].preferred = 'YES';
+        // references = 1
+        // Toggle preferred
+        if (obj[config.v.identifierElement].preferred === 'NO') {
+            obj[config.v.identifierElement].preferred = 'YES';
+        } else {
+            obj[config.v.identifierElement].preferred = 'NO';
+        }
     }
 }
 
@@ -348,8 +355,11 @@ function togglePreferred (oid, ref_id) {
     // 2. update frontend
     // toggle button state in list
     var fid = idm.getFrontendId(oid);
+    var current_is_active = $('#lbl-' + fid + '_' + ref_id).hasClass('active');
     $('#' + fid + ' label.btn.active').removeClass('active');
-    $('#lbl-' + fid + '_' + ref_id).addClass('active');
+    if (!current_is_active) {
+        $('#lbl-' + fid + '_' + ref_id).addClass('active');
+    }
 }
 
 
@@ -447,18 +457,15 @@ function enableButtonAddReference (selector, delegate_selector) {
 
 
 function enableButtonIdentifierToggling (selector, delegate_selector) {
-    $(selector).on('click', delegate_selector, function () {
+    $(selector).on('click', delegate_selector, function (e) {
+        e.preventDefault();
         if (! $(this).hasClass('disabled')) {
-            if (! $(this).hasClass('active')) {
-                // button is not already active, so
-                var id_composition = $(this).get(0).id.substring($(this).get(0).id.indexOf('-') + 1);
-                var fid = id_composition.substring(0, id_composition.indexOf('_'));
-                var ref_id = $(this).attr("data-ref-id");
-                // toggle state: local, backend, frontend
-                togglePreferred(idm.getObjectId(fid), ref_id);
-                // Fire event preferredReferenceChange
-                $(this).trigger('preferredReferenceChange');
-            }
+            var id_composition = $(this).get(0).id.substring($(this).get(0).id.indexOf('-') + 1);
+            var fid = id_composition.substring(0, id_composition.indexOf('_'));
+            var ref_id = $(this).attr("data-ref-id");
+            togglePreferred(idm.getObjectId(fid), ref_id);
+            // Fire event preferredReferenceChange
+            $(this).trigger('preferredReferenceChange');
         }
     });
 }
