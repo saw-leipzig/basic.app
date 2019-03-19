@@ -162,6 +162,8 @@ function constructCompareModalCards(selector){
         related_entries.each(function () {
             addCard(modal.find('#modal-cards'), $(this).attr('data-ref-id'), local_object);
         })
+        // Enable highlighting after modal closes
+        enableModalCardHighlightItem(selector, fid);
     })
 }
 
@@ -319,6 +321,20 @@ function enableModalCardEvents(selector) {
     enableModalCardDelete(selector);
     // Enable value copy
     enableModalCardValueCopy(selector);
+}
+
+
+function enableModalCardHighlightItem (selector, fid) {
+    $(selector).one('hidden.bs.modal', function () {
+        // Highlight result item from which the modal was triggered
+        if (fid != undefined) {
+            $('#' + fid)
+                .addClass('last-focussed-item')
+                .bind('animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd', function () {
+                    $(this).removeClass('last-focussed-item');
+                });
+        }
+    });
 }
 
 

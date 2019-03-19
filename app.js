@@ -558,7 +558,18 @@ function enableButtonDelete (selector, delegate_selector) {
 /* Reset form if modal is hiding */
 function enableObjectFormReset (selector) {
     $(selector).on('hidden.bs.modal', function () {
-        $('#object-form .form-control').val('')
+        // Highlight result item from which the modal was triggered
+        var oid = $('#ipt-id').val()
+        if (oid != undefined) {
+            var fid = idm.getFrontendId(oid);
+            $('#' + fid)
+                .addClass('last-focussed-item')
+                .bind('animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd', function () {
+                    $(this).removeClass('last-focussed-item');
+                });
+        }
+        // Reset all values
+        $('#object-form .form-control').val('');
     });
 }
 
