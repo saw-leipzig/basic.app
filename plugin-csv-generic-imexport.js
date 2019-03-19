@@ -376,12 +376,12 @@ CSVGenericImportExportPlugin.prototype.renderEntitiesForm = function () {
             ref_html += ' <span class="badge badge-warning">' + e[plugin.mapping['id']].trim() + '</span>';
         }
         if (e[plugin.mapping[config.v.identifierElement]]) {
-            // It should be possible to import plain IDs. So if there is an ID, not starting with the configured
-            // base URL, add them to the importable value
-            if (!e[plugin.mapping[config.v.identifierElement]].startsWith(config.v.identifierBaseURL)) {
-                e[plugin.mapping[config.v.identifierElement]] = config.v.identifierBaseURL + e[plugin.mapping[config.v.identifierElement]].trim()
+            var id_plain = e[plugin.mapping[config.v.identifierElement]];
+            if (id_plain.startsWith(config.v.identifierBaseURL)) {
+                console.log(id_plain,e[plugin.mapping[config.v.identifierElement]])
+                id_plain = id_plain.substr(config.v.identifierBaseURL.length)
             }
-            ref_html += ' <span class="badge badge-dark">' + config.v.identifierAbbreviation + ': ' + e[plugin.mapping[config.v.identifierElement]].substr(config.v.identifierBaseURL.length) + '</span>';
+            ref_html += ' <span class="badge badge-dark">' + config.v.identifierAbbreviation + ': ' + id_plain + '</span>';
         }
         var chk_html = '<div class="form-check form-check-inline">\
                           <input class="form-check-input" type="checkbox" value="' + e[plugin.mapping['id']] + '" id="' + plugin.prefix + '-import-entitiy-' + i + '" checked>\
@@ -570,11 +570,17 @@ CSVGenericImportExportPlugin.prototype.addEntities = function(event) {
             params['id'] = e[plugin.mapping['id']];
             params[config.v.titleElement] = e[plugin.mapping[config.v.titleElement]];
             // Check if we already have references set, which we can import.
-            if (e[plugin.mapping[config.v.identifierElement]] !== undefined && e[plugin.mapping[config.v.identifierElement]].startsWith(config.v.identifierBaseURL)) {
+            var id = e[plugin.mapping[config.v.identifierElement]];
+            if (id !== undefined && id.trim() !== '' && (!id.toLowerCase().startsWith('http') || id.startsWith(config.v.identifierBaseURL))) {
+                // It should be possible to import plain IDs. So if there is an ID, not starting with the configured
+                // base URL, add them to the importable value. If there is another URI (starting with http), ignore the value
+                if (!id.toLowerCase().startsWith('http')) {
+                    id = config.v.identifierBaseURL + id.trim()
+                }
                 // TODO: this structure must be configurable and should not be fixed in the code, because this is
                 // specific to the exist-db JSON export.
                 params[config.v.identifierElement] = {
-                    '#text': e[plugin.mapping[config.v.identifierElement]],
+                    '#text': id,
                     'preferred': 'YES'
                 };
             }
