@@ -1,9 +1,9 @@
 // Build plugin dataset dropdown
-var plugin_ls_datasets = $('<div id="ls-datasets-dropdown"></div>')
+var plugin_ls_datasets = $('<div></div>')
     // Add classes
     .addClass('btn-group btn-group-sm d-block')
     // Add dropdown button
-    .append('<button type="button" class="btn btn-outline-light btn-block dropdown-toggle text-left text-truncate" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">\
+    .append('<button type="button" id="ls-datasets-dropdown" class="btn btn-outline-light btn-block dropdown-toggle text-left text-truncate disabled" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">\
                 <strong>Current Dataset</strong>: <em id="ls-dataset-current"></em>\
             </button>')
     // Add dropdown menu
@@ -11,14 +11,14 @@ var plugin_ls_datasets = $('<div id="ls-datasets-dropdown"></div>')
 
 
 // Build plugin input group
-var plugin_ls_dataset_name = $('<div class="input-group input-group-sm mt-2"></div>')
+var plugin_ls_dataset_name = $('<div class="input-group input-group-sm mb-2"></div>')
     // Add input
     .append('<input id="ls-dataset-ipt-name" type="text" class="form-control" placeholder="New dataset name" aria-label="New dataset name"/>')
     .append('<div class="input-group-append"></div>');
 
 
 // Build dataset information
-var plugin_ls_dataset_info = $('<div id="ls-dataset-info"></div>')
+var plugin_ls_dataset_info = $('<div id="ls-dataset-info" class="small"></div>')
     .addClass('row mt-2 text-secondary')
     .append('<div class="col-md-12">Last modified: <em id="ls-dataset-info-last" class="text-light"></em></div>')
     .append('<div class="col-md-12">Objects: <em id="ls-dataset-info-count" class="text-light"></em></div>');
@@ -26,7 +26,7 @@ var plugin_ls_dataset_info = $('<div id="ls-dataset-info"></div>')
 
 // Add plugin section
 var basicPluginLocalStorage = new BasicAppPlugin('app-plugin-ls', 'Local Storage Configuration', 'fas fa-database', '#app-content-plugins-configuration', 'NO');
-basicPluginLocalStorage.render([plugin_ls_datasets, plugin_ls_dataset_info, plugin_ls_dataset_name]);
+basicPluginLocalStorage.render([plugin_ls_dataset_name, plugin_ls_datasets, plugin_ls_dataset_info]);
 
 
 // Build button add dataset name
@@ -80,6 +80,12 @@ function buildDatasetDropdownMenu (dss, current) {
                 }
             });
         });
+        // Enable/Disable dropdown
+        if (dss.length > 0) {
+            $('#ls-datasets-dropdown').removeClass('disabled');
+        } else {
+            $('#ls-datasets-dropdown').addClass('disabled');
+        }
     }
 }
 

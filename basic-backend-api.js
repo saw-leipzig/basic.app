@@ -20,11 +20,11 @@ var query_dataset = {'dataset': cds};
 
 
 // Build plugin dataset dropdown
-var plugin_xml_datasets = $('<div id="xml-datasets-dropdown"></div>')
+var plugin_xml_datasets = $('<div></div>')
     // Add classes
     .addClass('btn-group btn-group-sm')
     // Add dropdown button
-    .append('<button type="button" class="btn btn-outline-light dropdown-toggle text-truncate" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">\
+    .append('<button type="button" id="xml-datasets-dropdown" class="btn btn-outline-light dropdown-toggle text-truncate disabled" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">\
                 Current Dataset: <em id="xml-dataset-current"/>\
             </button>')
     // Add dropdown menu
@@ -51,14 +51,21 @@ function enableButtonDatasets (selector) {
 function addDatasetsToDOM (result) {
     var cnt = 0;
     if (result) {
-        cnt = asArray(result.dataset).length;
-        asArray(result.dataset).forEach(function (dataset) {
+        var datasets = asArray(result.dataset);
+        cnt = datasets.length;
+        datasets.forEach(function (dataset) {
             if (dataset != cds){
                 $('#xml-datasets').append('<button class="dropdown-item" type="button">' + dataset + '</button>');
             }
         })
-        // enable dataset dropdown
+        // enable dataset dropdown actions
         enableButtonDatasets('#xml-datasets > button');
+    }
+    // Enable/Disable dropdown
+    if (cnt > 0) {
+        $('#xml-datasets-dropdown').removeClass('disabled');
+    } else {
+        $('#xml-datasets-dropdown').addClass('disabled');
     }
     console.log('REST-API: ' + cnt + ' datasets available.');
 }
