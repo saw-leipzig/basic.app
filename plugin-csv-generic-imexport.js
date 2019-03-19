@@ -60,8 +60,8 @@ CSVGenericImportExportPlugin.prototype.init = function () {
         // If all required attributes are set, let's display the importable entities
         var map_id = $('#' + plugin.prefix + '-id').val();
         var map_title = $('#' + plugin.prefix + '-' + config.v.titleElement).val();
-        var map_reference = $('#' + plugin.prefix + '-' + config.v.identifierElement).val();
-        var required_values = [map_id, map_reference];
+        //var map_reference = $('#' + plugin.prefix + '-' + config.v.identifierElement).val();
+        var required_values = [map_id];
         if (plugin.mode == 'import') {
             required_values.push(map_title);
         }
@@ -299,7 +299,7 @@ CSVGenericImportExportPlugin.prototype.renderMappingForm = function () {
     var plugin = this;
     var mapping_form = $('#' + plugin.prefix + '-mapping-form');
     var map_form_description_html ='<small class="form-text">Configure value mapping: <span class="text-muted">Please choose your local corresponding label for each attribute you want to import/export (at least the required ones). To give you a little help, the mapping form will show you an example value next to the choosen label, which is extracted from your first data row.</span></small>';
-    var required_attributes = ['id', config.v.identifierElement];
+    var required_attributes = ['id'];
     if (plugin.mode == 'import') {
         required_attributes.push(config.v.titleElement);
     }
@@ -316,8 +316,15 @@ CSVGenericImportExportPlugin.prototype.renderMappingForm = function () {
                             </div>');
     });
     mapping_form.append('<hr/>');
+    // As identifier elements are not part of the configurable modal and no required attributes
+    // we need to add it manually here
+    var id_conf = [{
+        displayName: 'Identifier', // Maybe this could be configurable?
+        localJSONPath: config.v.identifierElement
+    }];
     // Create further mappable selects from config
-    config.m.forEach(function (e) {
+    var attributes = id_conf.concat(config.m);
+    attributes.forEach(function (e) {
         if (e.localJSONPath && !required_attributes.includes(e.localJSONPath)) {
             var select_html = '<div class="form-group row">\
                                     <label for="' + plugin.prefix + '-' + e.localJSONPath + '" class="col-sm-4 col-form-label text-right"><small>' + e.displayName + '</small></label>\
@@ -369,12 +376,12 @@ CSVGenericImportExportPlugin.prototype.renderEntitiesForm = function () {
             ref_html += ' <span class="badge badge-warning">' + e[plugin.mapping['id']].trim() + '</span>';
         }
         if (e[plugin.mapping[config.v.identifierElement]]) {
-            // It should be possible to import plain IDs. So if there is an ID, not starting with the configured
-            // base URL, add them to the importable value
-            if (!e[plugin.mapping[config.v.identifierElement]].startsWith(config.v.identifierBaseURL)) {
-                e[plugin.mapping[config.v.identifierElement]] = config.v.identifierBaseURL + e[plugin.mapping[config.v.identifierElement]].trim()
+            var id_plain = e[plugin.mapping[config.v.identifierElement]];
+            if (id_plain.startsWith(config.v.identifierBaseURL)) {
+                console.log(id_plain,e[plugin.mapping[config.v.identifierElement]])
+                id_plain = id_plain.substr(config.v.identifierBaseURL.length)
             }
-            ref_html += ' <span class="badge badge-dark">' + config.v.identifierAbbreviation + ': ' + e[plugin.mapping[config.v.identifierElement]].substr(config.v.identifierBaseURL.length) + '</span>';
+            ref_html += ' <span class="badge badge-dark">' + config.v.identifierAbbreviation + ': ' + id_plain + '</span>';
         }
         var chk_html = '<div class="form-check form-check-inline">\
                           <input class="form-check-input" type="checkbox" value="' + e[plugin.mapping['id']] + '" id="' + plugin.prefix + '-import-entitiy-' + i + '" checked>\
@@ -563,11 +570,17 @@ CSVGenericImportExportPlugin.prototype.addEntities = function(event) {
             params['id'] = e[plugin.mapping['id']];
             params[config.v.titleElement] = e[plugin.mapping[config.v.titleElement]];
             // Check if we already have references set, which we can import.
-            if (e[plugin.mapping[config.v.identifierElement]] !== undefined && e[plugin.mapping[config.v.identifierElement]].startsWith(config.v.identifierBaseURL)) {
+            var id = e[plugin.mapping[config.v.identifierElement]];
+            if (id !== undefined && id.trim() !== '' && (!id.toLowerCase().startsWith('http') || id.startsWith(config.v.identifierBaseURL))) {
+                // It should be possible to import plain IDs. So if there is an ID, not starting with the configured
+                // base URL, add them to the importable value. If there is another URI (starting with http), ignore the value
+                if (!id.toLowerCase().startsWith('http')) {
+                    id = config.v.identifierBaseURL + id.trim()
+                }
                 // TODO: this structure must be configurable and should not be fixed in the code, because this is
                 // specific to the exist-db JSON export.
                 params[config.v.identifierElement] = {
-                    '#text': e[plugin.mapping[config.v.identifierElement]],
+                    '#text': id,
                     'preferred': 'YES'
                 };
             }

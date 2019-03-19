@@ -236,6 +236,27 @@ function fetchObject(fid, ref_id, cluster){
 }
 
 
+function enableModalMapReset (selector, fid) {
+    $(selector).one('hidden.bs.modal', function () {
+        // Remove the map after Modal is closed - because of container conflict
+        if (map !== null) {
+            map.off;
+            map.remove();
+            L.tileLayer.remove;
+            map = null;
+        }
+        // Highlight result item from which the modal was triggered
+        if (fid != undefined) {
+            $('#' + fid)
+                .addClass('last-focussed-item')
+                .bind('animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd', function () {
+                    $(this).removeClass('last-focussed-item');
+                });
+        }
+    });
+}
+
+
 /* Build map layer and get marker via fetched objects */
 $('#modals').on('shown.bs.modal', '#map-modal', function (event) {
     var button = $(event.relatedTarget) // Button that triggered the modal
@@ -280,15 +301,6 @@ $('#modals').on('shown.bs.modal', '#map-modal', function (event) {
     modal.find('.modal-title').text('Autority Data Map: ' + place_name).append(' <small>(local ID: ' + oid + ')</small>');
     // clear former collected geodata
     arrayOfLatLng = [];
-});
-
-
-// Remove the map after Modal is closed - because of container conflict
-$('#modals').on('hidden.bs.modal', '#map-modal', function (event) {
-    if (map !== null) {
-        map.off;
-        map.remove();
-        L.tileLayer.remove;
-        map = null;
-    }
+    // Enable modal resetting
+    enableModalMapReset('#map-modal', fid);
 });

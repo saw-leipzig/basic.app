@@ -37,7 +37,7 @@ function getCardHTML (cardid, title, attributes, links, classes, status) {
         // preferred button
         var classes_pref = 'btn btn-secondary btn-card-preferred' + disabled;
         if (classes.indexOf('bg-info') >= 0) {
-            classes_pref = 'btn btn-secondary btn-card-preferred active disabled';
+            classes_pref = classes_pref + ' active';
         }
         header_buttons.push('<button type="button" class="' + classes_pref + '">' + title + '</button>');
         header_buttons.push('<button type="button" class="btn btn-secondary btn-card-delete' + disabled + '"><i class="fas fa-times"></i></button>');
@@ -162,6 +162,8 @@ function constructCompareModalCards(selector){
         related_entries.each(function () {
             addCard(modal.find('#modal-cards'), $(this).attr('data-ref-id'), local_object);
         })
+        // Enable highlighting after modal closes
+        enableModalCardHighlightItem(selector, fid);
     })
 }
 
@@ -254,19 +256,22 @@ function enableModalCardValueCopy(selector) {
 function enableModalCardPreferredToggling(selector) {
     $(selector)
         .on('click', '.btn-card-preferred', function () {
-            if (!$(this).hasClass('active') && !$(this).hasClass('disabled')) {
+            if (!$(this).hasClass('disabled')) {
                 var card = $(this).parents('.card');
                 var ids = getIdsFromCard(card);
                 // 1. update local object, backend and frontend (list)
                 togglePreferred(idm.getObjectId(ids.fid), ids.ref_id);
                 // 2. update cards
-                // remove classes on preferred object
+                var card_is_active = $(this).hasClass('active');
+                // remove classes on preferred object(s)
                 $('.card.bg-info.text-white').removeClass('bg-info text-white');
-                $('.card .active.disabled').removeClass('active disabled');
-                // toggle classes on card
-                card.toggleClass('bg-info text-white');
-                // toggle active class on button
-                $(this).toggleClass('active disabled');
+                $('.card .active').removeClass('active');
+                if (!card_is_active) {
+                    // toggle classes on card
+                    card.toggleClass('bg-info text-white');
+                    // toggle active class on button
+                    $(this).toggleClass('active');
+                }
                 //Fire event cardPreferredReferenceChange
                 $(this).trigger('cardPreferredReferenceChange');
             }
@@ -316,6 +321,20 @@ function enableModalCardEvents(selector) {
     enableModalCardDelete(selector);
     // Enable value copy
     enableModalCardValueCopy(selector);
+}
+
+
+function enableModalCardHighlightItem (selector, fid) {
+    $(selector).one('hidden.bs.modal', function () {
+        // Highlight result item from which the modal was triggered
+        if (fid != undefined) {
+            $('#' + fid)
+                .addClass('last-focussed-item')
+                .bind('animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd', function () {
+                    $(this).removeClass('last-focussed-item');
+                });
+        }
+    });
 }
 
 

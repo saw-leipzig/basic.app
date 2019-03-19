@@ -187,6 +187,7 @@ JSONImportExportPlugin.prototype.downloadJSON = function(exportObj, exportName) 
 
 
 JSONImportExportPlugin.prototype.getObjectsFromJSON = function() {
+    var plugin = this;
     var btn_import = $('#btn-import-from-json');
     var btn_add = $('#btn-add-from-json');
     var count_span = $('.found-json-objects');
@@ -208,7 +209,7 @@ JSONImportExportPlugin.prototype.getObjectsFromJSON = function() {
     file_form.find('.is-valid, .is-invalid').removeClass('is-valid is-invalid');
     file_form.find('.invalid-feedback').remove();
     // Reset importables, form, etc.
-    import_object = {};
+    plugin.import_object = {};
     objects_form.empty();
     count_span.empty();
     btn_import.addClass('disabled');
@@ -229,12 +230,12 @@ JSONImportExportPlugin.prototype.getObjectsFromJSON = function() {
                 importable_objects.forEach(function (obj, idx) {
                     asArray(objects[config.a.JSONContainer])[idx][config.v.statusElement] = status;
                 });
-                import_object = objects;
+                plugin.import_object = objects;
             } else {
                 console.log('JSON Import/Export: Status will be set to "' + status + '".');
-                import_object = objects;
+                plugin.import_object = objects;
             }
-            var num_objects = asArray(import_object[config.a.JSONContainer]).length
+            var num_objects = asArray(plugin.import_object[config.a.JSONContainer]).length
             // Update import button
             count_span.html(num_objects);
             if (num_objects > 0) {
@@ -285,7 +286,7 @@ JSONImportExportPlugin.prototype.importObjects = function(event) {
 JSONImportExportPlugin.prototype.addObjects = function(event) {
     console.log('JSON Import/Export: Adding objects ...');
 
-    var importable_objects = asArray(import_object[config.a.JSONContainer]);
+    var importable_objects = asArray(this.import_object[config.a.JSONContainer]);
     for (i in importable_objects) {
         addObject(event.target, importable_objects[i]);
     }
@@ -293,6 +294,7 @@ JSONImportExportPlugin.prototype.addObjects = function(event) {
     countObjectsByStatus();
     // Close modal
     $('#json-file-upload-modal').modal('hide');
+    return this;
 }
 
 
