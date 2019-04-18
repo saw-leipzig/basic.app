@@ -173,10 +173,15 @@ TEIImportPlugin.prototype.getEntitiesFromXML = function () {
             var found_refs = [];
             var identified_entities = entities.filter(function (i, e) {
                 var name = e.textContent;
+                // Ignore characters: [, ], ?
+                name = name.replace(/[\[\]\?]/g, '');
+                // normalize space
+                name = name.replace(/\s{2,}/g, ' ');
+
                 var local_id = e.getAttribute(plugin.id_attribute_name);
                 var ref = e.getAttribute(plugin.reference_attribute_name);
-                // object is identically if it has the same id/ref or the same name
 
+                // object is identically if it has the same id/ref or the same name
                 if (local_id != null ||  ref != null) {
                     if (found_ids.includes(local_id) || found_refs.includes(ref)) {
                         return false;
@@ -212,6 +217,11 @@ TEIImportPlugin.prototype.getEntitiesFromXML = function () {
                 $(chk_button_filter).appendTo(entities_form);
                 var entities_btn_group = $('<div class="form-group"></div>').appendTo(entities_form)
                 plugin.importable_entities.each(function (i, e) {
+                    var name = e.textContent;
+                    // Ignore characters: [, ], ?
+                    name = name.replace(/[\[\]\?]/g, '');
+                    // normalize space
+                    name = name.replace(/\s{2,}/g, ' ');
                     var ref_html = '';
                     if (e.attributes[plugin.id_attribute_name] && e.attributes[plugin.id_attribute_name].value != '') {
                         ref_html += ' <span class="badge badge-warning">' + e.attributes[plugin.id_attribute_name].value + '</span>';
@@ -220,9 +230,9 @@ TEIImportPlugin.prototype.getEntitiesFromXML = function () {
                         ref_html += ' <span class="badge badge-dark">' + e.attributes[plugin.reference_attribute_name].value.substr(config.v.identifierBaseURL.length) + '</span>';
                     }
                     var chk_html = '<div class="form-check form-check-inline">\
-                                      <input class="form-check-input" type="checkbox" value="' + e.textContent + '" id="import-entitiy-' + i + '" checked>\
+                                      <input class="form-check-input" type="checkbox" value="' + name + '" id="import-entitiy-' + i + '" checked>\
                                       <label class="form-check-label" for="import-entitiy-' + i + '">\
-                                        ' + e.textContent + ref_html +'\
+                                        ' + name + ref_html +'\
                                       </label>\
                                     </div>';
                     $(chk_html).appendTo(entities_btn_group);
@@ -313,10 +323,16 @@ TEIImportPlugin.prototype.addEntities = function (event) {
     var status = file_form.serializeArray().find(ipt => ipt.name == 'tei-import-status').value;
     console.log('TEI Import: Adding ' + plugin.names_to_import.length + ' objects ...');
     this.importable_entities.each(function (i, e) {
-        if (plugin.names_to_import.includes(e.textContent)) {
+        var name = e.textContent;
+        // Ignore characters: [, ], ?
+        name = name.replace(/[\[\]\?]/g, '');
+        // normalize space
+        name = name.replace(/\s{2,}/g, ' ');
+
+        if (plugin.names_to_import.includes(name)) {
             // Set params for new local object
             var params = {};
-            params[config.v.titleElement] = e.textContent;
+            params[config.v.titleElement] = name;
             params[config.v.statusElement] = status;
             console.log('TEI Import: Imported data is set to the status: "' + status + '".');
             // Check if we already have IDs set, which we can import.

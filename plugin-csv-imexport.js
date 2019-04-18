@@ -241,7 +241,10 @@ CSVImportExportPlugin.prototype.getObjectsFromCSV = function() {
                                             id = config.v.identifierBaseURL + id.trim();
                                         }
                                         var entity = {};
-
+                                        // Ignore characters: [, ], ?
+                                        name = name.replace(/[\[\]\?]/g, '');
+                                        // normalize space
+                                        name = name.replace(/\s{2,}/g, ' ');
                                         // Name and ID are given. Check for duplicate ID
                                         if (name && id && !found_ids.includes(id)) {
                                             entity[config.v.titleElement] = name;
@@ -552,6 +555,10 @@ CSVImportExportPlugin.prototype.mergeCSV = function() {
                 var ids = letter[col + 'ID'].split(delimiter);
                 names.forEach(function (name, idx) {
                     var id = ids[idx];
+                    // Ignore characters: [, ], ?
+                    name = name.replace(/[\[\]\?]/g, '');
+                    // normalize space
+                    name = name.replace(/\s{2,}/g, ' ');
                     // Don't replace/add anything in 'soft' mode if an ID is already given
                     if (name != undefined && name.trim() != '' && !(method == 'soft' && id && id.trim() != '')) {
                         // Get matching object
