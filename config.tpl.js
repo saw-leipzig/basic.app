@@ -37,7 +37,8 @@ var config = {
                     "identifierElement": "identifier",
                     "identifierAbbreviation": "DNB",
                     "identifierBaseURL": "http://d-nb.info/gnd/",
-                    "aliasElement": "alternateName"
+                    "aliasElement": "alternateName",
+                    "pseudonymElement": "pseudonym"
                 },
                 "places": {
                     "titleElement": "name",
@@ -76,7 +77,8 @@ var config = {
                     }, {
                         "displayName": "Pseudonym",
                         "JSONPath": "pseudonym.preferredName",
-                        "localJSONPath": "pseudonym"
+                        "localJSONPath": "pseudonym",
+                        "multiple": true
                     }, {
                         "displayName": "Alternate Names",
                         "JSONPath": "variantName",

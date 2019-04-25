@@ -568,6 +568,10 @@ CSVImportExportPlugin.prototype.mergeCSV = function() {
                         if (obj == undefined && config.v.aliasElement != undefined) {
                             obj = getLocalObjectByAlias(name);
                         }
+                        // If there is no match on titleElement and aliasElement, try to find one with matching pseudonym, if pseudonym is configured
+                        if (obj == undefined && config.v.pseudonymElement != undefined) {
+                            obj = getLocalObjectByPseudonym(name);
+                        }
                         // Check if object is in correct state
                         if (obj !== undefined && status.includes(obj[config.v.statusElement])) {
                             // Get preferred ID from local object

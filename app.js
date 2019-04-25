@@ -83,6 +83,13 @@ function getLocalObjectByAlias (alias) {
 }
 
 
+function getLocalObjectByPseudonym (pseudonym) {
+    return asArray(data_objects[config.a.JSONContainer]).find(function (e) {
+        return asArray(e[config.v.pseudonymElement]).includes(pseudonym);
+    });
+}
+
+
 // get the value using the path_key from config template
 function deepFind (obj, path_key, allow_arrays) {
     var allow_arrays = allow_arrays || false;
