@@ -81,11 +81,23 @@ ActionButtonPlugin.prototype.render = function () {
 
 
 ActionButtonPlugin.prototype.registerButton = function (btn) {
-    // TODO: Check if it is a button and add
-    this.buttons.push(btn);
-    // Add to first button group, which is the plugin button group.
-    // Other button groups could exist inside, e.g. as dropdowns.
-    this.plugin.find('.btn-group').first().append(btn);
+    // btn should be one JQuery element which is either <a> or <button> with class "btn"
+    // or a <div> with class "btn-group".
+    if (btn.length == 1) {
+        var n = btn[0].nodeName.toLowerCase();
+        var has_btn_class = btn.hasClass('btn');
+        var has_btngroup_class = btn.hasClass('btn-group');
+        if (((n == 'a' || n == 'button') && has_btn_class) || (n == 'div' && has_btngroup_class)) {
+            this.buttons.push(btn);
+            // Add to first button group, which is the plugin button group.
+            // Other button groups could exist inside, e.g. as dropdowns.
+            this.plugin.find('.btn-group').first().append(btn);
+        } else {
+            this.log('Wrong parameter for registerButton()', 'ERROR');
+        }
+    } else {
+        this.log('Too many objects for registerButton() given. Expected 1, got ' + btn.length + '.', 'ERROR');
+    }
     return this;
 }
 
