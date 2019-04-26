@@ -1,6 +1,7 @@
 // Global application object
 // TODO: reimplement, so that everything important is accessable via the global app object
 function BasicApp (ctx, cfg) {
+    this.version = '1.0.10';
     this.context = ctx;
     this.config = cfg;
     this.plugins = [];  // Container for registered plugins
@@ -33,9 +34,9 @@ function initApplication (config) {
     if (config != null) {
         // TODO: check configuration for minimal set of options
         // shorten some config paths
-        config.v = config.app.config.view[context];
-        config.a = config.app.config.api[context];
-        config.m = config.app.config.mapping[context];
+        config.v = config.view[context];
+        config.a = config.api[context];
+        config.m = config.mapping[context];
         console.log('Config loaded.');
         // config is loaded trigger a event
         $('body').trigger('basicAppConfigLoaded');
@@ -171,12 +172,12 @@ function createNewHTMLObject(data){
     }
     var title_html = '<h5 class="mb-1">' + data[config.v.titleElement] + '</h5>' + description_html;
     // Status button (dropdown)
-    var status = config.app.config.status.default;
+    var status = config.status.default;
     if (data[config.v.statusElement]) {
         status = data[config.v.statusElement];
     }
     var status_buttons = [];
-    var left_status = config.app.config.status.available.filter(function (item) {
+    var left_status = config.status.available.filter(function (item) {
         return item != status;
     });
     left_status.forEach(function (stat) {
@@ -240,7 +241,7 @@ function getPopoverHTMLFromObject(obj) {
 
 // Load the JSON data for the popover
 function loadPopoverContent (label_obj){
-    var use_corsanywhere = config.app.config.use_corsanywhere;
+    var use_corsanywhere = config.use_corsanywhere;
     var corsanywhere_url = '';
     if (use_corsanywhere) {
         corsanywhere_url = 'https://cors-anywhere.herokuapp.com/';
@@ -598,8 +599,8 @@ function enableButtonFilter (selector) {
 
 // Initialize app footer
 function initAppFooter () {
-    var f_conf = config.app.config.footer;
-    var img_path = 'img/' + config.app.config.footer.logoFileName;
+    var f_conf = config.footer;
+    var img_path = 'img/' + config.footer.logoFileName;
     if (context != 'root') {
         img_path = '../' + img_path;
     }
@@ -616,8 +617,8 @@ function initAppFooter () {
                         <div class="col-md-8 d-none d-md-block" id="footer-text">\
                             <span class="text-light small">' + f_conf.text + '</span>\
                         </div>\
-                        <div class="col-6 col-md-2" id="footer-version">\
-                            <span class="text-light small">Version ' + config.app.version + '</span>\
+                        <div class="col-6 col-md-2" id="footer-">\
+                            <span class="text-light small">Version ' + app.version + '</span>\
                         </div>\
                     </div>\
                 </div>';
@@ -757,7 +758,7 @@ function addObject (el, params){
         if (params && params[config.v.statusElement] != undefined) {
             local_object[config.v.statusElement] = params[config.v.statusElement];
         } else {
-            local_object[config.v.statusElement] = config.app.config.status.default;
+            local_object[config.v.statusElement] = config.status.default;
         }
         // Add configured attributes to object
         var attributes = config.m;

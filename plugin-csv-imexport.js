@@ -24,8 +24,8 @@ function CSVImportExportPlugin() {
 
     // Build the status buttons
     var modal_csv_file_upload_status_html = '';
-    config.app.config.status.available.forEach(function (status) {
-        if(status == config.app.config.status.default){
+    config.status.available.forEach(function (status) {
+        if(status == config.status.default){
             modal_csv_file_upload_status_html += '<label class="btn btn-secondary active">\
                     <input type="radio" name="csv-import-status" value="' + status + '" autocomplete="off" checked>' + status + '\
                 </label>';
@@ -467,7 +467,7 @@ CSVImportExportPlugin.prototype.mergeObjectsWithCSV = function() {
                         $(entities_form).append('<small class="form-text">Select statu(u)s to merge. <span class="text-muted">Only objects with the selected status will be merged.</span></small>');
                         var status_buttons = $('<div class="btn-group btn-group-sm btn-group-toggle mb-2" data-toggle="buttons"></div>')
                             .appendTo(entities_form);
-                        config.app.config.status.available.forEach(function (status) {
+                        config.status.available.forEach(function (status) {
                             if (preselected_status.includes(status)) {
                                 status_buttons.append('<label class="btn btn-secondary active">\
                                                         <input type="checkbox" name="csv-status" value="' + status + '" autocomplete="off" checked>\

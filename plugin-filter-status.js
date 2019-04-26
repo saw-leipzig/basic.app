@@ -10,7 +10,7 @@ var basicPluginFilter = new ActionButtonPlugin('app-plugin-filter-generic', 'Fil
 basicPluginFilter.render();
 
 // Register filter buttons
-config.app.config.status.available.forEach(function (status) {
+config.status.available.forEach(function (status) {
     // Filter button
     var filter_btn_span = $('<span id="badge-filter-' + status +'">0</span>')
         .addClass('badge' + (status_colormap[status] ? ' badge-' + status_colormap[status] : ''));
@@ -50,14 +50,14 @@ function enableButtonFilter (selector) {
 // Function is counting all data filter by status
 function countObjectsByStatus () {
     var counts = {};
-    config.app.config.status.available.forEach(function (status) {counts[status] = 0});
+    config.status.available.forEach(function (status) {counts[status] = 0});
     if(data_objects[config.a.JSONContainer]) {
         asArray(data_objects[config.a.JSONContainer]).forEach(function(e){
             // e.g. {counts: {safe: 1}}
             counts[e[config.v.statusElement]]++;
         })
     }
-    config.app.config.status.available.forEach(function (status) {
+    config.status.available.forEach(function (status) {
         document.getElementById('badge-filter-' + status).innerHTML = counts[status];
     })
 }

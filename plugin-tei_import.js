@@ -35,8 +35,8 @@ function TEIImportPlugin() {
 
     // Build the status buttons
     var modal_tei_file_upload_status_html = '';
-    config.app.config.status.available.forEach(function (status) {
-        if(status == config.app.config.status.default){
+    config.status.available.forEach(function (status) {
+        if(status == config.status.default){
             modal_tei_file_upload_status_html += '<label class="btn btn-secondary active">\
                     <input type="radio" name="tei-import-status" value="' + status + '" autocomplete="off" checked>' + status + '\
                 </label>';

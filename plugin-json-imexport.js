@@ -65,7 +65,7 @@ function JSONImportExportPlugin() {
     var modal_json_file_upload_status_html = '<label class="btn btn-secondary active">\
                 <input type="radio" name="json-import-status" value="as_is" autocomplete="off" checked> from file\
             </label>';
-    config.app.config.status.available.forEach(function (status) {
+    config.status.available.forEach(function (status) {
         modal_json_file_upload_status_html += '<label class="btn btn-secondary">\
                 <input type="radio" name="json-import-status" value="' + status + '" autocomplete="off">' + status + '\
             </label>';
