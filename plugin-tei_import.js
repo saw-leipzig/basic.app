@@ -1,5 +1,6 @@
 function TEIImportPlugin() {
     var plugin = this;
+    this.entities =[];
     this.importable_entities =[];
     this.names_to_import = [];
     this.ids_to_import = []; // local ids
@@ -27,10 +28,15 @@ function TEIImportPlugin() {
     basicPluginActions.registerButton(this.btn_action_tei_upload);
 
 
+    // Plugin documentation to show in import form
+    var modal_tei_file_upload_documentation = 'With the <em>XML Import</em>-Plugin you can import basic entity data (name, local ID and authority data ID) from a local XML file. The importer uses a combined unification logic - name based and id based.\
+                                               If no IDs are given, identical names will be imported as one entity. Also characters usually used to mark uncertainty and conjecture, that are <mark>[</mark>, <mark>]</mark> and <mark>?</mark>, will be ignored \
+                                               in comparison, e.g. "[John?] Doe" is the same as "John Doe". If names differ but any ID (local or authority) equals, only one entity will be imported. If aliases are configured in the app model, different names with same IDs will be imported as aliases.';
+
     // Build the status buttons
     var modal_tei_file_upload_status_html = '';
-    config.app.config.status.available.forEach(function (status) {
-        if(status == config.app.config.status.default){
+    config.status.available.forEach(function (status) {
+        if(status == config.status.default){
             modal_tei_file_upload_status_html += '<label class="btn btn-secondary active">\
                     <input type="radio" name="tei-import-status" value="' + status + '" autocomplete="off" checked>' + status + '\
                 </label>';
@@ -60,12 +66,13 @@ function TEIImportPlugin() {
                                           <div class="modal-dialog modal-lg" role="document">\
                                               <div class="modal-content">\
                                                   <div class="modal-header">\
-                                                      <h5 class="modal-title">Upload TEI</h5>\
+                                                      <h5 class="modal-title">Import from XML</h5>\
                                                       <button type="button" class="close" data-dismiss="modal" aria-label="Close">\
                                                           <span aria-hidden="true">✖</span>\
                                                       </button>\
                                                   </div>\
                                                   <div class="modal-body">\
+                                                      <p>' + modal_tei_file_upload_documentation + '</p>\
                                                       <form id="import-teidata-file-form">\
                                                           <div class="custom-file mb-2">\
                                                             <input type="file" class="custom-file-input" id="uploadFileTEI">\
@@ -138,6 +145,7 @@ TEIImportPlugin.prototype.getEntitiesFromXML = function () {
     $(btn_import).addClass('disabled');
     $(btn_add).addClass('disabled');
     entities_form.empty();
+    plugin.entities = [];
     plugin.importable_entities = [];
     plugin.names_to_import = [];
     var form_values = file_form.serializeArray();
@@ -167,16 +175,22 @@ TEIImportPlugin.prototype.getEntitiesFromXML = function () {
             // TODO: check if its TEI
             // Get all elements
             var entities = xml.find(context2elementname[context]);
+            plugin.entities = entities;
             // Uniquify by reference and name
             var unique_names = [];
             var found_ids = [];
             var found_refs = [];
             var identified_entities = entities.filter(function (i, e) {
                 var name = e.textContent;
+                // Ignore characters: [, ], ?
+                name = name.replace(/[\[\]\?]/g, '');
+                // normalize space
+                name = name.replace(/\s{2,}/g, ' ');
+
                 var local_id = e.getAttribute(plugin.id_attribute_name);
                 var ref = e.getAttribute(plugin.reference_attribute_name);
-                // object is identically if it has the same id/ref or the same name
 
+                // object is identically if it has the same id/ref or the same name
                 if (local_id != null ||  ref != null) {
                     if (found_ids.includes(local_id) || found_refs.includes(ref)) {
                         return false;
@@ -212,6 +226,11 @@ TEIImportPlugin.prototype.getEntitiesFromXML = function () {
                 $(chk_button_filter).appendTo(entities_form);
                 var entities_btn_group = $('<div class="form-group"></div>').appendTo(entities_form)
                 plugin.importable_entities.each(function (i, e) {
+                    var name = e.textContent;
+                    // Ignore characters: [, ], ?
+                    name = name.replace(/[\[\]\?]/g, '');
+                    // normalize space
+                    name = name.replace(/\s{2,}/g, ' ');
                     var ref_html = '';
                     if (e.attributes[plugin.id_attribute_name] && e.attributes[plugin.id_attribute_name].value != '') {
                         ref_html += ' <span class="badge badge-warning">' + e.attributes[plugin.id_attribute_name].value + '</span>';
@@ -220,9 +239,9 @@ TEIImportPlugin.prototype.getEntitiesFromXML = function () {
                         ref_html += ' <span class="badge badge-dark">' + e.attributes[plugin.reference_attribute_name].value.substr(config.v.identifierBaseURL.length) + '</span>';
                     }
                     var chk_html = '<div class="form-check form-check-inline">\
-                                      <input class="form-check-input" type="checkbox" value="' + e.textContent + '" id="import-entitiy-' + i + '" checked>\
+                                      <input class="form-check-input" type="checkbox" value="' + name + '" id="import-entitiy-' + i + '" checked>\
                                       <label class="form-check-label" for="import-entitiy-' + i + '">\
-                                        ' + e.textContent + ref_html +'\
+                                        ' + name + ref_html +'\
                                       </label>\
                                     </div>';
                     $(chk_html).appendTo(entities_btn_group);
@@ -313,28 +332,60 @@ TEIImportPlugin.prototype.addEntities = function (event) {
     var status = file_form.serializeArray().find(ipt => ipt.name == 'tei-import-status').value;
     console.log('TEI Import: Adding ' + plugin.names_to_import.length + ' objects ...');
     this.importable_entities.each(function (i, e) {
-        if (plugin.names_to_import.includes(e.textContent)) {
+        var name = e.textContent;
+        // Ignore characters: [, ], ?
+        name = name.replace(/[\[\]\?]/g, '');
+        // normalize space
+        name = name.replace(/\s{2,}/g, ' ');
+
+        if (plugin.names_to_import.includes(name)) {
             // Set params for new local object
             var params = {};
-            params[config.v.titleElement] = e.textContent;
+            params[config.v.titleElement] = name;
             params[config.v.statusElement] = status;
             console.log('TEI Import: Imported data is set to the status: "' + status + '".');
+            var id = e.attributes[plugin.id_attribute_name];
+            var ref = e.attributes[plugin.reference_attribute_name];
             // Check if we already have IDs set, which we can import.
             // They should be in the 'key'-attribute
-            if (e.attributes[plugin.id_attribute_name] !== undefined) {
+            if (id !== undefined) {
                 // TODO: this structure must be configurable and should not be fixed in the code.
-                params.id = e.attributes[plugin.id_attribute_name].value;
+                params.id = id.value;
             }
             // Check if we already have references set, which we can import.
             // They should be in the 'ref'-attribute
-            if (e.attributes[plugin.reference_attribute_name] !== undefined && e.attributes[plugin.reference_attribute_name].value.startsWith(config.v.identifierBaseURL)) {
+            if (ref !== undefined && ref.value.startsWith(config.v.identifierBaseURL)) {
                 // TODO: this structure must be configurable and should not be fixed in the code, because this is
                 // specific to the exist-db JSON export.
                 params[config.v.identifierElement] = {
-                    '#text': e.attributes[plugin.reference_attribute_name].value,
+                    '#text': ref.value,
                     'preferred': 'YES'
                 };
             }
+            // If alias element is configured, we can import alternative names with same IDs as aliases.
+            // So we have to filter out all with same id or ref and add names, if different, to configured
+            // alias element.
+            if (config.v.aliasElement != undefined && (id !== undefined || ref !== undefined)) {
+                var aliases = [];
+                plugin.entities
+                    .filter(function (i, ie) {
+                        return (ie.attributes[plugin.id_attribute_name] !== undefined && id !== undefined && ie.attributes[plugin.id_attribute_name].value == id.value) || (ie.attributes[plugin.reference_attribute_name] !== undefined && ref !== undefined && ie.attributes[plugin.reference_attribute_name].value == ref.value);
+                    })
+                    .each(function (i, el) {
+                        var alias = el.textContent;
+                        // Ignore characters: [, ], ?
+                        alias = alias.replace(/[\[\]\?]/g, '');
+                        // normalize space
+                        alias = alias.replace(/\s{2,}/g, ' ');
+                        if (!aliases.includes(alias) && alias != name) {
+                            aliases.push(alias);
+                        }
+                    });
+                if (aliases.length) {
+                    params[config.v.aliasElement] = aliases;
+                }
+            }
+            // Finally add the parsed object.
             addObject(event.target, params)
         }
     });

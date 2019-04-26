@@ -426,7 +426,7 @@ CSVGenericImportExportPlugin.prototype.renderSettingsForm = function (event) {
     if (plugin.mode == 'merge') {
         status_buttons_type = 'checkbox';
     }
-    config.app.config.status.available.forEach(function (status) {
+    config.status.available.forEach(function (status) {
         if (plugin.preselected_status.includes(status)) {
             status_buttons.append('<label class="btn btn-secondary active">\
                                     <input type="' + status_buttons_type + '" name="csv-status" value="' + status + '" autocomplete="off" checked>\

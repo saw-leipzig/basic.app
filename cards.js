@@ -356,7 +356,7 @@ function addCard (container, ref_id, local_object) {
         var obj = undefined;
         // Object wasn't loaded jet, do so
         // diplay loading state, e.g. spinner icon
-        var use_corsanywhere = config.app.config.use_corsanywhere;
+        var use_corsanywhere = config.use_corsanywhere;
         var corsanywhere_url = '';
         if (use_corsanywhere) {
             corsanywhere_url = 'https://cors-anywhere.herokuapp.com/';

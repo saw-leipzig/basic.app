@@ -1,13 +1,24 @@
-// Filter button
-var plugin_filter_btns = $('<button class="btn btn-outline-light btn-filter" id="btn-filter-safe" type="button">safe <span class="badge badge-success" id="badge-filter-safe">0</span></button>\
-                           <button class="btn btn-outline-light btn-filter" id="btn-filter-unsafe" type="button">unsafe <span class="badge badge-warning" id="badge-filter-unsafe">0</span></button>\
-                           <button class="btn btn-outline-light btn-filter" id="btn-filter-unchecked" type="button">unchecked <span class="badge badge-secondary" id="badge-filter-unchecked">0</span></button>\
-                           <button class="btn btn-outline-light btn-filter" id="btn-filter-unavailable" type="button">unavailable <span class="badge badge-danger" id="badge-filter-unavailable">0</span></button>');
+var status_colormap = {
+    safe: 'success',
+    unsafe: 'warning',
+    unchecked: 'secondary',
+    unavailable: 'danger',
+};
+
 // Initialize filter plugin
 var basicPluginFilter = new ActionButtonPlugin('app-plugin-filter-generic', 'Filter', 'fas fa-sliders-h', '#app-content-plugins-filter');
 basicPluginFilter.render();
+
 // Register filter buttons
-basicPluginFilter.registerButton(plugin_filter_btns);
+config.status.available.forEach(function (status) {
+    // Filter button
+    var filter_btn_span = $('<span id="badge-filter-' + status +'">0</span>')
+        .addClass('badge' + (status_colormap[status] ? ' badge-' + status_colormap[status] : ''));
+    var filter_btn = $('<button id="btn-filter-' + status +'" type="button">' + status +' </button>')
+        .addClass('btn btn-outline-light btn-filter')
+        .append(filter_btn_span);
+    basicPluginFilter.registerButton(filter_btn);
+});
 
 
 // Initialize filter button
@@ -39,14 +50,14 @@ function enableButtonFilter (selector) {
 // Function is counting all data filter by status
 function countObjectsByStatus () {
     var counts = {};
-    config.app.config.status.available.forEach(function (status) {counts[status] = 0})
+    config.status.available.forEach(function (status) {counts[status] = 0});
     if(data_objects[config.a.JSONContainer]) {
         asArray(data_objects[config.a.JSONContainer]).forEach(function(e){
             // e.g. {counts: {safe: 1}}
             counts[e[config.v.statusElement]]++;
         })
     }
-    config.app.config.status.available.forEach(function (status) {
+    config.status.available.forEach(function (status) {
         document.getElementById('badge-filter-' + status).innerHTML = counts[status];
     })
 }

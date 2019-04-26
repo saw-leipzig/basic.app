@@ -24,8 +24,8 @@ function CSVImportExportPlugin() {
 
     // Build the status buttons
     var modal_csv_file_upload_status_html = '';
-    config.app.config.status.available.forEach(function (status) {
-        if(status == config.app.config.status.default){
+    config.status.available.forEach(function (status) {
+        if(status == config.status.default){
             modal_csv_file_upload_status_html += '<label class="btn btn-secondary active">\
                     <input type="radio" name="csv-import-status" value="' + status + '" autocomplete="off" checked>' + status + '\
                 </label>';
@@ -212,6 +212,16 @@ CSVImportExportPlugin.prototype.getObjectsFromCSV = function() {
                 complete: function(results) {
                     console.log('CSV Import/Export: File ' + file.name + ' loaded.');
                     if (results.errors.length == 0) {
+                        // Ensure we have a valid cmi2csv CSV, that is at least the columns sender, addressee and senderDate exist
+                        if (!(results.meta.fields.includes('sender') && results.meta.fields.includes('addressee') && results.meta.fields.includes('senderDate'))) {
+                            var msg = '[ERROR] Your CSV file is missing one or all of the required columns: sender, addressee or senderDate.';
+                            console.log('CSV Import/Export: ' + msg);
+                            // Bootstrap form validation
+                            file_input
+                                .after('<div class="invalid-feedback">' + msg + '</div>')
+                                .addClass('is-invalid');
+                            return plugin;
+                        }
                         // Bootstrap form validation
                         file_input.addClass('is-valid');
                         // Get entities
@@ -241,7 +251,10 @@ CSVImportExportPlugin.prototype.getObjectsFromCSV = function() {
                                             id = config.v.identifierBaseURL + id.trim();
                                         }
                                         var entity = {};
-
+                                        // Ignore characters: [, ], ?
+                                        name = name.replace(/[\[\]\?]/g, '');
+                                        // normalize space
+                                        name = name.replace(/\s{2,}/g, ' ');
                                         // Name and ID are given. Check for duplicate ID
                                         if (name && id && !found_ids.includes(id)) {
                                             entity[config.v.titleElement] = name;
@@ -422,6 +435,16 @@ CSVImportExportPlugin.prototype.mergeObjectsWithCSV = function() {
                 complete: function(results) {
                     console.log('CSV Import/Export: File ' + file.name + ' loaded.');
                     if (results.errors.length == 0) {
+                        // Ensure we have a valid cmi2csv CSV, that is at least the columns sender, addressee and senderDate exist
+                        if (!(results.meta.fields.includes('sender') && results.meta.fields.includes('addressee') && results.meta.fields.includes('senderDate'))) {
+                            var msg = '[ERROR] Your CSV file is missing one or all of the required columns: sender, addressee or senderDate.';
+                            console.log('CSV Import/Export: ' + msg);
+                            // Bootstrap form validation
+                            file_input
+                                .after('<div class="invalid-feedback">' + msg + '</div>')
+                                .addClass('is-invalid');
+                            return plugin;
+                        }
                         // Bootstrap form validation
                         file_input.addClass('is-valid');
                         // Store data needed for later merging
@@ -444,7 +467,7 @@ CSVImportExportPlugin.prototype.mergeObjectsWithCSV = function() {
                         $(entities_form).append('<small class="form-text">Select statu(u)s to merge. <span class="text-muted">Only objects with the selected status will be merged.</span></small>');
                         var status_buttons = $('<div class="btn-group btn-group-sm btn-group-toggle mb-2" data-toggle="buttons"></div>')
                             .appendTo(entities_form);
-                        config.app.config.status.available.forEach(function (status) {
+                        config.status.available.forEach(function (status) {
                             if (preselected_status.includes(status)) {
                                 status_buttons.append('<label class="btn btn-secondary active">\
                                                         <input type="checkbox" name="csv-status" value="' + status + '" autocomplete="off" checked>\
@@ -542,9 +565,13 @@ CSVImportExportPlugin.prototype.mergeCSV = function() {
     this.csv_data.forEach(function (letter, index) {
         // Iterate over columns
         context2columnnames[context].forEach(function (col) {
-            // Ensure there is a column to read from. We presuppose the coexistence of
-            // columns <name> and <name>ID.
-            if (letter[col] != undefined && letter[col + 'ID'] != undefined) {
+            // Ensure there is a column to read from.
+            if (letter[col] != undefined) {
+                // Also ensure there is a corresponding ID-column.
+                if (letter[col + 'ID'] == undefined) {
+                    // If there is no corresponding ID-column in the original CSV, we add them now
+                    letter[col + 'ID'] = ''
+                }
                 // There could be multiple entities in one cell, divided by delimiter.
                 // Therefor split the column content by delimiter to an array and iterate through
                 // remember the current position to correctly match corresponding name and ID.
@@ -552,6 +579,10 @@ CSVImportExportPlugin.prototype.mergeCSV = function() {
                 var ids = letter[col + 'ID'].split(delimiter);
                 names.forEach(function (name, idx) {
                     var id = ids[idx];
+                    // Ignore characters: [, ], ?
+                    name = name.replace(/[\[\]\?]/g, '');
+                    // normalize space
+                    name = name.replace(/\s{2,}/g, ' ');
                     // Don't replace/add anything in 'soft' mode if an ID is already given
                     if (name != undefined && name.trim() != '' && !(method == 'soft' && id && id.trim() != '')) {
                         // Get matching object
@@ -560,6 +591,10 @@ CSVImportExportPlugin.prototype.mergeCSV = function() {
                         // If there is no match on titleElement, try to find one with matching alias, if alias is configured
                         if (obj == undefined && config.v.aliasElement != undefined) {
                             obj = getLocalObjectByAlias(name);
+                        }
+                        // If there is no match on titleElement and aliasElement, try to find one with matching pseudonym, if pseudonym is configured
+                        if (obj == undefined && config.v.pseudonymElement != undefined) {
+                            obj = getLocalObjectByPseudonym(name);
                         }
                         // Check if object is in correct state
                         if (obj !== undefined && status.includes(obj[config.v.statusElement])) {

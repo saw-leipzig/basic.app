@@ -99,9 +99,9 @@ function createMap (cluster) {
         trackResize: true
     });
     // Create base map
-    var tiles = L.tileLayer(config.app.config.map.baseTileURL, {
-        maxZoom: config.app.config.map.baseTileMaxZoom,
-        attribution: config.app.config.map.baseTileAttribution
+    var tiles = L.tileLayer(config.map.baseTileURL, {
+        maxZoom: config.map.baseTileMaxZoom,
+        attribution: config.map.baseTileAttribution
     }).addTo(map);
     // Invalide the Size to properly showing the map
     map.invalidateSize()

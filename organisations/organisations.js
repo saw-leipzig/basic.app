@@ -82,7 +82,7 @@ function loadSeealsoResources (cardid, ref_id) {
      *
      *  */
     // TODO: usage without cors-anywhere possible?
-    //var use_corsanywhere = config.app.config.use_corsanywhere;
+    //var use_corsanywhere = config.use_corsanywhere;
     var use_corsanywhere = true;
     var corsanywhere_url = '';
     if (use_corsanywhere) {

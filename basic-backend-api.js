@@ -1,13 +1,13 @@
 /**
  * This storage plugin requires additional parameter configured in config.js to work properly.
  *
- * config.app.config.baseURL = 'http://localhost:9080/exist/apps/basic/';
- * config.app.config.api.persons.datasets = "api/datasets/";
- * config.app.config.api.persons.RESTAPI = "api/persons/";
- * config.app.config.api.places.datasets = "api/datasets/";
- * config.app.config.api.places.RESTAPI = "api/places/";
- * config.app.config.api.organisations.datasets = "api/datasets/";
- * config.app.config.api.organisations.RESTAPI = "api/organisations/";
+ * config.baseURL = 'http://localhost:9080/exist/apps/basic/';
+ * config.api.persons.datasets = "api/datasets/";
+ * config.api.persons.RESTAPI = "api/persons/";
+ * config.api.places.datasets = "api/datasets/";
+ * config.api.places.RESTAPI = "api/places/";
+ * config.api.organisations.datasets = "api/datasets/";
+ * config.api.organisations.RESTAPI = "api/organisations/";
  *
  */
 
@@ -176,7 +176,7 @@ $('body').on('basicAppConfigLoaded', function () {
 /* API functions */
 function APIAdd(obj){
     var query = '?' + jQuery.param(query_dataset);
-    $.post(config.app.config.baseURL + config.a.RESTAPI + query, obj).done(function (data) {
+    $.post(config.baseURL + config.a.RESTAPI + query, obj).done(function (data) {
         //Update ID of Local Object
         var old_id = obj.id;
         getLocalObjectById(obj.id).id =  data.response.id;
@@ -191,7 +191,7 @@ function APIAdd(obj){
 function APIUpdate (oid) {
     var query = '?' + jQuery.param(query_dataset);
     $.ajax({
-        url: config.app.config.baseURL + config.a.RESTAPI + oid + query,
+        url: config.baseURL + config.a.RESTAPI + oid + query,
         type: 'PUT',
         headers: {
             "Content-Type": "application/xml",
@@ -208,7 +208,7 @@ function APIUpdate (oid) {
 function APIDelete (oid) {
     var query = '?' + jQuery.param(query_dataset);
     $.ajax({
-        url: config.app.config.baseURL + config.a.RESTAPI + oid + query,
+        url: config.baseURL + config.a.RESTAPI + oid + query,
         type: 'DELETE',
         success: function () {
             console.log('REST-API: Deleted object with ID: ' + oid);
@@ -223,7 +223,7 @@ function APIDatasets () {
        sessionStorage.setItem(context,cds);
     }
     // Load available datasets
-    $.getJSON(config.app.config.baseURL + config.a.datasets + context).done(function (result) {
+    $.getJSON(config.baseURL + config.a.datasets + context).done(function (result) {
         addDatasetsToDOM(result);
     });
     // To take the remembered dataset query_dataset has to override
@@ -233,7 +233,7 @@ function APIDatasets () {
     }
     if (cds) {
         // Load objects from cds in object cache
-        $.getJSON(config.app.config.baseURL + config.app.config.api[context].RESTAPI, query_dataset).done(function (result) {
+        $.getJSON(config.baseURL + config.api[context].RESTAPI, query_dataset).done(function (result) {
             var cnt = 0;
             if (result) {
                 cnt = 1;
