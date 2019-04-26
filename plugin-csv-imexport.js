@@ -212,6 +212,16 @@ CSVImportExportPlugin.prototype.getObjectsFromCSV = function() {
                 complete: function(results) {
                     console.log('CSV Import/Export: File ' + file.name + ' loaded.');
                     if (results.errors.length == 0) {
+                        // Ensure we have a valid cmi2csv CSV, that is at least the columns sender, addressee and senderDate exist
+                        if (!(results.meta.fields.includes('sender') && results.meta.fields.includes('addressee') && results.meta.fields.includes('senderDate'))) {
+                            var msg = '[ERROR] Your CSV file is missing one or all of the required columns: sender, addressee or senderDate.';
+                            console.log('CSV Import/Export: ' + msg);
+                            // Bootstrap form validation
+                            file_input
+                                .after('<div class="invalid-feedback">' + msg + '</div>')
+                                .addClass('is-invalid');
+                            return plugin;
+                        }
                         // Bootstrap form validation
                         file_input.addClass('is-valid');
                         // Get entities
@@ -425,6 +435,16 @@ CSVImportExportPlugin.prototype.mergeObjectsWithCSV = function() {
                 complete: function(results) {
                     console.log('CSV Import/Export: File ' + file.name + ' loaded.');
                     if (results.errors.length == 0) {
+                        // Ensure we have a valid cmi2csv CSV, that is at least the columns sender, addressee and senderDate exist
+                        if (!(results.meta.fields.includes('sender') && results.meta.fields.includes('addressee') && results.meta.fields.includes('senderDate'))) {
+                            var msg = '[ERROR] Your CSV file is missing one or all of the required columns: sender, addressee or senderDate.';
+                            console.log('CSV Import/Export: ' + msg);
+                            // Bootstrap form validation
+                            file_input
+                                .after('<div class="invalid-feedback">' + msg + '</div>')
+                                .addClass('is-invalid');
+                            return plugin;
+                        }
                         // Bootstrap form validation
                         file_input.addClass('is-valid');
                         // Store data needed for later merging
@@ -545,9 +565,13 @@ CSVImportExportPlugin.prototype.mergeCSV = function() {
     this.csv_data.forEach(function (letter, index) {
         // Iterate over columns
         context2columnnames[context].forEach(function (col) {
-            // Ensure there is a column to read from. We presuppose the coexistence of
-            // columns <name> and <name>ID.
-            if (letter[col] != undefined && letter[col + 'ID'] != undefined) {
+            // Ensure there is a column to read from.
+            if (letter[col] != undefined) {
+                // Also ensure there is a corresponding ID-column.
+                if (letter[col + 'ID'] == undefined) {
+                    // If there is no corresponding ID-column in the original CSV, we add them now
+                    letter[col + 'ID'] = ''
+                }
                 // There could be multiple entities in one cell, divided by delimiter.
                 // Therefor split the column content by delimiter to an array and iterate through
                 // remember the current position to correctly match corresponding name and ID.
