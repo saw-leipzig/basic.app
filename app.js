@@ -1,7 +1,7 @@
 // Global application object
 // TODO: reimplement, so that everything important is accessable via the global app object
 function BasicApp (ctx, cfg) {
-    this.version = '1.0.10';
+    this.version = '1.0.11';
     this.context = ctx;
     this.config = cfg;
     this.plugins = [];  // Container for registered plugins
