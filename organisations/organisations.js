@@ -8,7 +8,7 @@ basicPluginActions.registerButton(btn_action_add);
 
 
 function findAuthorityData (trigger, searchterm, fid) {
-    var viaf_url_suggest = 'http://www.viaf.org/viaf/AutoSuggest?query=';
+    const viaf_url_suggest = 'http://www.viaf.org/viaf/AutoSuggest?query=';
     var cnt = 0;
     // To prevend CORS warnings add '&callback=?' to the URL as suggested here http://api.jquery.com/jQuery.getJSON/
     $.getJSON(viaf_url_suggest + encodeURIComponent(searchterm) + '&callback=?').done(function (result) {
