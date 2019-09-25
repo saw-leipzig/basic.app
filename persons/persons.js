@@ -23,7 +23,7 @@ function findAuthorityData (trigger, searchterm, fid) {
             var person_gnd_results = person_results.filter(function (e) {
                 return e.dnb != undefined;
             });
-            cnt = person_gnd_results.length;
+            cnt = [...new Set(person_gnd_results.map(e => e.recordID))].length;
         }
         // Add number of results to button as badge
         $(trigger).children('.fas')
