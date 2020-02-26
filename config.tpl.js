@@ -62,7 +62,9 @@ var config = {
             "safe",
             "unsafe",
             "unavailable",
-            "unchecked"
+            "unchecked",
+            "duplicates",
+            "needs-correction"
         ],
         "default": "unchecked"
     },
