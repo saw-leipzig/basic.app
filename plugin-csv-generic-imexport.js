@@ -31,7 +31,8 @@ CSVGenericImportExportPlugin.prototype.init = function () {
     var plugin = this;
     // Set initial values
     plugin.allowed_mimetypes = [
-        'text/csv'
+        'text/csv',
+        'application/vnd.ms-excel'
     ];
 
     // Render buttons, forms, etc.

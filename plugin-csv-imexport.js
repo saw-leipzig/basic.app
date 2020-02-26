@@ -205,7 +205,7 @@ CSVImportExportPlugin.prototype.getObjectsFromCSV = function() {
     btn_add.addClass('disabled');
 
     if (file) {
-        if (file.type == 'text/csv') {
+        if (file.type == 'text/csv' || file.type == 'application/vnd.ms-excel') {
             Papa.parse(file, {
                 header: true,
                 skipEmptyLines: true,
@@ -428,7 +428,7 @@ CSVImportExportPlugin.prototype.mergeObjectsWithCSV = function() {
     btn_merge.addClass('disabled');
 
     if (file) {
-        if (file.type == 'text/csv') {
+        if (file.type == 'text/csv' || file.type == 'application/vnd.ms-excel') {
             Papa.parse(file, {
                 header: true,
                 skipEmptyLines: true,
