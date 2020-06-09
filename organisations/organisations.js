@@ -33,7 +33,8 @@ function findAuthorityData (trigger, searchterm, fid) {
         var references = [];
         for (var key in organisation_gnd_results) {
             if (Number(key) != 'NaN') {
-                references.push(organisation_gnd_results[key].dnb.toUpperCase());
+                var dnb_id = getDnbId(organisation_gnd_results[key].recordID);
+                references.push(dnb_id);
             }
         }
         console.log('FindAuthorityData: results (type is corporate and has DNB entry): ' + cnt);
@@ -44,6 +45,15 @@ function findAuthorityData (trigger, searchterm, fid) {
     });
 }
 
+
+function getDnbId(viaf_id) {
+    var links = JSON.parse($.ajax({
+        url: 'http://www.viaf.org/viaf/' + viaf_id + '/justlinks.json',
+        dataType: 'json',
+        async: false,
+    }).responseText);
+    return links.DNB[0].substring(21);
+}
 
 function addLinksFromObjectToCollection(obj, collection){
     /* Use SameAs relations to propagate further links.
