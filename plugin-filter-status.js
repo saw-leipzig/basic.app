@@ -4,7 +4,7 @@ var status_colormap = {
     unchecked: 'secondary',
     unavailable: 'danger',
     duplicates: 'info',
-    "needs-correction": 'warning'
+    'needs-correction': 'warning'
 };
 
 // Initialize filter plugin
