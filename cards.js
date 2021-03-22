@@ -90,7 +90,7 @@ function prepareCardData(local_object, obj, ref_id) {
             return e.preferred === 'YES'
         });
         // TODO: API constrainet: #text
-        if (pref_ref_object != undefined && pref_ref_object[ '#text'] === config.v.identifierBaseURL + ref_id) {
+        if (pref_ref_object != undefined && getPlainIdFromUrl(pref_ref_object[ '#text']) === ref_id) {
             pref_ref = 'YES';
         } else {
             pref_ref = 'NO'
@@ -119,7 +119,7 @@ function prepareCardData(local_object, obj, ref_id) {
         // create a base link
         ret.links.push({
             'name': config.v.identifierAbbreviation,
-            'url': config.v.identifierBaseURL + ref_id
+            'url': getUrlFromPlainId(ref_id)
         });
     }
 

@@ -162,6 +162,30 @@ function dataToString (data) {
 }
 
 
+/**
+ * Extracts the plain id value from a given full URL regardless of the protocol.
+ * Assumption: The plain id is the value after the given base Url value.
+ *
+ * @param  {string} url full url, e.g. https://d-nb.info/gnd/123456789X
+ * @return {string}     plain id, e.g. 123456789X
+ */
+function getPlainIdFromUrl(url) {
+    const pattern = new RegExp(config.v.identifierBaseURL + '(.+)$');
+    const match = url.match(pattern);
+    return match !== null ? match[1] : null;
+}
+
+
+/**
+ * Concatenates base_url and id value and adds protocol information
+ * @param  {string} id plain id, e.g. 123456789X
+ * @return {string}    full url, e.g. https://d-nb.info/gnd/123456789X
+ */
+function getUrlFromPlainId(id) {
+    return 'https://' + config.v.identifierBaseURL + id
+}
+
+
 function createNewHTMLObject(data){
     // As local objects exist before frontend representation, an id mapping is already there
     var fid = idm.getFrontendId(data.id);
@@ -194,7 +218,7 @@ function createNewHTMLObject(data){
     var button_del_html = '<button id="btn-delete_' + fid + '" type="button" aria-label="Delete." title="Delete" class="btn btn-delete btn-outline-secondary"><span class="fas fa-trash"></span></button>';
     var ads_buttons = [];
     asArray(data[config.v.identifierElement]).forEach(function (ref_data) {
-        var ref_id = ref_data['#text'].substring(config.v.identifierBaseURL.length);
+        var ref_id = getPlainIdFromUrl(ref_data['#text']);
         var pref_class = '';
         if (ref_data['preferred'] == 'YES') {
             pref_class = 'active';
@@ -316,7 +340,7 @@ function addRef2Data (oid, ref_id) {
         // TODO: API Model constrain: preferred
         'preferred': 'NO',
         // TODO: API Model constrain: #text
-        '#text': config.v.identifierBaseURL + ref_id
+        '#text': getUrlFromPlainId(ref_id)
     });
 }
 
@@ -327,7 +351,7 @@ function togglePreferredRef2Data (oid, ref_id) {
         // references > 1
         var ref_new_idx = obj[config.v.identifierElement].findIndex(function (ref) {
             // TODO: API Model constrain: #text
-            return ref['#text'] === config.v.identifierBaseURL + ref_id
+            return getPlainIdFromUrl(ref['#text']) === ref_id
         });
         var ref_old_idx = obj[config.v.identifierElement].findIndex(function (ref) {
             // TODO: API Model constrain: preferred
@@ -441,7 +465,7 @@ function enableButtonAddReference (selector, delegate_selector) {
             if (raw_value == '') {
                 // no input was given, maybe give a hint on that
                 console.log('No input given.');
-            } else if (! raw_value.startsWith(config.v.identifierBaseURL)) {
+            } else if (getPlainIdFromUrl(raw_value) === null || getPlainIdFromUrl(raw_value).length < 4) {
                 // input doesn't match a valid gnd URI (we should use a regex to check)
                 console.log('Invalid input given.');
             } else {
@@ -449,7 +473,7 @@ function enableButtonAddReference (selector, delegate_selector) {
                 // and than add a new button and update the backend
                 console.log('Valid URI: ' + raw_value);
                 // Get Reference-ID
-                var ref_id = raw_value.substring(config.v.identifierBaseURL.length)
+                var ref_id = getPlainIdFromUrl(raw_value)
                 console.log('REF-ID: ' + ref_id);
                 // add button and set popover event
                 addReference(this, fid, ref_id);
@@ -878,7 +902,7 @@ function shiftIdentifier (fid, ref_id, direction) {
     var obj = getLocalObjectById(idm.getObjectId(fid));
     var id_to_shift_idx = obj[config.v.identifierElement].findIndex(function (el) {
         // TODO: API constraint: #text
-        return el['#text'] == config.v.identifierBaseURL + ref_id;
+        return getPlainIdFromUrl(el['#text']) === ref_id;
     })
     var button_to_shift = $('#lbl-' + fid + '_' + ref_id);
     if (direction == 'right') {
@@ -907,7 +931,7 @@ function deleteIdentifier (fid, ref_id) {
     if (Array.isArray(obj[config.v.identifierElement])) {
         var id_to_delete_idx = obj[config.v.identifierElement].findIndex(function (el) {
             // TODO: API constraint: #text
-            return el['#text'] == config.v.identifierBaseURL + ref_id;
+            return getPlainIdFromUrl(el['#text']) === ref_id;
         });
         obj[config.v.identifierElement].splice(id_to_delete_idx, 1);
     } else {

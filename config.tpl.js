@@ -32,7 +32,7 @@ var config = {
             "statusElement": "status",
             "identifierElement": "identifier",
             "identifierAbbreviation": "DNB",
-            "identifierBaseURL": "http://d-nb.info/gnd/",
+            "identifierBaseURL": "d-nb.info/gnd/",
             "aliasElement": "alternateName",
             "pseudonymElement": "pseudonym"
         },
@@ -42,7 +42,7 @@ var config = {
             "statusElement": "status",
             "identifierElement": "identifier",
             "identifierAbbreviation": "GEO",
-            "identifierBaseURL": "http://www.geonames.org/",
+            "identifierBaseURL": "www.geonames.org/",
             "aliasElement": "alternateName"
         },
         "organisations":{
@@ -51,7 +51,7 @@ var config = {
             "statusElement": "status",
             "identifierElement": "identifier",
             "identifierAbbreviation": "DNB",
-            "identifierBaseURL": "http://d-nb.info/gnd/",
+            "identifierBaseURL": "d-nb.info/gnd/",
             "aliasElement": "alternateName"
         }
 
