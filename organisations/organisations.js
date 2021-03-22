@@ -8,7 +8,7 @@ basicPluginActions.registerButton(btn_action_add);
 
 
 function findAuthorityData (trigger, searchterm, fid) {
-    var viaf_url_suggest = 'http://www.viaf.org/viaf/AutoSuggest?query=';
+    const viaf_url_suggest = 'https://www.viaf.org/viaf/AutoSuggest?query=';
     var cnt = 0;
     // To prevend CORS warnings add '&callback=?' to the URL as suggested here http://api.jquery.com/jQuery.getJSON/
     $.getJSON(viaf_url_suggest + encodeURIComponent(searchterm) + '&callback=?').done(function (result) {
@@ -23,7 +23,7 @@ function findAuthorityData (trigger, searchterm, fid) {
             var organisation_gnd_results = organisation_results.filter(function (e) {
                 return e.dnb != undefined;
             });
-            cnt = organisation_gnd_results.length;
+            cnt = [...new Set(organisation_gnd_results.map(e => e.recordID))].length;
         }
         // Add number of results to button as badge
         $(trigger).children('.fas')
@@ -81,14 +81,7 @@ function loadSeealsoResources (cardid, ref_id) {
      * Example URL: https://beacon.findbuch.de/seealso/pnd-aks?format=seealso&id=100000118
      *
      *  */
-    // TODO: usage without cors-anywhere possible?
-    //var use_corsanywhere = config.use_corsanywhere;
-    var use_corsanywhere = true;
-    var corsanywhere_url = '';
-    if (use_corsanywhere) {
-        corsanywhere_url = 'https://cors-anywhere.herokuapp.com/';
-    }
-    var seealso_url = corsanywhere_url + 'https://beacon.findbuch.de/seealso/pnd-aks?format=seealso&id=' + ref_id.toUpperCase() + '&callback';
+    var seealso_url = 'https://beacon.findbuch.de/seealso/pnd-aks?format=seealso&id=' + ref_id.toUpperCase() + '&callback=?';
     // Only request data if not already done!
     // This is important, because prepareCardData is called twice if data wasn't fetched yet
     var fetched = fetched_objects.seealso.find(function (s){ return s.id == ref_id });

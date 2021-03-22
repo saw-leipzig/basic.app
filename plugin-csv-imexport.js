@@ -205,7 +205,7 @@ CSVImportExportPlugin.prototype.getObjectsFromCSV = function() {
     btn_add.addClass('disabled');
 
     if (file) {
-        if (file.type == 'text/csv') {
+        if (file.type == 'text/csv' || file.type == 'application/vnd.ms-excel') {
             Papa.parse(file, {
                 header: true,
                 skipEmptyLines: true,
@@ -248,7 +248,7 @@ CSVImportExportPlugin.prototype.getObjectsFromCSV = function() {
                                         var id = ids[idx];
                                         // csv2cmi automatically assigns ID to GND if not given as URL
                                         if (id && id.trim().length > 0 && !id.startsWith('http')) {
-                                            id = config.v.identifierBaseURL + id.trim();
+                                            id = getUrlFromPlainId(id.trim());
                                         }
                                         var entity = {};
                                         // Ignore characters: [, ], ?
@@ -312,8 +312,8 @@ CSVImportExportPlugin.prototype.getObjectsFromCSV = function() {
                             var entities_btn_group = $('<div class="form-group"></div>').appendTo(entities_form);
                             importable_entities.forEach(function (e, i) {
                                 var ref_html = '';
-                                if (e[config.v.identifierElement] && e[config.v.identifierElement].startsWith(config.v.identifierBaseURL)) {
-                                    ref_html = ' <span class="badge badge-dark">' + e[config.v.identifierElement].substr(config.v.identifierBaseURL.length) + '</span>';
+                                if (e[config.v.identifierElement] && getPlainIdFromUrl(e[config.v.identifierElement]) !== null) {
+                                    ref_html = ' <span class="badge badge-dark">' + getPlainIdFromUrl(e[config.v.identifierElement]) + '</span>';
                                 }
                                 var chk_html = '<div class="form-check form-check-inline">\
                                                   <input class="form-check-input" type="checkbox" value="' + e[config.v.titleElement] + '" id="import-entitiy-' + i + '" checked>\
@@ -388,7 +388,7 @@ CSVImportExportPlugin.prototype.addEntities = function(event) {
             params[config.v.statusElement] = status;
             console.log('CSV Import/Export: Imported data is set to the status: "' + status + '".');
             // Check if we already have references set, which we can import.
-            if (e[config.v.identifierElement] !== undefined && e[config.v.identifierElement].startsWith(config.v.identifierBaseURL)) {
+            if (e[config.v.identifierElement] !== undefined && getPlainIdFromUrl(e[config.v.identifierElement]) !== null) {
                 // TODO: this structure must be configurable and should not be fixed in the code, because this is
                 // specific to the exist-db JSON export.
                 params[config.v.identifierElement] = {
@@ -428,7 +428,7 @@ CSVImportExportPlugin.prototype.mergeObjectsWithCSV = function() {
     btn_merge.addClass('disabled');
 
     if (file) {
-        if (file.type == 'text/csv') {
+        if (file.type == 'text/csv' || file.type == 'application/vnd.ms-excel') {
             Papa.parse(file, {
                 header: true,
                 skipEmptyLines: true,
@@ -601,7 +601,7 @@ CSVImportExportPlugin.prototype.mergeCSV = function() {
                             // Get preferred ID from local object
                             var preferred_id = getPreferredIdentifierFromObject(obj);
                             // if plain mode is choosen, remove base URL from preferred ID
-                            if (mode == 'plain' && preferred_id) {preferred_id = preferred_id.substr(config.v.identifierBaseURL.length)}
+                            if (mode == 'plain' && preferred_id) { preferred_id = getPlainIdFromUrl(preferred_id) }
                             // Check if IDs are different
                             if (preferred_id != null && id != preferred_id) {
                                 ids[idx] = preferred_id;

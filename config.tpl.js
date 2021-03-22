@@ -1,7 +1,6 @@
 var config = {
-    "use_corsanywhere": false,
     "footer": {
-        "logoURL": "http://www.example.com",
+        "logoURL": "https://www.example.com",
         "logoFileName": "logo.png",
         "logoAlternativeText": "Open example.com in new window.",
         "text": "ba[sic?] - better authorities [search, identify, connect]"
@@ -9,12 +8,12 @@ var config = {
     "api": {
         "persons": {
             "JSONContainer": "person",
-            "authorityDataBaseURL": "http://hub.culturegraph.org/entityfacts/"
+            "authorityDataBaseURL": "https://hub.culturegraph.org/entityfacts/"
         },
         "places": {
             "JSONContainer": "place",
-            "authorityDataBaseURL": "http://api.geonames.org/getJSON?formatted=true&username=demo&style=full&geonameId=",
-            "geo_url_suggest": "http://api.geonames.org/searchJSON?q=",
+            "authorityDataBaseURL": "https://secure.geonames.org/getJSON?formatted=true&username=demo&style=full&geonameId=",
+            "geo_url_suggest": "https://secure.geonames.org/searchJSON?q=",
             "geo_url_params": {
                 "username": "demo",
                 "maxRows": "10",
@@ -23,7 +22,7 @@ var config = {
         },
         "organisations": {
             "JSONContainer" : "organisation",
-            "authorityDataBaseURL": "http://hub.culturegraph.org/entityfacts/"
+            "authorityDataBaseURL": "https://hub.culturegraph.org/entityfacts/"
         }
     },
     "view": {
@@ -33,7 +32,7 @@ var config = {
             "statusElement": "status",
             "identifierElement": "identifier",
             "identifierAbbreviation": "DNB",
-            "identifierBaseURL": "http://d-nb.info/gnd/",
+            "identifierBaseURL": "d-nb.info/gnd/",
             "aliasElement": "alternateName",
             "pseudonymElement": "pseudonym"
         },
@@ -43,7 +42,7 @@ var config = {
             "statusElement": "status",
             "identifierElement": "identifier",
             "identifierAbbreviation": "GEO",
-            "identifierBaseURL": "http://www.geonames.org/",
+            "identifierBaseURL": "www.geonames.org/",
             "aliasElement": "alternateName"
         },
         "organisations":{
@@ -52,7 +51,7 @@ var config = {
             "statusElement": "status",
             "identifierElement": "identifier",
             "identifierAbbreviation": "DNB",
-            "identifierBaseURL": "http://d-nb.info/gnd/",
+            "identifierBaseURL": "d-nb.info/gnd/",
             "aliasElement": "alternateName"
         }
 
@@ -62,7 +61,9 @@ var config = {
             "safe",
             "unsafe",
             "unavailable",
-            "unchecked"
+            "unchecked",
+            "duplicates",
+            "incorrect"
         ],
         "default": "unchecked"
     },
@@ -198,7 +199,7 @@ var config = {
     },
     "map": {
         "baseTileURL": "https://{s}.tile.openstreetmap.de/tiles/osmde/{z}/{x}/{y}.png",
-        "baseTileAttribution": "&copy; <a href=\"http://www.openstreetmap.org/copyright\">OpenStreetMap</a>",
+        "baseTileAttribution": "&copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a>",
         "baseTileMaxZoom": 18
     }
 };

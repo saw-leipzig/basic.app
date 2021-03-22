@@ -31,7 +31,8 @@ CSVGenericImportExportPlugin.prototype.init = function () {
     var plugin = this;
     // Set initial values
     plugin.allowed_mimetypes = [
-        'text/csv'
+        'text/csv',
+        'application/vnd.ms-excel'
     ];
 
     // Render buttons, forms, etc.
@@ -377,9 +378,10 @@ CSVGenericImportExportPlugin.prototype.renderEntitiesForm = function () {
         }
         if (e[plugin.mapping[config.v.identifierElement]]) {
             var id_plain = e[plugin.mapping[config.v.identifierElement]];
-            if (id_plain.startsWith(config.v.identifierBaseURL)) {
-                console.log(id_plain,e[plugin.mapping[config.v.identifierElement]])
-                id_plain = id_plain.substr(config.v.identifierBaseURL.length)
+            const id_plain_processed = getPlainIdFromUrl(id_plain);
+            if (id_plain_processed !== null) {
+                console.log(id_plain, e[plugin.mapping[config.v.identifierElement]])
+                id_plain = id_plain_processed
             }
             ref_html += ' <span class="badge badge-dark">' + config.v.identifierAbbreviation + ': ' + id_plain + '</span>';
         }
@@ -571,11 +573,11 @@ CSVGenericImportExportPlugin.prototype.addEntities = function(event) {
             params[config.v.titleElement] = e[plugin.mapping[config.v.titleElement]];
             // Check if we already have references set, which we can import.
             var id = e[plugin.mapping[config.v.identifierElement]];
-            if (id !== undefined && id.trim() !== '' && (!id.toLowerCase().startsWith('http') || id.startsWith(config.v.identifierBaseURL))) {
+            if (id !== undefined && id.trim() !== '' && (!id.toLowerCase().startsWith('http') || getPlainIdFromUrl(id) !== null)) {
                 // It should be possible to import plain IDs. So if there is an ID, not starting with the configured
                 // base URL, add them to the importable value. If there is another URI (starting with http), ignore the value
                 if (!id.toLowerCase().startsWith('http')) {
-                    id = config.v.identifierBaseURL + id.trim()
+                    id = getUrlFromPlainId(id.trim());
                 }
                 // TODO: this structure must be configurable and should not be fixed in the code, because this is
                 // specific to the exist-db JSON export.
@@ -654,7 +656,7 @@ CSVGenericImportExportPlugin.prototype.mergeEntities = function() {
                             // Get preferred ID from local object
                             var preferred_id = getPreferredIdentifierFromObject(obj);
                             // if plain mode is choosen, remove base URL from preferred ID
-                            if (mode == 'plain' && preferred_id) {preferred_id = preferred_id.substr(config.v.identifierBaseURL.length)}
+                            if (mode == 'plain' && preferred_id) { preferred_id = getPlainIdFromUrl(preferred_id) }
                             // React according to choosen method
                             if (preferred_id != null && (method == 'hard' || (method == 'soft' && row[plugin.mapping[key]].trim() == ''))) {
                                 plugin.csvdata.data[index][plugin.mapping[key]] = preferred_id;

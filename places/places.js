@@ -54,7 +54,7 @@ function addLinksFromObjectToCollection(obj, collection){
     // Add geoname object link
     collection.push({
         'name': config.v.identifierAbbreviation,
-        'url': config.v.identifierBaseURL + obj.geonameId
+        'url': getUrlFromPlainId(obj.geonameId)
     });
     // May add Wikipedia link
     if (obj.wikipediaURL) {

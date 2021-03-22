@@ -123,7 +123,7 @@ function getMarker (fid, obj, cluster) {
          var pref_ref_object = local_object[config.v.identifierElement].find(function (e) {
              return e.preferred === 'YES'
          });
-         if (pref_ref_object != undefined && pref_ref_object['#text'] === config.v.identifierBaseURL + ref_id) {
+         if (pref_ref_object != undefined && getPlainIdFromUrl(pref_ref_object['#text']) === ref_id) {
              pref_ref = 'YES';
          } else {
              pref_ref = 'NO'
@@ -166,7 +166,7 @@ function getMarker (fid, obj, cluster) {
                  var pref_ref_object = local_object[config.v.identifierElement].find(function (e) {
                      return e.preferred === 'YES'
                  });
-                 if (pref_ref_object != undefined && pref_ref_object[ '#text'] === config.v.identifierBaseURL + ref_id) {
+                 if (pref_ref_object != undefined && getPlainIdFromUrl(pref_ref_object[ '#text']) === ref_id) {
                      pref_ref = 'YES';
                  } else {
                      pref_ref = 'NO'

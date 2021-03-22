@@ -235,8 +235,8 @@ TEIImportPlugin.prototype.getEntitiesFromXML = function () {
                     if (e.attributes[plugin.id_attribute_name] && e.attributes[plugin.id_attribute_name].value != '') {
                         ref_html += ' <span class="badge badge-warning">' + e.attributes[plugin.id_attribute_name].value + '</span>';
                     }
-                    if (e.attributes[plugin.reference_attribute_name] && e.attributes[plugin.reference_attribute_name].value.startsWith(config.v.identifierBaseURL)) {
-                        ref_html += ' <span class="badge badge-dark">' + e.attributes[plugin.reference_attribute_name].value.substr(config.v.identifierBaseURL.length) + '</span>';
+                    if (e.attributes[plugin.reference_attribute_name] && getPlainIdFromUrl(e.attributes[plugin.reference_attribute_name].value) !== null) {
+                        ref_html += ' <span class="badge badge-dark">' + getPlainIdFromUrl(e.attributes[plugin.reference_attribute_name].value) + '</span>';
                     }
                     var chk_html = '<div class="form-check form-check-inline">\
                                       <input class="form-check-input" type="checkbox" value="' + name + '" id="import-entitiy-' + i + '" checked>\
@@ -354,7 +354,7 @@ TEIImportPlugin.prototype.addEntities = function (event) {
             }
             // Check if we already have references set, which we can import.
             // They should be in the 'ref'-attribute
-            if (ref !== undefined && ref.value.startsWith(config.v.identifierBaseURL)) {
+            if (ref !== undefined && getPlainIdFromUrl(ref.value) !== null) {
                 // TODO: this structure must be configurable and should not be fixed in the code, because this is
                 // specific to the exist-db JSON export.
                 params[config.v.identifierElement] = {

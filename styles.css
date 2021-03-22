@@ -45,7 +45,6 @@ footer {
 .status-ref-safe .btn-group-toggle .btn.active {
     background: #1e7e34;
 }
-
 .status-ref-unsafe .btn-group-toggle .btn,
 .status-ref-unsafe button.dropdown-toggle {
     background: #ffc107;
@@ -70,6 +69,24 @@ footer {
 .status-ref-unavailable .btn-group-toggle .btn.active {
     background: #c82333;
     color: #fff;
+}
+.status-ref-duplicates .btn-group-toggle .btn,
+.status-ref-duplicates button.dropdown-toggle {
+    background: #33b5e5;
+    color: #fff;
+}
+.status-ref-duplicates .btn-group-toggle .btn.active {
+    background: #1992be;
+}
+
+.status-ref-incorrect .btn-group-toggle .btn,
+.status-ref-incorrect button.dropdown-toggle {
+    background: #FF8800;
+    color: #fff;
+}
+.status-ref-incorrect .btn-group-toggle .btn.active,
+.badge-incorrect {
+    background: #d17000;
 }
 .status-ref .btn-group-toggle .btn.disabled {
     color: #000;

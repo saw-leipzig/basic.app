@@ -90,7 +90,7 @@ function prepareCardData(local_object, obj, ref_id) {
             return e.preferred === 'YES'
         });
         // TODO: API constrainet: #text
-        if (pref_ref_object != undefined && pref_ref_object[ '#text'] === config.v.identifierBaseURL + ref_id) {
+        if (pref_ref_object != undefined && getPlainIdFromUrl(pref_ref_object[ '#text']) === ref_id) {
             pref_ref = 'YES';
         } else {
             pref_ref = 'NO'
@@ -119,7 +119,7 @@ function prepareCardData(local_object, obj, ref_id) {
         // create a base link
         ret.links.push({
             'name': config.v.identifierAbbreviation,
-            'url': config.v.identifierBaseURL + ref_id
+            'url': getUrlFromPlainId(ref_id)
         });
     }
 
@@ -354,15 +354,10 @@ function addCard (container, ref_id, local_object) {
     } else {
         // Error case
         var obj = undefined;
-        // Object wasn't loaded jet, do so
-        // diplay loading state, e.g. spinner icon
-        var use_corsanywhere = config.use_corsanywhere;
-        var corsanywhere_url = '';
-        if (use_corsanywhere) {
-            corsanywhere_url = 'https://cors-anywhere.herokuapp.com/';
-        }
+        // Object wasn't loaded yet, do so
+        // display loading state, e.g. spinner icon
         // compose API GET-URL for object with ID
-        var source_url = corsanywhere_url + config.a.authorityDataBaseURL + ref_id.toUpperCase();
+        var source_url = config.a.authorityDataBaseURL + ref_id.toUpperCase();
         console.log('Request external object: ', source_url);
         $.getJSON(source_url)
             .done(function (result) {
