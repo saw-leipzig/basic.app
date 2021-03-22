@@ -1,5 +1,4 @@
 var config = {
-    "use_corsanywhere": false,
     "footer": {
         "logoURL": "http://www.example.com",
         "logoFileName": "logo.png",

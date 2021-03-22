@@ -354,15 +354,10 @@ function addCard (container, ref_id, local_object) {
     } else {
         // Error case
         var obj = undefined;
-        // Object wasn't loaded jet, do so
-        // diplay loading state, e.g. spinner icon
-        var use_corsanywhere = config.use_corsanywhere;
-        var corsanywhere_url = '';
-        if (use_corsanywhere) {
-            corsanywhere_url = 'https://cors-anywhere.herokuapp.com/';
-        }
+        // Object wasn't loaded yet, do so
+        // display loading state, e.g. spinner icon
         // compose API GET-URL for object with ID
-        var source_url = corsanywhere_url + config.a.authorityDataBaseURL + ref_id.toUpperCase();
+        var source_url = config.a.authorityDataBaseURL + ref_id.toUpperCase();
         console.log('Request external object: ', source_url);
         $.getJSON(source_url)
             .done(function (result) {

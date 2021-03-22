@@ -241,11 +241,6 @@ function getPopoverHTMLFromObject(obj) {
 
 // Load the JSON data for the popover
 function loadPopoverContent (label_obj){
-    var use_corsanywhere = config.use_corsanywhere;
-    var corsanywhere_url = '';
-    if (use_corsanywhere) {
-        corsanywhere_url = 'https://cors-anywhere.herokuapp.com/';
-    }
     var ref_id = label_obj.attr('data-ref-id').toUpperCase();
     var already_fetched_object = fetched_objects.objects.find(function (e) {
         return e.id === ref_id;
@@ -257,7 +252,7 @@ function loadPopoverContent (label_obj){
         // Mark button as already fetching the object (visual feedback by CSS)
         $(label_obj).toggleClass('btn-loading');
         // compose the source URL
-        var source_url = corsanywhere_url + config.a.authorityDataBaseURL + ref_id;
+        var source_url = config.a.authorityDataBaseURL + ref_id;
         console.log('Request external object: ', source_url);
         $.getJSON(source_url).done(function (result) {
             // Highlight loading button
