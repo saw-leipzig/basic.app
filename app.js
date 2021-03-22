@@ -521,7 +521,7 @@ function enableButtonStatus (selector, delegate_selector) {
         var current_status = $('#btn-status-' + fid).html();
         var new_status = $(this).html();
         changeStatus($(this), fid, current_status, new_status);
-        // Fire event trifferSetStatus
+        // Fire event statusChange
         $(this).trigger('statusChange');
     });
 }
@@ -707,7 +707,7 @@ function setItemButtonsAbilityByStatus (obj) {
     if (obj[config.v.statusElement] == 'safe') {
         $('#' + fid + ' label.btn, #' + fid + ' input.form-control, #' + fid + ' .input-group > .input-group-append > button').addClass('disabled');
         $('#' + fid + ' input.form-control').attr('disabled', 'disabled');
-    } else if (obj[config.v.statusElement] == 'unchecked' || obj[config.v.statusElement] == 'unsafe' || obj[config.v.statusElement] == 'unavailable') {
+    } else {
         $('#' + fid + ' label.btn, #' + fid + ' input.form-control, #' + fid + ' .input-group > .input-group-append > button').removeClass('disabled');
         $('#' + fid + ' input.form-control').removeAttr('disabled');
     }
