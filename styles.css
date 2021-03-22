@@ -79,12 +79,13 @@ footer {
     background: #1992be;
 }
 
-.status-ref-needs-correction .btn-group-toggle .btn,
-.status-ref-needs-correction button.dropdown-toggle {
+.status-ref-incorrect .btn-group-toggle .btn,
+.status-ref-incorrect button.dropdown-toggle {
     background: #FF8800;
     color: #fff;
 }
-.status-ref-needs-correction .btn-group-toggle .btn.active {
+.status-ref-incorrect .btn-group-toggle .btn.active,
+.badge-incorrect {
     background: #d17000;
 }
 .status-ref .btn-group-toggle .btn.disabled {

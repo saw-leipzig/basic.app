@@ -63,7 +63,7 @@ var config = {
             "unavailable",
             "unchecked",
             "duplicates",
-            "needs-correction"
+            "incorrect"
         ],
         "default": "unchecked"
     },
