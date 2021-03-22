@@ -76,7 +76,7 @@ footer {
     color: #fff;
 }
 .status-ref-duplicates .btn-group-toggle .btn.active {
-    background: #33b5e5;
+    background: #1992be;
 }
 
 .status-ref-needs-correction .btn-group-toggle .btn,
@@ -85,7 +85,7 @@ footer {
     color: #fff;
 }
 .status-ref-needs-correction .btn-group-toggle .btn.active {
-    background: #FF8800;
+    background: #d17000;
 }
 .status-ref .btn-group-toggle .btn.disabled {
     color: #000;
