@@ -8,35 +8,20 @@ basicPluginActions.registerButton(btn_action_add);
 
 
 function findAuthorityData (trigger, searchterm, fid) {
-    const viaf_url_suggest = 'https://www.viaf.org/viaf/AutoSuggest?query=';
-    var cnt = 0;
-    // To prevend CORS warnings add '&callback=?' to the URL as suggested here http://api.jquery.com/jQuery.getJSON/
-    $.getJSON(viaf_url_suggest + encodeURIComponent(searchterm) + '&callback=?').done(function (result) {
+    // Search parameter: only corporate bodies
+    const lobidSearchUrl = 'https://lobid.org/gnd/search?format=json&filter=type:CorporateBody&q=';
+    let cnt = 0;
+    $.getJSON(lobidSearchUrl + encodeURIComponent(searchterm)).done(function (result) {
         console.log('Got JSON from querying: ' + searchterm);
-        var all_results = result.result;
-        if (all_results != null) {
-            // filter results by nametype of 'corporate' to get only organisation authority data
-            var organisation_results = all_results.filter(function (e) {
-                return e.nametype == 'corporate';
-            });
-            // take only DNB links and count them
-            var organisation_gnd_results = organisation_results.filter(function (e) {
-                return e.dnb != undefined;
-            });
-            cnt = [...new Set(organisation_gnd_results.map(e => e.recordID))].length;
-        }
+        cnt = result.totalItems
         // Add number of results to button as badge
         $(trigger).children('.fas')
             .toggleClass('fa-binoculars fa-sync-alt fa-spin')
             .html(cnt);
-        // add buttons for each result
-        var references = [];
-        for (var key in organisation_gnd_results) {
-            if (Number(key) != 'NaN') {
-                references.push(organisation_gnd_results[key].dnb.toUpperCase());
-            }
-        }
-        console.log('FindAuthorityData: results (type is corporate and has DNB entry): ' + cnt);
+        // Use 'gndIdentifier' attribute for reference collection
+        const references = result.member.map(item => item.gndIdentifier);
+        console.log('FindAuthorityData: results (type is person and has DNB entry): ' + cnt);
+        // add buttons for each result using 'gndIdentifier'
         addReference(trigger, fid, references);
     }).fail(function (jqxhr, textStatus, error) {
         var err = textStatus + ", " + error;
@@ -80,23 +65,9 @@ function loadSeealsoResources (cardid, ref_id) {
      *
      * Example URL: https://beacon.findbuch.de/seealso/pnd-aks?format=seealso&id=100000118
      *
+     * DISABLED AS THE SERVICE ISN'T AVAILABLE ANYMORE
+     *
      *  */
-    var seealso_url = 'https://beacon.findbuch.de/seealso/pnd-aks?format=seealso&id=' + ref_id.toUpperCase() + '&callback=?';
-    // Only request data if not already done!
-    // This is important, because prepareCardData is called twice if data wasn't fetched yet
-    var fetched = fetched_objects.seealso.find(function (s){ return s.id == ref_id });
-    if (fetched == undefined) {
-        fetched_objects.seealso.push({id: ref_id, data: []});
-        console.log('Request external object: ', seealso_url);
-        $.getJSON(seealso_url)
-            .done(function (result) {
-                fetched_objects.seealso.find(function (s){ return s.id == ref_id }).data = result;
-                addFindbuchLinksToCard(cardid, result);
-        });
-    } else if (fetched.data.length) {
-        // we already fetched the result, so let's use them to add the link
-        addFindbuchLinksToCard(cardid, fetched.data);
-    }
 }
 
 

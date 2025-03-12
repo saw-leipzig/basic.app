@@ -1,6 +1,5 @@
 # ba[sic?] - better authorities [search, identify, connect]
 
-
 ## Introduction
 
 ba[sic?] is a tool for searching, identifying and connecting named entities  with authority data. Currently persistent identifiers from the [GND](https://www.dnb.de/EN/Standardisierung/GND/gnd_node.html) (persons, organisations) and [Geonames.org](https://www.geonames.org/) (places) are supported.
@@ -19,8 +18,10 @@ There is an online [demo instance](https://basicdemo.saw-leipzig.de), usually sh
 * **Lars Scheideler** - *software development*
 
 ## Contributors
+
 * **Klaus Rettinghaus** - *bug reports, software development*
 
 ## Licence
+
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md)
  file for details
